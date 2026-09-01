@@ -137,3 +137,24 @@ Stage Summary:
 - المنصة مكتملة ومتحقق منها: موقع + محرك حجز + ضيف + استقبال + إدارة + فوري (socket.io عبر البوابة) + فواتير + أكواد هاش + تدقيق — فوق DB مركزية واحدة
 - lint نظيف، dev.log نظيف، صفر أخطاء console، الخدمات الثلاث تعمل (3000 تطبيق، 3002 سوكت، 3004 بث)
 - أكواد العرض: H834729X7 / H119922K4 / R492671M3 / A371849L9
+
+---
+Task ID: 9
+Agent: Main Agent (Z.ai Code)
+Task: رفع المشروع بالكامل إلى GitHub (مستودع Cairo-Hart-Hotel-0)
+
+Work Log:
+- التحقق من المستودع البعيد بـ git ls-remote: فارغ تمامًا (لا فروع) — رفع مباشر بلا تعارضات
+- تنظيف الفهرس قبل الرفع: git rm --cached لـ .env و db/custom.db و db/hotel.db و tool-results/ و download/ (كلها بقيت على القرص المحلي، لم تُرفع)
+- تحديث .gitignore: استثناء db/*.db بكل امتداداتها + /tool-results/ + /download/ + السماح بـ !.env.example
+- إنشاء .env.example (DATABASE_URL نموذجي بمسار نسبي مع شرح) وإنشاء README.md شامل بالعربية: نظرة عامة على القنوات الأربع، المفاهيم الجوهرية (Reservation مقابل Stay، كود الضيف مقابل مرجع الحجز)، التقنيات، خطوات التشغيل المحلي، أكواد الدخول التجريبية، بنية المشروع، أبرز نقاط الأمان، روابط الوثائق
+- فحص أمني للملفات المؤرشفة (ghp_/sk-/api_key/password): لا أسرار حقيقية
+- commit جديد (5f4cb98) برسالة وافية تصف كل قنوات المنصة ثم git remote add origin بالتوكن و git push -u origin main
+- تحقق بعد الرفع: HEAD البعيد = main = 5f4cb98، 256 ملفًا على البعيد، الشجرة تحوي كل الملفات المفتاحية (README.md، .env.example، MASTER_PLAN.md، prisma/schema.prisma، src/app/page.tsx، mini-services/realtime/index.ts، public/images/*)، working tree محلي نظيف (0 تغييرات = مزامنة كاملة)
+- فحص صحة الخادم بعد العملية: HTTP 200 على / و dev.log نظيف — المنصة تعمل بلا أي تأثر
+
+Stage Summary:
+- المشروع مرفوع بالكامل بنجاح إلى https://github.com/Mohammed503-qtb/Cairo-Hart-Hotel-0 (فرع main، 256 ملفًا)
+- التوكن مخزن في .git/config محليًا فقط (غير مؤرشف، لا يظهر في أي ملف مرفوع)
+- الكود المصدر + الوثائق (MASTER_PLAN.md + خطتا الأصل) + سجل العمل + الصور مرفوعة؛ ملفات .env و .db غير مرفوعة عمدًا (تُولّد بـ db:push + seed حسب README)
+- الحالة: بانتظار أوامر المالك لبدء تنفيذ الخطط اللاحقة (المرحلة التالية بحسب MASTER_PLAN)
