@@ -1,0 +1,1088 @@
+     1→'use client'
+     2→
+     3→// ─────────────────────────────────────────────────────────────
+     4→// BOOKING DIALOG — نافذة الحجز (5 خطوات)
+     5→// 1) النتائج  2) بيانات الضيف  3) المراجعة  4) المعالجة  5) التأكيد
+     6→// الخادم هو مصدر الحقيقة: كل الأسعار من استجاباته فقط
+     7→// ─────────────────────────────────────────────────────────────
+     8→import { useCallback, useEffect, useRef, useState } from 'react'
+     9→import { AnimatePresence, motion } from 'framer-motion'
+    10→import {
+    11→  CalendarDays,
+    12→  Users,
+    13→  BedDouble,
+    14→  CheckCircle2,
+    15→  Copy,
+    16→  Printer,
+    17→  MessageCircle,
+    18→  ClipboardList,
+    19→  Loader2,
+    20→  AlertCircle,
+    21→  SearchX,
+    22→  RefreshCw,
+    23→  Pencil,
+    24→  Info,
+    25→} from 'lucide-react'
+    26→import { Button } from '@/components/ui/button'
+    27→import { Input } from '@/components/ui/input'
+    28→import { Label } from '@/components/ui/label'
+    29→import { Textarea } from '@/components/ui/textarea'
+    30→import { Checkbox } from '@/components/ui/checkbox'
+    31→import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+    32→import { Skeleton } from '@/components/ui/skeleton'
+    33→import { Separator } from '@/components/ui/separator'
+    34→import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+    35→import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+    36→import { useToast } from '@/hooks/use-toast'
+    37→import { api, ApiError } from '@/lib/api-client'
+    38→import { formatMoney, formatDateAr, addDaysInput, todayInputValue } from '@/lib/format'
+    39→import type { HotelPublic, ReservationPublic, AvailabilityItem } from '@/types'
+    40→import {
+    41→  nightsText,
+    42→  guestsText,
+    43→  roomsText,
+    44→  miniCapacity,
+    45→  formatClockAr,
+    46→  digits,
+    47→  waLink,
+    48→  paymentStatusBadge,
+    49→  type SearchParams,
+    50→  type SnapshotBreakdown,
+    51→} from './helpers'
+    52→
+    53→const STEP_LABELS = ['التوفر', 'بياناتك', 'المراجعة', 'الدفع', 'التأكيد']
+    54→
+    55→interface GuestForm {
+    56→  fullName: string
+    57→  phone: string
+    58→  whatsapp: string
+    59→  email: string
+    60→  specialRequests: string
+    61→}
+    62→
+    63→const EMPTY_GUEST: GuestForm = { fullName: '', phone: '', whatsapp: '', email: '', specialRequests: '' }
+    64→
+    65→interface BookingDialogProps {
+    66→  open: boolean
+    67→  onOpenChange: (open: boolean) => void
+    68→  hotel: HotelPublic | null
+    69→  initialSearch: SearchParams
+    70→  presetRoomTypeId?: string
+    71→  onManageBooking: (reference: string) => void
+    72→  onPrint: (data: { reservation: ReservationPublic; snapshot: SnapshotBreakdown | null }) => void
+    73→}
+    74→
+    75→export function BookingDialog({
+    76→  open,
+    77→  onOpenChange,
+    78→  hotel,
+    79→  initialSearch,
+    80→  presetRoomTypeId,
+    81→  onManageBooking,
+    82→  onPrint,
+    83→}: BookingDialogProps) {
+    84→  const { toast } = useToast()
+    85→
+    86→  const [step, setStep] = useState(1)
+    87→  const [search, setSearch] = useState<SearchParams>(initialSearch)
+    88→  const [editOpen, setEditOpen] = useState(false)
+    89→  const [items, setItems] = useState<AvailabilityItem[]>([])
+    90→  const [searching, setSearching] = useState(false)
+    91→  const [searchError, setSearchError] = useState<string | null>(null)
+    92→  const [selected, setSelected] = useState<AvailabilityItem | null>(null)
+    93→  const [guest, setGuest] = useState<GuestForm>(EMPTY_GUEST)
+    94→  const [policyAccepted, setPolicyAccepted] = useState(false)
+    95→  const [errors, setErrors] = useState<Record<string, string>>({})
+    96→  const [paymentMethod, setPaymentMethod] = useState<'PAY_AT_HOTEL' | 'CARD'>('PAY_AT_HOTEL')
+    97→  const [confirmed, setConfirmed] = useState<ReservationPublic | null>(null)
+    98→
+    99→  // آخر قيم props (تُقرأ عند الفتح دون إعادة تشغيل التأثيرات)
+   100→  const initialSearchRef = useRef(initialSearch)
+   101→  initialSearchRef.current = initialSearch
+   102→  const presetRef = useRef(presetRoomTypeId)
+   103→  presetRef.current = presetRoomTypeId
+   104→
+   105→  // مفتاح idempotency — يولد مرة لكل تدفق حجز ويثبت
+   106→  const idemKeyRef = useRef('')
+   107→  const submittingRef = useRef(false)
+   108→
+   109→  // ── البحث ──
+   110→  const runSearch = useCallback(
+   111→    async (s: SearchParams): Promise<AvailabilityItem[]> => {
+   112→      setSearching(true)
+   113→      setSearchError(null)
+   114→      try {
+   115→        const res = await api<{ items: AvailabilityItem[] }>('/api/public/availability', {
+   116→          method: 'POST',
+   117→          body: s,
+   118→        })
+   119→        setItems(res.items)
+   120→        return res.items
+   121→      } catch (e) {
+   122→        setItems([])
+   123→        const msg = e instanceof ApiError ? e.message : 'تعذر البحث عن الغرف — يرجى المحاولة مرة أخرى'
+   124→        setSearchError(msg)
+   125→        return []
+   126→      } finally {
+   127→        setSearching(false)
+   128→      }
+   129→    },
+   130→    []
+   131→  )
+   132→
+   133→  // ── إعادة التعيين + البحث التلقائي عند الفتح ──
+   134→  useEffect(() => {
+   135→    if (!open) return
+   136→    const s = initialSearchRef.current
+   137→    const preset = presetRef.current
+   138→    setStep(1)
+   139→    setSearch(s)
+   140→    setEditOpen(false)
+   141→    setItems([])
+   142→    setSearchError(null)
+   143→    setSelected(null)
+   144→    setGuest(EMPTY_GUEST)
+   145→    setPolicyAccepted(false)
+   146→    setErrors({})
+   147→    setPaymentMethod('PAY_AT_HOTEL')
+   148→    setConfirmed(null)
+   149→    idemKeyRef.current = ''
+   150→    submittingRef.current = false
+   151→
+   152→    let cancelled = false
+   153→    void runSearch(s).then((result) => {
+   154→      if (cancelled) return
+   155→      // تحديد مسبق لنوع الغرفة (زر «احجز الآن» من بطاقة الغرفة)
+   156→      if (preset) {
+   157→        const match = result.find((i) => i.roomType.id === preset)
+   158→        if (match) {
+   159→          setSelected(match)
+   160→          setStep(2)
+   161→        } else if (result.length > 0) {
+   162→          toast({
+   163→            title: 'هذا النوع غير متاح للمواعيد المختارة',
+   164→            description: 'اختر أحد الخيارات المتاحة أدناه أو عدّل المواعيد',
+   165→          })
+   166→        }
+   167→      }
+   168→    })
+   169→    return () => {
+   170→      cancelled = true
+   171→    }
+   172→  }, [open])
+   173→
+   174→  // ── الخطوة 4: إرسال الحجز تلقائيًا (مرة واحدة لكل دخول) ──
+   175→  const submitBooking = useCallback(async () => {
+   176→    if (!selected || !hotel) return
+   177→    submittingRef.current = true
+   178→    if (!idemKeyRef.current) {
+   179→      idemKeyRef.current =
+   180→        typeof crypto !== 'undefined' && 'randomUUID' in crypto
+   181→          ? crypto.randomUUID()
+   182→          : `idem-${Date.now()}-${Math.random().toString(36).slice(2)}`
+   183→    }
+   184→    const key = idemKeyRef.current
+   185→
+   186→    try {
+   187→      const res = await api<{ reservation: ReservationPublic }>('/api/public/bookings', {
+   188→        method: 'POST',
+   189→        body: {
+   190→          checkIn: search.checkIn,
+   191→          checkOut: search.checkOut,
+   192→          adults: search.adults,
+   193→          children: search.children,
+   194→          roomsCount: search.roomsCount,
+   195→          roomTypeId: selected.roomType.id,
+   196→          guest: {
+   197→            fullName: guest.fullName.trim(),
+   198→            phone: guest.phone.trim(),
+   199→            ...(guest.whatsapp.trim() ? { whatsapp: guest.whatsapp.trim() } : {}),
+   200→            ...(guest.email.trim() ? { email: guest.email.trim() } : {}),
+   201→          },
+   202→          ...(guest.specialRequests.trim() ? { specialRequests: guest.specialRequests.trim() } : {}),
+   203→          paymentMethod,
+   204→          idempotencyKey: key,
+   205→        },
+   206→      })
+   207→      setConfirmed(res.reservation)
+   208→      setStep(5)
+   209→      toast({ title: 'تم تأكيد حجزك بنجاح', description: res.reservation.bookingReference })
+   210→    } catch (e) {
+   211→      const msg = e instanceof ApiError ? e.message : 'حدث خطأ غير متوقع أثناء الحجز'
+   212→      if (e instanceof ApiError && e.status === 409) {
+   213→        // فشل التوفر → عودة للخطوة 1 + تحديث النتائج
+   214→        setStep(1)
+   215→        toast({ title: 'تنبيه', description: msg })
+   216→        setSelected(null)
+   217→        void runSearch(search)
+   218→      } else {
+   219→        setStep(3)
+   220→        toast({ title: 'تعذر إتمام الحجز', description: msg, variant: 'destructive' })
+   221→      }
+   222→    } finally {
+   223→      submittingRef.current = false
+   224→    }
+   225→  }, [selected, hotel, search, guest, paymentMethod, runSearch, toast])
+   226→
+   227→  useEffect(() => {
+   228→    if (step === 4 && !submittingRef.current) {
+   229→      void submitBooking()
+   230→    }
+   231→  }, [step])
+   232→
+   233→  // ── إجراءات ──
+   234→  const submitSearchEdit = () => {
+   235→    if (search.checkOut <= search.checkIn) {
+   236→      setSearchError('تاريخ المغادرة يجب أن يكون بعد تاريخ الوصول')
+   237→      return
+   238→    }
+   239→    void runSearch(search)
+   240→    setEditOpen(false)
+   241→  }
+   242→
+   243→  const validateGuest = () => {
+   244→    const errs: Record<string, string> = {}
+   245→    if (guest.fullName.trim().length < 3) errs.fullName = 'يرجى إدخال الاسم الكامل (3 أحرف على الأقل)'
+   246→    if (digits(guest.phone).length < 9) errs.phone = 'يرجى إدخال رقم هاتف صحيح (9 أرقام على الأقل)'
+   247→    if (guest.whatsapp.trim() && digits(guest.whatsapp).length < 9)
+   248→      errs.whatsapp = 'رقم الواتساب غير صحيح (9 أرقام على الأقل)'
+   249→    if (guest.email.trim() && !/^\S+@\S+\.\S+$/.test(guest.email.trim()))
+   250→      errs.email = 'يرجى إدخال بريد إلكتروني صحيح أو تركه فارغًا'
+   251→    if (!policyAccepted) errs.policy = 'يرجى الإقرار بسياسة الإلغاء للمتابعة'
+   252→    setErrors(errs)
+   253→    return Object.keys(errs).length === 0
+   254→  }
+   255→
+   256→  const copyReference = async (ref: string) => {
+   257→    try {
+   258→      await navigator.clipboard.writeText(ref)
+   259→      toast({ title: 'تم النسخ', description: `تم نسخ رقم الحجز ${ref}` })
+   260→    } catch {
+   261→      toast({ title: 'تعذر النسخ', description: ref, variant: 'destructive' })
+   262→    }
+   263→  }
+   264→
+   265→  const closeDialog = () => onOpenChange(false)
+   266→
+   267→  return (
+   268→    <Dialog open={open} onOpenChange={onOpenChange}>
+   269→      <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden gap-0 p-0 sm:max-w-3xl [&>button]:z-10">
+   270→        <DialogHeader className="border-b p-4 pb-3 sm:p-5 sm:pb-4">
+   271→          <DialogTitle className="text-lg font-extrabold sm:text-xl">
+   272→            {step === 5 ? 'تم الحجز' : 'احجز إقامتك'}
+   273→          </DialogTitle>
+   274→          <StepIndicator step={step} />
+   275→        </DialogHeader>
+   276→
+   277→        <div className="flex-1 overflow-y-auto p-4 sm:p-5">
+   278→          <AnimatePresence mode="wait">
+   279→            <motion.div
+   280→              key={step}
+   281→              initial={{ opacity: 0, x: -16 }}
+   282→              animate={{ opacity: 1, x: 0 }}
+   283→              exit={{ opacity: 0, x: 16 }}
+   284→              transition={{ duration: 0.22, ease: 'easeOut' }}
+   285→            >
+   286→              {step === 1 ? (
+   287→                <StepResults
+   288→                  search={search}
+   289→                  onSearchChange={setSearch}
+   290→                  items={items}
+   291→                  searching={searching}
+   292→                  error={searchError}
+   293→                  editOpen={editOpen}
+   294→                  onEditToggle={() => setEditOpen((o) => !o)}
+   295→                  onSearchSubmit={submitSearchEdit}
+   296→                  onRetry={() => void runSearch(search)}
+   297→                  onSelect={(item) => {
+   298→                    setSelected(item)
+   299→                    setStep(2)
+   300→                  }}
+   301→                />
+   302→              ) : null}
+   303→
+   304→              {step === 2 && selected ? (
+   305→                <StepGuest
+   306→                  guest={guest}
+   307→                  onChange={(g) => setGuest(g)}
+   308→                  errors={errors}
+   309→                  hotel={hotel}
+   310→                  policyAccepted={policyAccepted}
+   311→                  onPolicyChange={(c) => setPolicyAccepted(c)}
+   312→                  onBack={() => setStep(1)}
+   313→                  onSubmit={() => {
+   314→                    if (validateGuest()) setStep(3)
+   315→                  }}
+   316→                />
+   317→              ) : null}
+   318→
+   319→              {step === 3 && selected ? (
+   320→                <StepReview
+   321→                  hotel={hotel}
+   322→                  selected={selected}
+   323→                  search={search}
+   324→                  guest={guest}
+   325→                  paymentMethod={paymentMethod}
+   326→                  onPaymentChange={setPaymentMethod}
+   327→                  onBack={() => setStep(2)}
+   328→                  onConfirm={() => setStep(4)}
+   329→                />
+   330→              ) : null}
+   331→
+   332→              {step === 4 ? <StepProcessing /> : null}
+   333→
+   334→              {step === 5 && confirmed ? (
+   335→                <StepConfirmation
+   336→                  hotel={hotel}
+   337→                  reservation={confirmed}
+   338→                  snapshot={selected ? snapshotFromQuote(selected, hotel) : null}
+   339→                  paymentMethod={paymentMethod}
+   340→                  onCopy={copyReference}
+   341→                  onPrint={() =>
+   342→                    onPrint({
+   343→                      reservation: confirmed,
+   344→                      snapshot: selected ? snapshotFromQuote(selected, hotel) : null,
+   345→                    })
+   346→                  }
+   347→                  onManage={() => {
+   348→                    onManageBooking(confirmed.bookingReference)
+   349→                  }}
+   350→                  onClose={closeDialog}
+   351→                />
+   352→              ) : null}
+   353→            </motion.div>
+   354→          </AnimatePresence>
+   355→        </div>
+   356→      </DialogContent>
+   357→    </Dialog>
+   358→  )
+   359→}
+   360→
+   361→/** بناء لقطة عرض من عرض السعر (الملخص فقط — المجاميع من استجابة الخادم) */
+   362→function snapshotFromQuote(item: AvailabilityItem, hotel: HotelPublic | null): SnapshotBreakdown {
+   363→  return {
+   364→    nightly: item.quote.nightly,
+   365→    subtotalCents: item.quote.subtotalCents,
+   366→    taxCents: item.quote.taxCents,
+   367→    grandTotalCents: item.quote.grandTotalCents,
+   368→    cancellationPolicy: hotel?.cancellationPolicy,
+   369→    checkInTime: hotel?.checkInTime,
+   370→    checkOutTime: hotel?.checkOutTime,
+   371→  }
+   372→}
+   373→
+   374→// ─────────────────────────── مؤشر الخطوات ───────────────────────────
+   375→
+   376→function StepIndicator({ step }: { step: number }) {
+   377→  return (
+   378→    <ol className="mt-3 flex items-center gap-1.5" aria-label="خطوات الحجز">
+   379→      {STEP_LABELS.map((label, i) => {
+   380→        const n = i + 1
+   381→        const done = n < step
+   382→        const active = n === step
+   383→        return (
+   384→          <li key={label} className="flex flex-1 items-center gap-1.5">
+   385→            <span
+   386→              className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black transition-colors ${
+   387→                done
+   388→                  ? 'bg-success text-white'
+   389→                  : active
+   390→                    ? 'bg-primary text-primary-foreground'
+   391→                    : 'bg-muted text-muted-foreground'
+   392→              }`}
+   393→              aria-current={active ? 'step' : undefined}
+   394→            >
+   395→              {done ? <CheckCircle2 className="size-4" /> : n}
+   396→            </span>
+   397→            <span
+   398→              className={`hidden text-[11px] font-bold sm:inline ${
+   399→                active ? 'text-foreground' : 'text-muted-foreground'
+   400→              }`}
+   401→            >
+   402→              {label}
+   403→            </span>
+   404→            {n < STEP_LABELS.length ? (
+   405→              <span className={`h-px flex-1 ${done ? 'bg-success/60' : 'bg-border'}`} />
+   406→            ) : null}
+   407→          </li>
+   408→        )
+   409→      })}
+   410→    </ol>
+   411→  )
+   412→}
+   413→
+   414→// ─────────────────────────── الخطوة 1: النتائج ───────────────────────────
+   415→
+   416→function StepResults({
+   417→  search,
+   418→  onSearchChange,
+   419→  items,
+   420→  searching,
+   421→  error,
+   422→  editOpen,
+   423→  onEditToggle,
+   424→  onSearchSubmit,
+   425→  onRetry,
+   426→  onSelect,
+   427→}: {
+   428→  search: SearchParams
+   429→  onSearchChange: (s: SearchParams) => void
+   430→  items: AvailabilityItem[]
+   431→  searching: boolean
+   432→  error: string | null
+   433→  editOpen: boolean
+   434→  onEditToggle: () => void
+   435→  onSearchSubmit: () => void
+   436→  onRetry: () => void
+   437→  onSelect: (item: AvailabilityItem) => void
+   438→}) {
+   439→  const set = (patch: Partial<SearchParams>) => {
+   440→    const next = { ...search, ...patch }
+   441→    if (next.checkOut <= next.checkIn) next.checkOut = addDaysInput(next.checkIn, 1)
+   442→    onSearchChange(next)
+   443→  }
+   444→
+   445→  return (
+   446→    <div className="space-y-4">
+   447→      {/* ملخص البحث */}
+   448→      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/50 px-3 py-2">
+   449→        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-semibold text-foreground">
+   450→          <span className="inline-flex items-center gap-1.5">
+   451→            <CalendarDays className="size-4 text-primary dark:text-gold" />
+   452→            {formatDateAr(search.checkIn)} ← {formatDateAr(search.checkOut)}
+   453→          </span>
+   454→          <span className="inline-flex items-center gap-1.5">
+   455→            <Users className="size-4 text-primary dark:text-gold" />
+   456→            {guestsText(search.adults, search.children)}
+   457→          </span>
+   458→          <span className="inline-flex items-center gap-1.5">
+   459→            <BedDouble className="size-4 text-primary dark:text-gold" />
+   460→            {roomsText(search.roomsCount)}
+   461→          </span>
+   462→        </div>
+   463→        <Button variant="outline" size="sm" onClick={onEditToggle}>
+   464→          <Pencil className="size-3.5" />
+   465→          {editOpen ? 'إخفاء' : 'تعديل'}
+   466→        </Button>
+   467→      </div>
+   468→
+   469→      {/* نموذج التعديل */}
+   470→      {editOpen ? (
+   471→        <div className="grid grid-cols-2 gap-3 rounded-lg border p-3 md:grid-cols-3 xl:grid-cols-6">
+   472→          <div className="space-y-1.5">
+   473→            <Label className="text-xs text-muted-foreground">الوصول</Label>
+   474→            <Input type="date" dir="ltr" value={search.checkIn} min={todayInputValue()} onChange={(e) => set({ checkIn: e.target.value })} />
+   475→          </div>
+   476→          <div className="space-y-1.5">
+   477→            <Label className="text-xs text-muted-foreground">المغادرة</Label>
+   478→            <Input
+   479→              type="date"
+   480→              dir="ltr"
+   481→              value={search.checkOut}
+   482→              min={addDaysInput(search.checkIn, 1)}
+   483→              onChange={(e) => set({ checkOut: e.target.value })}
+   484→            />
+   485→          </div>
+   486→          <div className="space-y-1.5">
+   487→            <Label className="text-xs text-muted-foreground">البالغون</Label>
+   488→            <Select value={String(search.adults)} onValueChange={(v) => set({ adults: Number(v) })}>
+   489→              <SelectTrigger dir="rtl">
+   490→                <SelectValue />
+   491→              </SelectTrigger>
+   492→              <SelectContent>
+   493→                {[1, 2, 3, 4, 5, 6].map((n) => (
+   494→                  <SelectItem key={n} value={String(n)}>
+   495→                    {n === 1 ? 'بالغ واحد' : n === 2 ? 'بالغان' : `${n} بالغين`}
+   496→                  </SelectItem>
+   497→                ))}
+   498→              </SelectContent>
+   499→            </Select>
+   500→          </div>
+   501→          <div className="space-y-1.5">
+   502→            <Label className="text-xs text-muted-foreground">الأطفال</Label>
+   503→            <Select value={String(search.children)} onValueChange={(v) => set({ children: Number(v) })}>
+   504→              <SelectTrigger dir="rtl">
+   505→                <SelectValue />
+   506→              </SelectTrigger>
+   507→              <SelectContent>
+   508→                {[0, 1, 2, 3, 4].map((n) => (
+   509→                  <SelectItem key={n} value={String(n)}>
+   510→                    {n === 0 ? 'بدون' : n === 1 ? 'طفل واحد' : n === 2 ? 'طفلان' : `${n} أطفال`}
+   511→                  </SelectItem>
+   512→                ))}
+   513→              </SelectContent>
+   514→            </Select>
+   515→          </div>
+   516→          <div className="space-y-1.5">
+   517→            <Label className="text-xs text-muted-foreground">الغرف</Label>
+   518→            <Select value={String(search.roomsCount)} onValueChange={(v) => set({ roomsCount: Number(v) })}>
+   519→              <SelectTrigger dir="rtl">
+   520→                <SelectValue />
+   521→              </SelectTrigger>
+   522→              <SelectContent>
+   523→                {[1, 2, 3].map((n) => (
+   524→                  <SelectItem key={n} value={String(n)}>
+   525→                    {n === 1 ? 'غرفة واحدة' : n === 2 ? 'غرفتان' : `${n} غرف`}
+   526→                  </SelectItem>
+   527→                ))}
+   528→              </SelectContent>
+   529→            </Select>
+   530→          </div>
+   531→          <div className="col-span-2 flex items-end md:col-span-3 xl:col-span-1">
+   532→            <Button className="w-full" onClick={onSearchSubmit}>
+   533→              تحديث النتائج
+   534→            </Button>
+   535→          </div>
+   536→        </div>
+   537→      ) : null}
+   538→
+   539→      {/* الحالات */}
+   540→      {searching ? (
+   541→        <div className="space-y-3">
+   542→          {[1, 2, 3].map((i) => (
+   543→            <div key={i} className="flex gap-3 rounded-xl border p-3">
+   544→              <Skeleton className="h-20 w-28 shrink-0 rounded-lg" />
+   545→              <div className="flex-1 space-y-2 py-1">
+   546→                <Skeleton className="h-5 w-36" />
+   547→                <Skeleton className="h-4 w-24" />
+   548→                <Skeleton className="h-4 w-28" />
+   549→              </div>
+   550→              <Skeleton className="h-9 w-20 self-center" />
+   551→            </div>
+   552→          ))}
+   553→        </div>
+   554→      ) : error ? (
+   555→        <div className="flex flex-col items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center">
+   556→          <AlertCircle className="size-10 text-destructive" />
+   557→          <p className="text-sm font-semibold text-foreground">{error}</p>
+   558→          <Button variant="outline" onClick={onRetry}>
+   559→            <RefreshCw className="size-4" />
+   560→            إعادة المحاولة
+   561→          </Button>
+   562→        </div>
+   563→      ) : items.length === 0 ? (
+   564→        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed p-8 text-center">
+   565→          <SearchX className="size-10 text-muted-foreground" />
+   566→          <p className="text-sm font-semibold text-foreground">
+   567→            لا توجد غرف متاحة لهذه المواعيد — جرّب مواعيد أخرى
+   568→          </p>
+   569→          <Button variant="outline" onClick={onEditToggle}>
+   570→            <Pencil className="size-4" />
+   571→            تعديل المواعيد
+   572→          </Button>
+   573→        </div>
+   574→      ) : (
+   575→        <ul className="space-y-3">
+   576→          {items.map((item) => (
+   577→            <li
+   578→              key={item.roomType.id}
+   579→              className="flex flex-col gap-3 rounded-xl border p-3 transition-all hover:border-primary/40 hover:shadow-md sm:flex-row sm:items-center"
+   580→            >
+   581→              <img
+   582→                src={item.roomType.images[0] ?? '/images/room-double.png'}
+   583→                alt={item.roomType.name}
+   584→                className="h-20 w-full shrink-0 rounded-lg object-cover sm:w-28"
+   585→                loading="lazy"
+   586→              />
+   587→              <div className="min-w-0 flex-1">
+   588→                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+   589→                  <h4 className="text-base font-extrabold text-foreground">{item.roomType.name}</h4>
+   590→                  <span className="text-xs font-bold text-muted-foreground">
+   591→                    {miniCapacity(item.roomType.capacityAdults, item.roomType.capacityChildren)}
+   592→                  </span>
+   593→                  <span className="text-xs font-bold text-muted-foreground">
+   594→                    · {nightsText(item.quote.nights)}
+   595→                  </span>
+   596→                </div>
+   597→                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+   598→                  <span dir="ltr">
+   599→                    {formatMoney(item.quote.nightly[0]?.priceCents ?? item.roomType.basePriceCents)} / ليلة
+   600→                  </span>
+   601→                  {item.quote.nightly.some((n) => n.priceCents !== item.quote.nightly[0]?.priceCents) ? (
+   602→                    <span className="text-gold">· أسعار متغيرة (تشمل زيادة نهاية الأسبوع)</span>
+   603→                  ) : null}
+   604→                  {item.availableCount <= 2 ? (
+   605→                    <span className="font-bold text-warning">
+   606→                      · متبقٍ {item.availableCount === 1 ? 'غرفة واحدة' : `${item.availableCount} غرف`} فقط!
+   607→                    </span>
+   608→                  ) : null}
+   609→                </div>
+   610→              </div>
+   611→              <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
+   612→                <div className="text-left sm:text-right">
+   613→                  <div className="text-xs text-muted-foreground">الإجمالي شامل الضريبة</div>
+   614→                  <div className="text-xl font-black text-primary dark:text-gold" dir="ltr">
+   615→                    {formatMoney(item.quote.grandTotalCents)}
+   616→                  </div>
+   617→                </div>
+   618→                <Button onClick={() => onSelect(item)} className="shrink-0">
+   619→                  اختر
+   620→                </Button>
+   621→              </div>
+   622→            </li>
+   623→          ))}
+   624→        </ul>
+   625→      )}
+   626→    </div>
+   627→  )
+   628→}
+   629→
+   630→// ─────────────────────────── الخطوة 2: بيانات الضيف ───────────────────────────
+   631→
+   632→function StepGuest({
+   633→  guest,
+   634→  onChange,
+   635→  errors,
+   636→  hotel,
+   637→  policyAccepted,
+   638→  onPolicyChange,
+   639→  onBack,
+   640→  onSubmit,
+   641→}: {
+   642→  guest: GuestForm
+   643→  onChange: (g: GuestForm) => void
+   644→  errors: Record<string, string>
+   645→  hotel: HotelPublic | null
+   646→  policyAccepted: boolean
+   647→  onPolicyChange: (accepted: boolean) => void
+   648→  onBack: () => void
+   649→  onSubmit: () => void
+   650→}) {
+   651→  const set = (patch: Partial<GuestForm>) => onChange({ ...guest, ...patch })
+   652→
+   653→  return (
+   654→    <form
+   655→      className="space-y-4"
+   656→      onSubmit={(e) => {
+   657→        e.preventDefault()
+   658→        onSubmit()
+   659→      }}
+   660→    >
+   661→      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+   662→        <div className="space-y-1.5">
+   663→          <Label htmlFor="bk-name">الاسم الكامل *</Label>
+   664→          <Input
+   665→            id="bk-name"
+   666→            value={guest.fullName}
+   667→            onChange={(e) => set({ fullName: e.target.value })}
+   668→            placeholder="مثال: أحمد محمد الشرعبي"
+   669→            autoComplete="name"
+   670→            aria-invalid={!!errors.fullName}
+   671→          />
+   672→          {errors.fullName ? <FieldError msg={errors.fullName} /> : null}
+   673→        </div>
+   674→
+   675→        <div className="space-y-1.5">
+   676→          <Label htmlFor="bk-phone">رقم الهاتف *</Label>
+   677→          <Input
+   678→            id="bk-phone"
+   679→            dir="ltr"
+   680→            value={guest.phone}
+   681→            onChange={(e) => set({ phone: e.target.value })}
+   682→            placeholder="+967 7XX XXX XXX"
+   683→            inputMode="tel"
+   684→            autoComplete="tel"
+   685→            className="text-left"
+   686→            aria-invalid={!!errors.phone}
+   687→          />
+   688→          {errors.phone ? <FieldError msg={errors.phone} /> : null}
+   689→        </div>
+   690→
+   691→        <div className="space-y-1.5">
+   692→          <Label htmlFor="bk-wa">رقم الواتساب (اختياري)</Label>
+   693→          <Input
+   694→            id="bk-wa"
+   695→            dir="ltr"
+   696→            value={guest.whatsapp}
+   697→            onChange={(e) => set({ whatsapp: e.target.value })}
+   698→            placeholder="+967 7XX XXX XXX"
+   699→            inputMode="tel"
+   700→            className="text-left"
+   701→            aria-invalid={!!errors.whatsapp}
+   702→          />
+   703→          {errors.whatsapp ? <FieldError msg={errors.whatsapp} /> : null}
+   704→        </div>
+   705→
+   706→        <div className="space-y-1.5">
+   707→          <Label htmlFor="bk-email">البريد الإلكتروني (اختياري)</Label>
+   708→          <Input
+   709→            id="bk-email"
+   710→            dir="ltr"
+   711→            type="email"
+   712→            value={guest.email}
+   713→            onChange={(e) => set({ email: e.target.value })}
+   714→            placeholder="name@example.com"
+   715→            inputMode="email"
+   716→            autoComplete="email"
+   717→            className="text-left"
+   718→            aria-invalid={!!errors.email}
+   719→          />
+   720→          {errors.email ? <FieldError msg={errors.email} /> : null}
+   721→        </div>
+   722→      </div>
+   723→
+   724→      <div className="space-y-1.5">
+   725→        <Label htmlFor="bk-requests">طلبات خاصة (اختياري)</Label>
+   726→        <Textarea
+   727→          id="bk-requests"
+   728→          value={guest.specialRequests}
+   729→          onChange={(e) => set({ specialRequests: e.target.value })}
+   730→          placeholder="مثال: طابق مرتفع إن أمكن"
+   731→          rows={3}
+   732→        />
+   733→      </div>
+   734→
+   735→      {/* الإقرار بسياسة الإلغاء */}
+   736→      <div className="rounded-lg border bg-muted/40 p-3">
+   737→        <div className="flex items-start gap-2.5">
+   738→          <Checkbox
+   739→            id="bk-policy"
+   740→            checked={policyAccepted}
+   741→            onCheckedChange={(c) => onPolicyChange(Boolean(c))}
+   742→            className="mt-0.5"
+   743→            aria-invalid={!!errors.policy}
+   744→          />
+   745→          <div>
+   746→            <Label htmlFor="bk-policy" className="cursor-pointer text-sm font-bold">
+   747→              أقر بسياسة الإلغاء
+   748→            </Label>
+   749→            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+   750→              {hotel?.cancellationPolicy ?? 'الإلغاء مجاني حتى 24 ساعة قبل موعد الوصول.'}
+   751→            </p>
+   752→            {errors.policy ? <FieldError msg={errors.policy} /> : null}
+   753→          </div>
+   754→        </div>
+   755→      </div>
+   756→
+   757→      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+   758→        <Button type="button" variant="outline" onClick={onBack}>
+   759→          رجوع للنتائج
+   760→        </Button>
+   761→        <Button type="submit" size="lg" className="flex-1 sm:flex-none sm:min-w-40">
+   762→          متابعة للمراجعة
+   763→        </Button>
+   764→      </div>
+   765→    </form>
+   766→  )
+   767→}
+   768→
+   769→function FieldError({ msg }: { msg: string }) {
+   770→  return (
+   771→    <p className="flex items-center gap-1 text-xs font-semibold text-destructive" role="alert">
+   772→      <AlertCircle className="size-3.5 shrink-0" />
+   773→      {msg}
+   774→    </p>
+   775→  )
+   776→}
+   777→
+   778→// ─────────────────────────── الخطوة 3: المراجعة ───────────────────────────
+   779→
+   780→function StepReview({
+   781→  hotel,
+   782→  selected,
+   783→  search,
+   784→  guest,
+   785→  paymentMethod,
+   786→  onPaymentChange,
+   787→  onBack,
+   788→  onConfirm,
+   789→}: {
+   790→  hotel: HotelPublic | null
+   791→  selected: AvailabilityItem
+   792→  search: SearchParams
+   793→  guest: GuestForm
+   794→  paymentMethod: 'PAY_AT_HOTEL' | 'CARD'
+   795→  onPaymentChange: (m: 'PAY_AT_HOTEL' | 'CARD') => void
+   796→  onBack: () => void
+   797→  onConfirm: () => void
+   798→}) {
+   799→  const quote = selected.quote
+   800→  const nightly = quote.nightly
+   801→  const uniform = nightly.length > 0 && nightly.every((n) => n.priceCents === nightly[0].priceCents)
+   802→  const deposit = Math.round(quote.grandTotalCents / 2)
+   803→
+   804→  return (
+   805→    <div className="space-y-4">
+   806→      {/* بطاقة الملخص */}
+   807→      <div className="rounded-xl border bg-card">
+   808→        <div className="border-b bg-muted/40 px-4 py-3">
+   809→          <div className="text-sm font-bold text-muted-foreground">{hotel?.name ?? 'فندق قلب القاهرة'}</div>
+   810→          <div className="mt-0.5 text-lg font-extrabold text-foreground">{selected.roomType.name}</div>
+   811→        </div>
+   812→
+   813→        <div className="grid grid-cols-2 gap-x-4 gap-y-3 p-4 text-sm sm:grid-cols-4">
+   814→          <div>
+   815→            <div className="text-xs text-muted-foreground">الوصول</div>
+   816→            <div className="mt-0.5 font-bold text-foreground">{formatDateAr(search.checkIn)}</div>
+   817→            <div className="text-xs text-muted-foreground" dir="ltr">
+   818→              {formatClockAr(hotel?.checkInTime)}
+   819→            </div>
+   820→          </div>
+   821→          <div>
+   822→            <div className="text-xs text-muted-foreground">المغادرة</div>
+   823→            <div className="mt-0.5 font-bold text-foreground">{formatDateAr(search.checkOut)}</div>
+   824→            <div className="text-xs text-muted-foreground" dir="ltr">
+   825→              {formatClockAr(hotel?.checkOutTime)}
+   826→            </div>
+   827→          </div>
+   828→          <div>
+   829→            <div className="text-xs text-muted-foreground">المدة</div>
+   830→            <div className="mt-0.5 font-bold text-foreground">{nightsText(quote.nights)}</div>
+   831→            <div className="text-xs text-muted-foreground">{roomsText(quote.roomsCount)}</div>
+   832→          </div>
+   833→          <div>
+   834→            <div className="text-xs text-muted-foreground">الضيوف</div>
+   835→            <div className="mt-0.5 font-bold text-foreground">{guestsText(search.adults, search.children)}</div>
+   836→            <div className="text-xs text-muted-foreground">{guest.fullName}</div>
+   837→          </div>
+   838→        </div>
+   839→
+   840→        <Separator />
+   841→
+   842→        {/* جدول الأسعار — من الخادم فقط */}
+   843→        <div className="p-4">
+   844→          <h4 className="mb-2 text-sm font-bold text-foreground">تفصيل الأسعار</h4>
+   845→          <div className="space-y-1.5 text-sm">
+   846→            {uniform ? (
+   847→              <PriceRow
+   848→                label={`${formatMoney(nightly[0].priceCents)} × ${nightsText(quote.nights)}${
+   849→                  quote.roomsCount > 1 ? ` × ${quote.roomsCount}` : ''
+   850→                }`}
+   851→                value={formatMoney(quote.subtotalCents)}
+   852→              />
+   853→            ) : (
+   854→              nightly.map((n) => (
+   855→                <PriceRow
+   856→                  key={n.date}
+   857→                  label={`${formatDateAr(n.date)}${n.rateName ? ` — ${n.rateName}` : ''}`}
+   858→                  value={formatMoney(n.priceCents * quote.roomsCount)}
+   859→                  muted
+   860→                />
+   861→              ))
+   862→            )}
+   863→            <PriceRow label={`المجموع الفرعي`} value={formatMoney(quote.subtotalCents)} />
+   864→            <PriceRow label={`الضريبة (${quote.taxPercent}%)`} value={formatMoney(quote.taxCents)} />
+   865→            <Separator className="my-2" />
+   866→            <div className="flex items-center justify-between">
+   867→              <span className="text-base font-black text-foreground">الإجمالي</span>
+   868→              <span className="text-2xl font-black text-primary dark:text-gold" dir="ltr">
+   869→                {formatMoney(quote.grandTotalCents)}
+   870→              </span>
+   871→            </div>
+   872→          </div>
+   873→        </div>
+   874→      </div>
+   875→
+   876→      {/* طريقة الدفع */}
+   877→      <div>
+   878→        <h4 className="mb-2.5 text-sm font-bold text-foreground">طريقة الدفع</h4>
+   879→        <RadioGroup
+   880→          value={paymentMethod}
+   881→          onValueChange={(v) => onPaymentChange(v as 'PAY_AT_HOTEL' | 'CARD')}
+   882→          className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+   883→        >
+   884→          <label
+   885→            className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-all ${
+   886→              paymentMethod === 'PAY_AT_HOTEL' ? 'border-primary bg-primary/5 shadow-sm' : 'hover:border-primary/40'
+   887→            }`}
+   888→          >
+   889→            <RadioGroupItem value="PAY_AT_HOTEL" className="mt-1" />
+   890→            <div>
+   891→              <div className="text-sm font-extrabold text-foreground">الدفع في الفندق</div>
+   892→              <div className="mt-1 text-xs leading-relaxed text-muted-foreground">
+   893→                تسدد كامل المبلغ عند الوصول — نقدًا أو بالبطاقة
+   894→              </div>
+   895→            </div>
+   896→          </label>
+   897→          <label
+   898→            className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-all ${
+   899→              paymentMethod === 'CARD' ? 'border-primary bg-primary/5 shadow-sm' : 'hover:border-primary/40'
+   900→            }`}
+   901→          >
+   902→            <RadioGroupItem value="CARD" className="mt-1" />
+   903→            <div>
+   904→              <div className="text-sm font-extrabold text-foreground">
+   905→                بطاقة — عربون <span dir="ltr">{formatMoney(deposit)}</span>
+   906→              </div>
+   907→              <div className="mt-1 text-xs leading-relaxed text-muted-foreground">
+   908→                يُحجز العربون إلكترونيًا الآن (50%) والباقي يُسدد بالفندق
+   909→              </div>
+   910→            </div>
+   911→          </label>
+   912→        </RadioGroup>
+   913→      </div>
+   914→
+   915→      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+   916→        <Button variant="outline" onClick={onBack}>
+   917→          رجوع
+   918→        </Button>
+   919→        <Button size="lg" className="flex-1 sm:flex-none sm:min-w-48" onClick={onConfirm}>
+   920→          تأكيد الحجز
+   921→        </Button>
+   922→      </div>
+   923→    </div>
+   924→  )
+   925→}
+   926→
+   927→function PriceRow({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
+   928→  return (
+   929→    <div className="flex items-center justify-between">
+   930→      <span className={muted ? 'text-xs text-muted-foreground' : 'text-muted-foreground'}>{label}</span>
+   931→      <span className={`font-semibold ${muted ? 'text-xs text-muted-foreground' : 'text-foreground'}`} dir="ltr">
+   932→        {value}
+   933→      </span>
+   934→    </div>
+   935→  )
+   936→}
+   937→
+   938→// ─────────────────────────── الخطوة 4: المعالجة ───────────────────────────
+   939→
+   940→function StepProcessing() {
+   941→  return (
+   942→    <div className="flex flex-col items-center gap-4 py-14 text-center">
+   943→      <Loader2 className="size-14 animate-spin text-primary dark:text-gold" />
+   944→      <p className="text-lg font-extrabold text-foreground">جارٍ تأكيد حجزك…</p>
+   945→      <p className="max-w-xs text-sm text-muted-foreground">
+   946→        يتم التحقق من التوفر وحجز غرفتك بأمان — لا تغلق النافذة
+   947→      </p>
+   948→    </div>
+   949→  )
+   950→}
+   951→
+   952→// ─────────────────────────── الخطوة 5: التأكيد ───────────────────────────
+   953→
+   954→function StepConfirmation({
+   955→  hotel,
+   956→  reservation,
+   957→  snapshot,
+   958→  paymentMethod,
+   959→  onCopy,
+   960→  onPrint,
+   961→  onManage,
+   962→  onClose,
+   963→}: {
+   964→  hotel: HotelPublic | null
+   965→  reservation: ReservationPublic
+   966→  snapshot: SnapshotBreakdown | null
+   967→  paymentMethod: 'PAY_AT_HOTEL' | 'CARD'
+   968→  onCopy: (ref: string) => void
+   969→  onPrint: () => void
+   970→  onManage: () => void
+   971→  onClose: () => void
+   972→}) {
+   973→  const remaining = Math.max(0, reservation.grandTotalCents - reservation.paidCents)
+   974→  const payBadge = paymentStatusBadge(reservation.paymentStatus)
+   975→
+   976→  return (
+   977→    <div className="space-y-5">
+   978→      {/* النجاح */}
+   979→      <div className="flex flex-col items-center gap-3 pt-2 text-center">
+   980→        <CheckCircle2 className="size-16 text-success" />
+   981→        <h3 className="text-2xl font-black text-foreground">تم تأكيد حجزك!</h3>
+   982→        <p className="text-sm text-muted-foreground">أرسلنا التفاصيل إلى رقم هاتفك المسجل</p>
+   983→
+   984→        {/* رقم الحجز copyable */}
+   985→        <button
+   986→          type="button"
+   987→          onClick={() => onCopy(reservation.bookingReference)}
+   988→          className="group flex items-center gap-2.5 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 px-5 py-3 transition-colors hover:border-primary"
+   989→          title="اضغط للنسخ"
+   990→        >
+   991→          <span className="font-mono text-2xl font-black tracking-wider text-primary dark:text-gold sm:text-3xl" dir="ltr">
+   992→            {reservation.bookingReference}
+   993→          </span>
+   994→          <Copy className="size-5 text-muted-foreground transition-colors group-hover:text-primary" />
+   995→        </button>
+   996→        <span className="text-xs text-muted-foreground">رقم الحجز — اضغط عليه للنسخ واحتفظ به لإدارة حجزك</span>
+   997→      </div>
+   998→
+   999→      <Separator />
+  1000→
+  1001→      {/* الملخص */}
+  1002→      <div className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-xl border bg-muted/40 p-4 text-sm sm:grid-cols-4">
+  1003→        <SummaryCell label="الضيف" value={reservation.guest.fullName} />
+  1004→        <SummaryCell label="الغرفة" value={reservation.roomType.name} />
+  1005→        <SummaryCell
+  1006→          label="الوصول"
+  1007→          value={`${formatDateAr(reservation.checkIn)} · ${formatClockAr(snapshot?.checkInTime ?? hotel?.checkInTime)}`}
+  1008→        />
+  1009→        <SummaryCell
+  1010→          label="المغادرة"
+  1011→          value={`${formatDateAr(reservation.checkOut)} · ${formatClockAr(snapshot?.checkOutTime ?? hotel?.checkOutTime)}`}
+  1012→        />
+  1013→        <SummaryCell label="المدة" value={nightsText(reservation.nights)} />
+  1014→        <SummaryCell label="الضيوف" value={guestsText(reservation.adults, reservation.children)} />
+  1015→        <SummaryCell label="الإجمالي" value={formatMoney(reservation.grandTotalCents)} ltr bold />
+  1016→        <div>
+  1017→          <div className="text-xs text-muted-foreground">حالة الدفع</div>
+  1018→          <span className={`mt-0.5 inline-block ${payBadge.className}`}>{payBadge.label}</span>
+  1019→        </div>
+  1020→      </div>
+  1021→
+  1022→      {/* تفصيل الدفع */}
+  1023→      <div className="rounded-xl border p-4">
+  1024→        <div className="flex items-center justify-between text-sm">
+  1025→          <span className="font-bold text-foreground">
+  1026→            {paymentMethod === 'CARD' ? 'بطاقة — عربون 50% مدفوع إلكترونيًا' : 'الدفع في الفندق عند الوصول'}
+  1027→          </span>
+  1028→        </div>
+  1029→        {paymentMethod === 'CARD' && remaining > 0 ? (
+  1030→          <div className="mt-2 flex items-center justify-between text-sm">
+  1031→            <span className="text-muted-foreground">
+  1032→              المدفوع <span className="font-bold text-success" dir="ltr">{formatMoney(reservation.paidCents)}</span> ·
+  1033→              المتبقي بالفندق <span className="font-bold text-warning" dir="ltr">{formatMoney(remaining)}</span>
+  1034→            </span>
+  1035→          </div>
+  1036→        ) : null}
+  1037→      </div>
+  1038→
+  1039→      {/* الأزرار */}
+  1040→      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+  1041→        <Button size="lg" onClick={onPrint}>
+  1042→          <Printer className="size-4" />
+  1043→          تحميل / طباعة التأكيد
+  1044→        </Button>
+  1045→        {hotel?.whatsapp ? (
+  1046→          <Button size="lg" variant="outline" asChild>
+  1047→            <a
+  1048→              href={waLink(hotel.whatsapp, `حجز جديد ${reservation.bookingReference}`)}
+  1049→              target="_blank"
+  1050→              rel="noopener noreferrer"
+  1051→            >
+  1052→              <MessageCircle className="size-4" />
+  1053→              تواصل واتساب
+  1054→            </a>
+  1055→          </Button>
+  1056→        ) : null}
+  1057→        <Button size="lg" variant="outline" onClick={onManage}>
+  1058→          <ClipboardList className="size-4" />
+  1059→          إدارة الحجز
+  1060→        </Button>
+  1061→        <Button size="lg" onClick={onClose}>
+  1062→          <CheckCircle2 className="size-4" />
+  1063→          تم
+  1064→        </Button>
+  1065→      </div>
+  1066→
+  1067→      <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
+  1068→        <Info className="size-3.5" />
+  1069→        الإلغاء مجاني حتى 24 ساعة قبل الوصول — من «إدارة الحجز»
+  1070→      </p>
+  1071→    </div>
+  1072→  )
+  1073→}
+  1074→
+  1075→function SummaryCell({ label, value, ltr, bold }: { label: string; value: string; ltr?: boolean; bold?: boolean }) {
+  1076→  return (
+  1077→    <div>
+  1078→      <div className="text-xs text-muted-foreground">{label}</div>
+  1079→      <div
+  1080→        className={`mt-0.5 ${bold ? 'font-black text-primary dark:text-gold' : 'font-bold text-foreground'}`}
+  1081→        dir={ltr ? 'ltr' : undefined}
+  1082→      >
+  1083→        {value}
+  1084→      </div>
+  1085→    </div>
+  1086→  )
+  1087→}
+  1088→

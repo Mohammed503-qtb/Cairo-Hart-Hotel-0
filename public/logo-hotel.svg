@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- فندق قلب القاهرة — شعار: قلب + قوس عمارة -->
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D4A843"/>
+      <stop offset="55%" stop-color="#C4922E"/>
+      <stop offset="100%" stop-color="#B07E1F"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+  <circle cx="60" cy="60" r="49" fill="#1A3C6E"/>
+  <!-- قوس معماري -->
+  <path d="M 38 82 L 38 58 A 22 22 0 0 1 82 58 L 82 82" fill="none" stroke="#D4A843" stroke-width="4" stroke-linecap="round"/>
+  <!-- قلب -->
+  <path d="M 60 74 C 48 64 42 57 42 50.5 C 42 45 46.5 41 52 41 C 55.5 41 58.5 43 60 46 C 61.5 43 64.5 41 68 41 C 73.5 41 78 45 78 50.5 C 78 57 72 64 60 74 Z" fill="url(#goldGrad)"/>
+  <!-- نجمة صغيرة -->
+  <path d="M 60 26 l 2.2 4.6 5 .7 -3.6 3.5 .85 5 -4.45 -2.35 -4.45 2.35 .85 -5 -3.6 -3.5 5 -.7 Z" fill="#D4A843"/>
+</svg>

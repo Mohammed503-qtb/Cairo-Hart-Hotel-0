@@ -1,0 +1,431 @@
+// ============================================================
+// HOTEL PLATFORM — CENTRAL DATABASE SCHEMA
+// فندق قلب القاهرة — عدن | Single source of truth for all channels
+// SQLite: enums stored as String with documented allowed values.
+// Money: always integer cents (no floats for financial values).
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────── HOTEL & CONTENT ───────────────────────────
+
+model Hotel {
+  id                      String   @id @default(uuid())
+  name                    String
+  tagline                 String   @default("")
+  description             String   @default("")
+  phone                   String   @default("")
+  whatsapp                String   @default("")
+  email                   String   @default("")
+  address                 String   @default("")
+  city                    String   @default("")
+  country                 String   @default("اليمن")
+  currency                String   @default("USD")
+  taxPercent              Int      @default(15) // نسبة الضريبة %
+  weekendSurchargePercent Int      @default(0) // نسبة زيادة نهاية الأسبوع (الجمعة/السبت) %
+  checkInTime             String   @default("14:00")
+  checkOutTime            String   @default("12:00")
+  minStayNights           Int      @default(1)
+  maxStayNights           Int      @default(30)
+  bookingHorizonDays      Int      @default(365)
+  cancellationPolicy      String   @default("")
+  paymentPolicy           String   @default("")
+  childrenPolicy          String   @default("")
+  petsPolicy              String   @default("")
+  smokingPolicy           String   @default("")
+  logoUrl                 String   @default("")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+
+model RoomType {
+  id               String        @id @default(uuid())
+  hotelId          String
+  name             String // Arabic name
+  nameEn           String        @default("")
+  description      String        @default("")
+  descriptionEn    String        @default("")
+  capacityAdults   Int           @default(2)
+  capacityChildren Int           @default(1)
+  bedConfig        String        @default("")
+  sizeSqm          Int           @default(0)
+  basePriceCents   Int           @default(0)
+  amenities        String        @default("[]") // JSON array (Arabic strings)
+  images           String        @default("[]") // JSON array of urls
+  active           Boolean       @default(true)
+  sortOrder        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  rooms            Room[]
+  rates            Rate[]
+  reservations     Reservation[]
+
+  @@map("room_types")
+}
+
+model Room {
+  id         String   @id @default(uuid())
+  roomTypeId String
+  number     String   @unique
+  floor      Int      @default(1)
+  status     String   @default("AVAILABLE") // AVAILABLE | OCCUPIED | RESERVED | CLEANING | DIRTY | OUT_OF_ORDER
+  notes      String?
+  createdAt  DateTime @default(now())
+  roomType   RoomType @relation(fields: [roomTypeId], references: [id])
+  stays      Stay[]
+
+  @@map("rooms")
+}
+
+model Rate {
+  id          String   @id @default(uuid())
+  roomTypeId  String
+  name        String // e.g. "الموسم الشتوي"
+  startDate   DateTime
+  endDate     DateTime
+  priceCents  Int
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  roomType    RoomType @relation(fields: [roomTypeId], references: [id])
+
+  @@map("rates")
+}
+
+// ─────────────────────────── GUESTS & RESERVATIONS ───────────────────────────
+
+model Guest {
+  id          String        @id @default(uuid())
+  fullName    String
+  phone       String        @unique
+  whatsapp    String?
+  email       String?
+  idNumber    String?
+  nationality String?
+  createdAt   DateTime      @default(now())
+  reservations Reservation[]
+  stays       Stay[]
+
+  @@map("guests")
+}
+
+model Reservation {
+  id               String    @id @default(uuid())
+  bookingReference String    @unique // HTL-2026-000421
+  guestId          String
+  roomTypeId       String
+  // PENDING | CONFIRMED | CANCELLED | CHECKED_IN | COMPLETED | NO_SHOW | EXPIRED
+  status           String    @default("PENDING")
+  // WEBSITE | WHATSAPP | PHONE | WALK_IN | RECEPTION
+  source           String    @default("WEBSITE")
+  checkIn          DateTime
+  checkOut         DateTime
+  adults           Int       @default(1)
+  children         Int       @default(0)
+  roomsCount       Int       @default(1)
+  currency         String    @default("USD")
+  subtotalCents    Int       @default(0)
+  discountCents    Int       @default(0)
+  taxCents         Int       @default(0)
+  grandTotalCents  Int       @default(0)
+  paidCents        Int       @default(0)
+  // UNPAID | PARTIALLY_PAID | PAID | REFUNDED
+  paymentStatus    String    @default("UNPAID")
+  // PAY_AT_HOTEL | CARD | CASH | TRANSFER
+  paymentMethod    String?
+  specialRequests  String?
+  priceSnapshot    String    @default("{}") // JSON: nightly breakdown, rates, policies at booking time
+  holdExpiresAt    DateTime?
+  createdAt        DateTime  @default(now())
+  confirmedAt      DateTime?
+  cancelledAt      DateTime?
+  guest            Guest     @relation(fields: [guestId], references: [id])
+  roomType         RoomType  @relation(fields: [roomTypeId], references: [id])
+  payments         Payment[]
+  stay             Stay?
+
+  @@index([checkIn, checkOut])
+  @@index([status])
+  @@map("reservations")
+}
+
+// ─────────────────────────── STAYS (الإقامة الفعلية) ───────────────────────────
+
+model Stay {
+  id                 String    @id @default(uuid())
+  reference          String    @unique // ST-2026-000883
+  reservationId      String    @unique
+  guestId            String
+  roomId             String
+  checkInAt          DateTime
+  expectedCheckOutAt DateTime
+  actualCheckOutAt   DateTime?
+  // ACTIVE | CHECKOUT_REQUESTED | CLOSED
+  status             String    @default("ACTIVE")
+  createdAt          DateTime  @default(now())
+  reservation        Reservation @relation(fields: [reservationId], references: [id])
+  guest              Guest       @relation(fields: [guestId], references: [id])
+  room               Room        @relation(fields: [roomId], references: [id])
+  accessCodes        AccessCode[]
+  serviceRequests    ServiceRequest[]
+  messages           Message[]
+  charges            Charge[]
+  payments           Payment[]
+  notifications      Notification[]
+  extensionRequests  ExtensionRequest[]
+  roomChangeRequests RoomChangeRequest[]
+  feedback           Feedback[]
+
+  @@map("stays")
+}
+
+// ─────────────────────────── BILLING ───────────────────────────
+
+// بنود إضافية على الفاتورة (خدمات مدفوعة / رسوم / غرامات)
+model Charge {
+  id          String   @id @default(uuid())
+  stayId      String
+  // SERVICE | EXTRA | PENALTY | ROOM_EXTENSION
+  category    String   @default("EXTRA")
+  description String
+  amountCents Int
+  createdAt   DateTime @default(now())
+  stay        Stay     @relation(fields: [stayId], references: [id])
+
+  @@map("charges")
+}
+
+model Payment {
+  id            String      @id @default(uuid())
+  reservationId String
+  stayId        String?
+  // CASH | CARD | ONLINE | TRANSFER
+  method        String
+  amountCents   Int
+  // COMPLETED | FAILED | REFUNDED
+  status        String      @default("COMPLETED")
+  reference     String? // provider/manual reference
+  note          String?
+  recordedBy    String? // staff name or "ONLINE"
+  createdAt     DateTime    @default(now())
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  stay          Stay?       @relation(fields: [stayId], references: [id])
+
+  @@map("payments")
+}
+
+// ─────────────────────────── IDENTITY: CODES & SESSIONS ───────────────────────────
+
+model Staff {
+  id        String       @id @default(uuid())
+  fullName  String
+  // RECEPTION | ADMIN | MANAGER
+  role      String       @default("RECEPTION")
+  phone     String?
+  active    Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  accessCodes AccessCode[]
+
+  @@map("staff")
+}
+
+model AccessCode {
+  id          String    @id @default(uuid())
+  codeHash    String    @unique // sha256 of the raw code — raw code is never stored
+  codeMasked  String    // e.g. R49••••M3 — للعرض في القوائم
+  // GUEST | RECEPTION | ADMIN
+  type        String
+  stayId      String?
+  staffId     String?
+  expiresAt   DateTime
+  // ACTIVE | EXPIRED | REVOKED | USED
+  status      String    @default("ACTIVE")
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  stay        Stay?     @relation(fields: [stayId], references: [id])
+  staff       Staff?    @relation(fields: [staffId], references: [id])
+  sessions    Session[]
+
+  @@map("access_codes")
+}
+
+model Session {
+  id           String     @id @default(uuid())
+  token        String     @unique
+  accessCodeId String
+  role         String // GUEST | RECEPTION | ADMIN
+  expiresAt    DateTime
+  revoked      Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  lastSeenAt   DateTime?
+  accessCode   AccessCode @relation(fields: [accessCodeId], references: [id])
+
+  @@map("sessions")
+}
+
+// ─────────────────────────── SERVICES & REQUESTS ───────────────────────────
+
+model ServiceCategory {
+  id        String    @id @default(uuid())
+  name      String
+  nameEn    String    @default("")
+  // HOUSEKEEPING | MAINTENANCE | GUEST_SERVICES | OTHER
+  key       String    @default("OTHER")
+  icon      String    @default("") // lucide icon name
+  sortOrder Int       @default(0)
+  services  Service[]
+
+  @@map("service_categories")
+}
+
+model Service {
+  id          String          @id @default(uuid())
+  categoryId  String
+  name        String
+  nameEn      String          @default("")
+  description String          @default("")
+  priceCents  Int             @default(0)
+  active      Boolean         @default(true)
+  sortOrder   Int             @default(0)
+  category    ServiceCategory @relation(fields: [categoryId], references: [id])
+
+  @@map("services")
+}
+
+model ServiceRequest {
+  id          String           @id @default(uuid())
+  reference   String           @unique // REQ-1042
+  stayId      String
+  serviceId   String?
+  // HOUSEKEEPING | MAINTENANCE | GUEST_SERVICES | OTHER
+  category    String           @default("OTHER")
+  title       String
+  description String?
+  // NORMAL | URGENT
+  priority    String           @default("NORMAL")
+  // NEW | ACKNOWLEDGED | ASSIGNED | IN_PROGRESS | WAITING | COMPLETED | CANCELLED | REJECTED
+  status      String           @default("NEW")
+  assignedTo  String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  completedAt DateTime?
+  stay        Stay             @relation(fields: [stayId], references: [id])
+  updates     RequestUpdate[]
+
+  @@index([status])
+  @@map("service_requests")
+}
+
+model RequestUpdate {
+  id        String         @id @default(uuid())
+  requestId String
+  status    String? // new status (if changed)
+  note      String?
+  byName    String
+  byRole    String // GUEST | RECEPTION | SYSTEM
+  createdAt DateTime       @default(now())
+  request   ServiceRequest @relation(fields: [requestId], references: [id])
+
+  @@map("request_updates")
+}
+
+// ─────────────────────────── CHAT & NOTIFICATIONS ───────────────────────────
+
+model Message {
+  id         String    @id @default(uuid())
+  stayId     String
+  // GUEST | RECEPTION
+  sender     String
+  senderName String
+  body       String
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+  stay       Stay      @relation(fields: [stayId], references: [id])
+
+  @@map("messages")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  // GUEST | RECEPTION | ADMIN
+  audience  String
+  stayId    String?
+  type      String   @default("INFO")
+  title     String
+  body      String   @default("")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  stay      Stay?    @relation(fields: [stayId], references: [id])
+
+  @@index([audience, read])
+  @@map("notifications")
+}
+
+// ─────────────────────────── REQUESTS ON STAY ───────────────────────────
+
+model ExtensionRequest {
+  id           String    @id @default(uuid())
+  stayId       String
+  newCheckOut  DateTime
+  nights       Int
+  priceCents   Int
+  note         String?
+  // PENDING | APPROVED | REJECTED
+  status       String    @default("PENDING")
+  decidedBy    String?
+  decidedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  stay         Stay      @relation(fields: [stayId], references: [id])
+
+  @@map("extension_requests")
+}
+
+model RoomChangeRequest {
+  id            String   @id @default(uuid())
+  stayId        String
+  toRoomId      String
+  toRoomNumber  String
+  priceDiffCents Int    @default(0)
+  reason        String?
+  // PENDING | APPROVED | REJECTED
+  status        String   @default("PENDING")
+  decidedBy     String?
+  decidedAt     DateTime?
+  createdAt     DateTime @default(now())
+  stay          Stay     @relation(fields: [stayId], references: [id])
+
+  @@map("room_change_requests")
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  stayId    String   @unique
+  rating    Int // 1..5
+  tags      String   @default("[]") // JSON array
+  comment   String?
+  createdAt DateTime @default(now())
+  stay      Stay     @relation(fields: [stayId], references: [id])
+
+  @@map("feedback")
+}
+
+// ─────────────────────────── AUDIT ───────────────────────────
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String // RESERVATION_CREATED | CHECK_IN | CODE_GENERATED ...
+  entityType String
+  entityId   String
+  actor      String
+  actorRole  String // GUEST | RECEPTION | ADMIN | SYSTEM | WEBSITE
+  details    String   @default("{}") // JSON
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("audit_logs")
+}
