@@ -28,7 +28,7 @@ List<Widget> requestsViewChildren(
   }
   if (store.requests.isEmpty) {
     return [
-      EmptyState(
+      const EmptyState(
         icon: Icons.assignment_outlined,
         title: 'لا طلبات بعد',
         subtitle: 'اطلب أي خدمة من الكتالوج وستظهر هنا مع حالتها لحظة بلحظة',

@@ -110,7 +110,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.warning_amber_rounded,
                         size: 15,
                         color: AppColors.warning,

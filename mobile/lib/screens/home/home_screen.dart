@@ -116,7 +116,7 @@ class _WelcomeCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(24),
       child: Stack(
         children: [
-          Positioned.fill(
+          const Positioned.fill(
             child: DecoratedBox(
               // from-primary via-primary to-primary/85 نحو أسفل-يسار
               decoration: const BoxDecoration(
@@ -164,7 +164,7 @@ class _WelcomeCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'رقم غرفتك',
                             style: const TextStyle(
                               fontSize: 13,
@@ -253,7 +253,7 @@ class _WelcomeCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'إقامتك حتى',
                             style: const TextStyle(
                               fontSize: 12,

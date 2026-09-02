@@ -65,9 +65,9 @@ ThemeData buildDarkTheme() {
     surfaceContainerHighest: const Color(0xFF1E2D47),
     onSurfaceVariant: const Color(0xFF9BAAC0),
     error: const Color(0xFFF2B8B5),
-    onError: Color(0xFF601410),
-    errorContainer: Color(0xFF8C1D18),
-    onErrorContainer: Color(0xFFF9DEDC),
+    onError: const Color(0xFF601410),
+    errorContainer: const Color(0xFF8C1D18),
+    onErrorContainer: const Color(0xFFF9DEDC),
     outline: const Color(0xFF3A4B66),
     outlineVariant: const Color(0xFF2A3A54),
   );
