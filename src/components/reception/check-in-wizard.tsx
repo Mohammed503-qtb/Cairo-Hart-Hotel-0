@@ -55,6 +55,8 @@ export default function CheckInWizard({
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<CheckInResult | null>(null)
   const [copied, setCopied] = useState(false)
+  // رقم الواتساب المُرسل إليه — يتحكم به المستخدم (استقبال/إدارة)، افتراضيًا هاتف الضيف
+  const [waNumber, setWaNumber] = useState('')
 
   const dateKey = useMemo(() => {
     const d = new Date(checkInISO)
@@ -119,6 +121,7 @@ export default function CheckInWizard({
         },
       })
       setResult(res)
+      setWaNumber(res.guestPhone)
       setStep(3)
     } catch (e) {
       toast({
@@ -149,7 +152,8 @@ export default function CheckInWizard({
 
   const whatsappLink = () => {
     if (!result) return '#'
-    const phone = normalizePhone(result.guestPhone)
+    const phone = normalizePhone(waNumber)
+    if (!phone) return '#'
     const text = `أهلًا بك في فندق قلب القاهرة ❤️\nغرفتك: ${result.roomNumber}\nكود تطبيق الفندق: ${result.guestCode} — افتح التطبيق وأدخل الكود`
     return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
   }
@@ -366,6 +370,25 @@ export default function CheckInWizard({
               <AlertTriangle className="w-3.5 h-3.5" />
               احتفظ بالكود الآن — لن يمكن استرجعه لاحقًا
             </p>
+
+            <div className="space-y-1.5">
+              <label htmlFor="wa-dest" className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                <Phone className="w-3.5 h-3.5" aria-hidden />
+                رقم الواتساب المُرسَل إليه — قابل للتعديل
+              </label>
+              <Input
+                id="wa-dest"
+                value={waNumber}
+                onChange={(e) => setWaNumber(e.target.value)}
+                dir="ltr"
+                inputMode="tel"
+                placeholder="+9677XXXXXXXX"
+                aria-label="رقم الواتساب المُرسَل إليه"
+              />
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                افتراضيًا هاتف الضيف من الحجز — عدّله إن كان رقم واتساب الضيف مختلفًا قبل الإرسال.
+              </p>
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-2">
               <Button variant="outline" className="flex-1" onClick={copyCode}>

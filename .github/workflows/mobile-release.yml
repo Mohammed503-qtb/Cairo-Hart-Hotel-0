@@ -1,0 +1,112 @@
+name: Mobile Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: 'عنوان الخادم المدمج (اختياري، https://…)'
+        required: false
+        default: ''
+      build_dev:
+        description: 'بناء نسخة dev أيضًا'
+        type: boolean
+        default: true
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & publish signed APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.29.2
+          channel: stable
+          cache: true
+
+      - name: Restore signing keystore (from repo secrets)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > mobile/android/app/upload-keystore.jks
+            {
+              echo "storeFile=upload-keystore.jks"
+              echo "storePassword=$KEYSTORE_PASSWORD"
+              echo "keyAlias=$KEY_ALIAS"
+              echo "keyPassword=$KEY_PASSWORD"
+            } > mobile/android/key.properties
+            echo "keystore restored"
+          else
+            echo "::warning::ANDROID_KEYSTORE_BASE64 غير مضبوط — سيُوقَّع APK بمفتاح debug"
+          fi
+
+      - name: Pub get
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Build prod APK
+        working-directory: mobile
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.api_base_url }}" ]; then
+            ARGS="--dart-define=API_BASE_URL=${{ inputs.api_base_url }}"
+          fi
+          flutter build apk --release --flavor prod --dart-define=APP_ENV=prod $ARGS
+
+      - name: Build dev APK
+        if: ${{ inputs.build_dev != false }}
+        working-directory: mobile
+        run: flutter build apk --release --flavor dev --dart-define=APP_ENV=dev
+
+      - name: Rename APKs
+        run: |
+          VERSION=$(grep -m1 '^version:' mobile/pubspec.yaml | sed 's/version: *//' | tr -d ' "')
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          mkdir -p dist
+          cp mobile/build/app/outputs/flutter-apk/app-prod-release.apk "dist/CairoHeartGuest-v${VERSION}-prod.apk"
+          if [ -f mobile/build/app/outputs/flutter-apk/app-dev-release.apk ]; then
+            cp mobile/build/app/outputs/flutter-apk/app-dev-release.apk "dist/CairoHeartGuest-v${VERSION}-dev.apk"
+          fi
+          ls -la dist/
+
+      - name: Compute release tag
+        id: rel
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v${VERSION}+${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create GitHub Release with APKs
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.rel.outputs.tag }}
+          name: 'تطبيق الضيف — فندق قلب القاهرة ${{ steps.rel.outputs.tag }}'
+          body: |
+            تطبيق الضيف (Flutter) — فندق قلب القاهرة — عدن
+
+            - **CairoHeartGuest-v${{ env.VERSION }}-prod.apk** — نسخة الإنتاج الموقّعة (وضع الضيف F1).
+            - **CairoHeartGuest-v${{ env.VERSION }}-dev.apk** — نسخة التطوير (suffix حزمة .dev — تُثبَّت جنبًا إلى جنب مع prod).
+            - عند غياب عنوان الخادم المدمج: من شاشة الدخول → «إعدادات الخادم» → أدخل عنوان منصة الفندق.
+            - كود الدخول: كود الضيف الذي يصدره الاستقبال عند تسجيل الوصول.
+          artifacts: 'dist/*.apk'
+          allowUpdates: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}

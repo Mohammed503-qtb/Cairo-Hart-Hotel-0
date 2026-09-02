@@ -1,0 +1,48 @@
+name: Web CI
+
+on:
+  push:
+    paths:
+      - 'src/**'
+      - 'prisma/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'bun.lock'
+      - 'eslint.config.mjs'
+      - '.github/workflows/web-ci.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'prisma/**'
+      - 'tests/**'
+  workflow_dispatch:
+
+jobs:
+  lint-test:
+    name: Bun lint + tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # حامل الاختبارات يُصلب المسار /home/z/my-project — نربطه بمسار العمل بلا أي تعديل كود
+      - name: Link workspace (test harness fixed root)
+        run: |
+          sudo mkdir -p /home/z
+          sudo ln -sfn "$GITHUB_WORKSPACE" /home/z/my-project
+          mkdir -p db
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Prisma generate
+        run: bunx prisma generate
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Tests (unit + auth + integration)
+        run: bun run test
