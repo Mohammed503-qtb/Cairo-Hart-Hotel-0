@@ -377,3 +377,60 @@ Stage Summary:
 - أبرز الانحرافات الموثقة: goRequests → push RequestsScreen (الـ Shell يملك فهرس التبويب — نفس تكيف الوكيل الموازي) · حالة الخطأ بErrorRetryView المشترك بنصي العنوان/التلميح الحرفيين بدل EmptyState البصري للويب · RefreshIndicator مضاف وفق تعليمات المهمة (أخطاؤه توست ApiError الحرفي بmounted-guards) · SectionTitle المشترك بلا أيقونات (قيد الويدجت) · هاتف الفندق يُعرض بأسلوبه دون فتح المتصل (لا url_launcher) · UrgentMark → StatusChip.priority (عرف التطبيق) · font-mono → Cairo مع LTR للمراجع/المبالغ
 - صفر تعديلات خارج الملكية · صفر اختبارات (ملك الوكيل الرئيسي) · خادم الويب حي طوال العمل (dev.log: 200) ولم يُلمس
 - بانتظار flutter analyze عند توفر SDK (المراجعة اليدوية الثلاثية هي الضمان الحالي — نمط 13-b نفسه)
+
+---
+Task ID: 12
+Agent: Main Agent (Z.ai Code)
+Task: F0 — تأسيس مشروع Flutter في mobile/ (البند 6.1 من MASTER_PLAN): سقالة كاملة + عميل API بعقد §1.2.1 + النماذج + الجلسة + المخزن + Realtime + الدخول + هيكل الضيف
+
+Work Log:
+- التحقق من أن Phase H مقفلة وبوابة الثقة مفتوحة (commit 4ed07d4 + worklog H1/H2-a/H4-a/H3/H2-b/11) ثم قياس الواقع: لا Flutter SDK محليًا (فحص مباشر) → البناء عبر GitHub Actions بقرار المالك («لديك جميع الإمكانيات هناك») — Scaffolding يدوي بلا flutter create
+- تنزيل خط Cairo (400/600/700 TTF من Google Fonts) + توليد أصول العلامة: logo.png 512 من public/logo-hotel.svg بcairosvg + أيقونات ic_launcher لكل الكثافات (48→192 بأساس كحلي وزوايا مستديرة عبر PIL)
+- كتابة الأساس: pubspec.yaml (http + shared_preferences + socket_io_client 3.x + flutter_localizations) · config.dart (API_BASE_URL عبر --dart-define أو إدخال المستخدم مع تخزين محلي) · core/api_client.dart (مغلف ok/fail + 401→renew→retry مرة واحدة→SessionExpiredError وفق سياسة §1.2.1 حرفيًا) · core/format.dart (نقل حرفي لsrc/lib/format.ts: formatMoney بالسنت + تواريخ عربية + كل خرائط التسميات) · models/guest.dart (نماذج كل نقاط G-01..G-16 بالسنت) · state/session.dart (restore→renew عند الإطلاق + renewOnForeground + logout) · state/guest_store.dart (كل نداءات guest الست عشرة + مؤشرات تحميل + مزامنات Realtime) · services/socket_service.dart (socket_io_client بنفس طوبولوجيا الويب: path=/ + query XTransformPort=3002 + join stay:{id} + الأحداث السبعة) · ui/theme.dart (كحلي #1A3C6E + ذهبي #D4A843 + Cairo + ليلي/نهاري) · ui/widgets.dart (AppCard/StatusChip/LoadingView/ErrorRetryView/EmptyState/showAppToast/InfoRow)
+- شاشات الجذر: splash_gate + login_screen (نقل code-login.tsx: تطبيع الكود، أكواد العرض، إعدادات الخادم عند غياب المخبوز) + role_placeholder (أكواد الطاقم → إرشاد F4/F5) + guest_shell (نقل guest-app.tsx: هيدر بالجرس والخروج + 4 تبويبات + FAB محادثة + توصيل Realtime بمعالجات الويب نفسها) + app.dart (MaterialApp RTL عربي + مراقبة دورة الحياة للمقدمة) + شاشات stub قابلة للترجمة لكل ملكيات الوكلاء
+- منصة Android يدويًا (متوافق قوالب 3.29): settings.gradle (AGP 8.7.3 + Kotlin 1.9.24) · gradle-wrapper.jar منقولة من gradle v8.12.0 الرسمي + gradlew/gradlew.bat · app/build.gradle (namespace com.cairoheart.aden + minSdk 23 + flavors dev/prod بsuffix حزمة واسم تطبيق عربي + توقيع release من key.properties عند وجوده وإلا debug-sign) · Manifest بINTERNET + res كاملة (styles/launch_background كحلي/أيقونات) — بلا local.properties (تولّده أداة flutter)
+- اختبارات الأساس: format_test (المال والتواريخ والتسميات الحرفية) + api_client_test (المغلف + سياسة 401→renew→retry + 429 ليس خروجًا + Bearer) بMockClient + guest_models_test (أشكال CONTRACTS الحرفية: G-01/G-09/G-04/G-11) + login_widget_test — كلها بلا شبكة
+- إصلاحات جولة CI الأولى بعد تشخيص سجلات GitHub: flavorDimensions قائمة لا سلسلة · تعارض اسم label مع حقل StatusChip (بادئة fmt للاستيراد) · استيراد services_screen ناقص في guest_shell · AlignmentDirectional بدل Alignment.centerStart · colorScheme.outlineVariant · SnackBar بلا contentTextStyle (بناء النص بالتنسيق مباشرة) · إصلاح أخطاء الاختبارات نفسها (closures لfail() + findsAtLeastNWidgets) — ثم جولة ثانية: 9 إصلاحات const + --no-fatal-infos
+- **جولة CI الثانية أثبتت البنية كاملة: Android build smoke نجح** (Gradle + flavors + Kotlin + الرموز + Dart compile كلها خضراء على GitHub) — التحليل فقط كان يفشل بسبب fatal-infos الافتراضية
+
+Stage Summary:
+- mobile/ مشروع Flutter كامل الملكية (38 ملف dart + منصة android + أصول العلامة + 4 ملفات اختبار) — الهوية والسلوك منقولان من الويب والعقد لا من فراغ
+- قرار توثيق: W (واتساب) يبقى على روابط wa.me الحالية بلا Twilio/Cloud API بقرار المالك — والأدمن يتحكم برقم الوجهة (Task 14)
+- كل تعديلات الويب في هذه المرحلة: check-in-wizard فقط (Task 14) — القائمة المجمدة محترمة (صفر «بينما نحن هنا» في الدومين/المنطق المالي)
+
+---
+Task ID: 14-15-16
+Agent: Main Agent (Z.ai Code)
+Task: WhatsApp برقم وجهة يتحكم به الأدمن (بطلب المالك) + CI/Release على GitHub Actions + الدفع والمراقبة والتحقق (Tasks 14/15/16 من خطة F)
+
+Work Log:
+- Task 14 (واتساب على حالته + تحكم الأدمن): قلب الموضوع موجود أصلًا — hotel.whatsapp يُدار من إعدادات الفندق (A-03) وكل روابط wa.me (الهيرو/الفوتر/تأكيد الحجز/إدارة الحجز/تطبيق الضيف) تشرب منه؛ الفجوة الوحيدة: معالج تسجيل الوصول كان يرسل كود الضيف لهاتف الحجز بلا تحرير → أضفت حالة waNumber (افتراضي هاتف الضيف بعد الوصول) + حقل إدخال قابل للتحرير بlabel عربي وملاحظة إرشادية في الخطوة 4 + whatsappLink يستخدم الرقم المحرَّر (normalizePhone) — لا مساس بأي منطق مالي ولا مخطط (AD-06/AD-09 لا تنطبقان: تغيير عرض فقط)
+- تحقق المتصفح (agent-browser) بعد التغيير: الموقع 200 سليم · دخول استقبال R492671M3 → فتح معالج الوصول لوصيل اليوم → تنقّل حتى خطوة تعيين الغرفة يعمل بكامل أزراره (Fast Refresh أعاد التجميع بلا أخطاء) — لم يُستكمل الوصول حفاظًا على بيانات العرض · دخول ضيف H834729X7 → لوحة خالد كاملة (إشعارات 2 + إجراءات سريعة) · صفر أخطاء console/page · bun run lint exit 0
+- Task 15 (CI/Release): توليد مفتاح توقيع PKCS12 محليًا (keytool، صلاحية 30 سنة، alias upload) ورفعه كأسرار GitHub مشفرة بlibsodium (ANDROID_KEYSTORE_BASE64/PASSWORD/ALIAS/KEY_PASSWORD عبر API — المفتاح نفسه خارج المستودع نهائيًا) · ثلاثة workflows: mobile-ci (analyze --no-fatal-infos + test + build smoke لdev flavor برفع artifact) · mobile-release (workflow_dispatch + tags: استعادة المفتاح من الأسرار → بناء prod/dev release APKs → Release بتAG عربي وAPKs كمرفقات، عنوان خادم مدمج اختياري كمدخل) · web-ci (bun install + prisma generate + lint + bun run test عبر symlink لمسار /home/z/my-project الذي يصلبه حامل الاختبارات — بلا أي تعديل على الملف المجمد)
+- إصلاح جذري قبل الدفع: سطر `test` في .gitignore الجذر كان سيستبني mobile/test/ بالكامل — ضيّقته إلى /test
+- Task 16 (الدفع والمراقبة): دفعة أولى b693bbc (67 ملف mobile + workflows) → Web CI نجح من أول مرة (157 اختبارًا أخضر على GitHub) · جولتا إصلاح للجوال (أخطاء أعلاه) → **بناء Android أخضر في الجولة الثانية** — التحليل بقي يفشل بسبب fatal-infos الافتراضية فأصلحت المواضع وأضفت --no-fatal-infos (الجولة الثالثة 3ed2c46)
+
+Stage Summary:
+- البناء والتشغيل والاختبار والصيانة صارت كلها على GitHub Actions بقرار المالك — الخادم المحلي بلا Flutter SDK وأثبتت CI ذلك مسارًا موثوقًا (سجل كامل قابل للتنقيح)
+- توقيع الإصدارات مؤمَّن بالأسرار (لا مفتاح في المستودع العام) مع مسار fallback إلى debug-sign إن غابت الأسرار
+- الويب لم يتأثر سلبًا: Web CI أخضر من الجولة الأولى والمتصفح يعرض كل شيء سليمًا بعد تغيير الواتساب
+- بانتظار الجولة الثالثة (analyze + test) ثم تشغيل mobile-release والتحقق من الـ APK الموقَّع والمرفق بإصدار GitHub
+
+---
+Task ID: 17
+Agent: Main Agent (Z.ai Code)
+Task: إغلاق تنفيذ F0+F1+F2: التحقق النهائي من الإصدار الموقَّع + MASTER_PLAN v2.2 + الدفع الختامي + تقرير المالك
+
+Work Log:
+- مراقبة CI عبر GitHub API جولة بجولة: الجولة 1 فشلت (أخطاء تجميع منقولة من الوكلاء: flavorDimensions سلسلة بدل قائمة، تعارض اسم label مع حقل، استيراد ناقص، Alignment.centerStart غير موجود، ThemeData.outlineVariant بدل colorScheme، SnackBar بلا contentTextStyle، أخطاء في اختباراتي) · الجولة 2: **بناء Android أخضر** (المسار الهيكلي كله سليم) والتحليل فشل بسبب fatal-infos الافتراضية · الجولة 3: التحليل أخضر وظهر فشلان في الاختبارات (خطآن في الاختبارات نفسها: مقارنة مسارات url.path بلا الشرطة الأولى، وتوقع سالب لا يطابق سلوك الويب $-5.00) · الجولة 4: خطأ هروب $ في عنوان اختبار · **الجولة 5: Mobile CI خضراء بالكامل (analyze + 33 اختبار Flutter + بناء Android debug)**
+- **mobile-release نجح بالكامل**: استعادة المفتاح من الأسرار ("keystore restored" في السجل) → بناء prod/dev release APKs (52.9MB) → GitHub Release منشور (tag v1.0.0+1+2) بملفّي APK وملاحظات عربية
+- تحقق نهائي من الـ APK الموقَّع: تنزيل prod APK من الرابط العام → `file` يتعرف عليه كحزمة Android → سلامة ZIP كاملة (383 مدخلًا: dex + native libs + flutter_assets + Manifest)
+- web-ci على GitHub: **157 اختبارًا أخضر من الجولة الأولى** (الويب لم يتأثر إطلاقًا بتغييرات F)
+- تحقق المتصفح الختامي: GET / = 200 · dev.log نظيف (كل المسارات 200) · دخول ضيف واستقبال سليم (موثق أعلاه في Task 14-15-16)
+- MASTER_PLAN → **v2.2**: جدولا الجرد يوثقان Flutter (F0/F1/F2 منفَّذة) وقرار W0 (بلا مزود واتساب — wa.me + الأدمن يتحكم برقم الوجهة) · أقسام F0/F1/F2/F6 معلَّمة بالمنفَّذ والقبول · قسم W بسجل قرار المالك الحرفي · سجل تغييرات 2.2
+
+Stage Summary:
+- **المرحلة F المطلوبة من المالك مكتملة في نطاقها المعتمد**: تطبيق ضيف Flutter أصلي كامل البنية والشاشات + Realtime + بناء وإصدار موقَّع عبر GitHub Actions (بقرار المالك: «لديك جميع الإمكانيات هناك»)
+- **المرفقات الحية:** https://github.com/Mohammed503-qtb/Cairo-Hart-Hotel-0/releases — CairoHeartGuest-v1.0.0+1-prod.apk و-dev.apk (موقَّعان، قابلان للتثبيت)
+- واتساب كما قرر المالك: بلا ربط — والأدمن يتحكم برقم الوجهة من إعدادات الفندق (روابط الموقع) ومن حقل قابل للتحرير في معالج الوصول (كود الضيف)
+- المتبقي من خريطة F (لم يُطلب ولم يُنفَّذ — بلا «بينما نحن هنا»): F3 Push · F4/F5 استقبال/إدارة في التطبيق · F6-minAppVersion · F7 Dogfooding · F8 المتاجر
