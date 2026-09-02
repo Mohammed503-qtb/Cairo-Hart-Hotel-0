@@ -32,7 +32,7 @@ android {
         versionName = flutter.versionName
     }
 
-    flavorDimensions = "stage"
+    flavorDimensions = ["stage"]
 
     productFlavors {
         dev {

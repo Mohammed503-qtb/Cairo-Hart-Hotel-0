@@ -93,7 +93,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                 Directionality(
                   textDirection: TextDirection.ltr,
                   child: Align(
-                    alignment: Alignment.centerStart,
+                    alignment: AlignmentDirectional.centerStart,
                     child: Text(
                       formatMoney(balance, currency: currency),
                       style: TextStyle(

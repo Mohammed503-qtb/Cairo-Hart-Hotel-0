@@ -148,7 +148,7 @@ class _RoomChangeSheetState extends State<RoomChangeSheet> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Theme.of(context).outlineVariant),
+                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
               ),
               child: Text(
                 'لا غرف متاحة للنقل حاليًا — جرّب لاحقًا',

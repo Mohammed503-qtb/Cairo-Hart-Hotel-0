@@ -25,7 +25,7 @@ void main() {
     await pumpLogin(tester);
     expect(find.text('فندق قلب القاهرة'), findsOneWidget);
     expect(find.text('دخول'), findsOneWidget);
-    expect(find.byType(TextField), atLeast(1));
+    expect(find.byType(TextField), findsAtLeastNWidgets(1));
     expect(find.text('أدخل كود الدخول'), findsOneWidget);
   });
 

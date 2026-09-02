@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────
 import 'package:flutter/material.dart';
 
-import '../core/format.dart';
+import '../core/format.dart' as fmt;
 import 'theme.dart';
 
 /// بطاقة موحدة (مقابل Card في الويب)
@@ -81,7 +81,7 @@ class StatusChip extends StatelessWidget {
   factory StatusChip.requestStatus(BuildContext context, String status) {
     final c = requestStatusChipColors(context, status);
     return StatusChip(
-      label: label(requestStatusLabels, status),
+      label: fmt.label(fmt.requestStatusLabels, status),
       foreground: c.$1,
       background: c.$2,
     );
@@ -95,7 +95,7 @@ class StatusChip extends StatelessWidget {
       _ => (scheme.onSurfaceVariant, scheme.surfaceContainerHighest),
     };
     return StatusChip(
-      label: label(stayStatusLabels, status),
+      label: fmt.label(fmt.stayStatusLabels, status),
       foreground: scheme.brightness == Brightness.light ? fg : scheme.onSurface,
       background: bg,
     );
@@ -110,7 +110,7 @@ class StatusChip extends StatelessWidget {
       _ => (scheme.onSurfaceVariant, scheme.surfaceContainerHighest),
     };
     return StatusChip(
-      label: label(paymentStatusLabels, status),
+      label: fmt.label(fmt.paymentStatusLabels, status),
       foreground: scheme.brightness == Brightness.light ? fg : scheme.onSurface,
       background: bg,
     );
@@ -119,7 +119,7 @@ class StatusChip extends StatelessWidget {
   factory StatusChip.priority(BuildContext context, String priority) {
     final urgent = priority == 'URGENT';
     return StatusChip(
-      label: label(priorityLabels, priority),
+      label: fmt.label(fmt.priorityLabels, priority),
       foreground: urgent ? Colors.white : Theme.of(context).colorScheme.onSurface,
       background: urgent ? AppColors.danger : Theme.of(context).colorScheme.surfaceContainerHighest,
     );
@@ -295,19 +295,19 @@ void showAppToast(BuildContext context, String message, {bool error = false}) {
   final messenger = ScaffoldMessenger.maybeOf(context);
   if (messenger == null) return;
   messenger.hideCurrentSnackBar();
+  final scheme = Theme.of(context).colorScheme;
   messenger.showSnackBar(
     SnackBar(
-      content: Text(message),
-      backgroundColor: error
-          ? Theme.of(context).colorScheme.errorContainer
-          : Theme.of(context).colorScheme.inverseSurface,
-      contentTextStyle: TextStyle(
-        fontFamily: 'Cairo',
-        fontWeight: FontWeight.w700,
-        color: error
-            ? Theme.of(context).colorScheme.onErrorContainer
-            : Theme.of(context).colorScheme.onInverseSurface,
+      content: Text(
+        message,
+        style: TextStyle(
+          fontFamily: 'Cairo',
+          fontWeight: FontWeight.w700,
+          color: error ? scheme.onErrorContainer : scheme.onInverseSurface,
+        ),
       ),
+      backgroundColor:
+          error ? scheme.errorContainer : scheme.inverseSurface,
     ),
   );
 }

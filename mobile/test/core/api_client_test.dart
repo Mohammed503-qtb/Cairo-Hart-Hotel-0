@@ -81,7 +81,7 @@ void main() {
       final client = ApiClient(
         baseUrlProvider: () => 'https://hotel.example.com',
         tokenProvider: () => token,
-        onSessionExpired: fail('يجب ألا تُستدعى'),
+        onSessionExpired: () => fail('يجب ألا تُستدعى'),
         httpClient: MockClient((req) async {
           calls.add('${req.method} ${req.url.path}');
           if (req.url.path == 'api/guest/dashboard') {
@@ -145,7 +145,7 @@ void main() {
       final client = ApiClient(
         baseUrlProvider: () => 'https://hotel.example.com',
         tokenProvider: () => null,
-        onSessionExpired: fail('لا تجديد لمسار الدخول'),
+        onSessionExpired: () => fail('لا تجديد لمسار الدخول'),
         httpClient: MockClient(
           (req) async => jsonRes(
             {'ok': false, 'error': 'انتهت إقامتك ولم يعد بإمكانك استخدام هذا الكود'},
@@ -169,7 +169,7 @@ void main() {
       final client = ApiClient(
         baseUrlProvider: () => 'https://hotel.example.com',
         tokenProvider: () => 't',
-        onSessionExpired: fail('429 ليس خروجًا'),
+        onSessionExpired: () => fail('429 ليس خروجًا'),
         httpClient: MockClient(
           (req) async => jsonRes(
             {'ok': false, 'error': 'محاولات كثيرة جدًا. أعد المحاولة بعد 42 ثانية'},

@@ -15,6 +15,7 @@ import 'bill/bill_screen.dart';
 import 'chat/chat_screen.dart';
 import 'home/home_screen.dart';
 import 'notifications/notifications_screen.dart';
+import 'services/services_screen.dart';
 import 'stay/stay_screen.dart';
 
 class GuestShell extends StatefulWidget {
