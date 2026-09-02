@@ -84,7 +84,7 @@ void main() {
         onSessionExpired: () => fail('يجب ألا تُستدعى'),
         httpClient: MockClient((req) async {
           calls.add('${req.method} ${req.url.path}');
-          if (req.url.path == 'api/guest/dashboard') {
+          if (req.url.path == '/api/guest/dashboard') {
             final auth = req.headers['authorization'];
             if (renewed && auth == 'Bearer tok-old') {
               return jsonRes({'ok': true, 'data': 1});
@@ -97,7 +97,7 @@ void main() {
               status: 401,
             );
           }
-          if (req.url.path == 'api/auth/renew') {
+          if (req.url.path == '/api/auth/renew') {
             renewed = true;
             return jsonRes({
               'ok': true,
@@ -122,7 +122,7 @@ void main() {
         tokenProvider: () => 'tok-dead',
         onSessionExpired: () => expiredCalled = true,
         httpClient: MockClient((req) async {
-          if (req.url.path == 'api/auth/renew') {
+          if (req.url.path == '/api/auth/renew') {
             return jsonRes(
               {
                 'ok': false,

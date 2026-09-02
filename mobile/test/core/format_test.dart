@@ -22,9 +22,9 @@ void main() {
       expect(formatMoney(100), r'$1.00');
     });
 
-    test('صفر وسالب', () {
+    test('صفر وسالب (مطابقة الويب: $-5.00)', () {
       expect(formatMoney(0), r'$0.00');
-      expect(formatMoney(-500), r'-$5.00');
+      expect(formatMoney(-500), r'$-5.00');
     });
 
     test('عملة أخرى', () {
