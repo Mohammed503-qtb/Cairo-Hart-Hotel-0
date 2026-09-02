@@ -22,6 +22,17 @@ export async function getAuth(req: Request): Promise<AuthContext | null> {
   if (!session || session.revoked || session.expiresAt < new Date()) return null
   if (session.accessCode.status !== 'ACTIVE' || session.accessCode.expiresAt < new Date()) return null
 
+  // لمسة نشاط خفيفة (H3): حدّث lastSeenAt مرة كل 60 ثانية على الأكثر —
+  // منع كتابة مع كل طلب. الفشل لا يُفشل الطلب أبدًا (lastSeenAt ليس
+  // جزءًا من صلاحية الجلسة) — يُلتقط ويُتجاهل.
+  if (!session.lastSeenAt || Date.now() - session.lastSeenAt.getTime() > 60_000) {
+    try {
+      await db.session.update({ where: { id: session.id }, data: { lastSeenAt: new Date() } })
+    } catch {
+      // تجاهل عمدًا — سلوك getAuth لا يتأثر
+    }
+  }
+
   if (session.role === 'GUEST') {
     if (!session.accessCode.stayId) return null
     const stay = await db.stay.findUnique({

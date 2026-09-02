@@ -175,3 +175,145 @@ Work Log:
 Stage Summary:
 - MASTER_PLAN.md v2.0 جاهز ومرفوع: وثيقة خط سير تنفيذية واحدة من نقطة الوقوف الحالية إلى ما بعد الإنتاج (إيقاعات التشغيل + محفزات التوسع) بأربعة قرارات حاكمة: لا rewrite، قائمة تحصين مغلقة من 4 بسقف أسبوع، Flutter كنقل، الاستخراج بمحفز واقعي فقط
 - بوابة بدء التنفيذ التالية بحسب الخطة: المرحلة H (التحصين) H1..H4 ثم بوابة الثقة ثم F — **بانتظار إشارة المالك لبدء تنفيذ H**
+
+---
+Task ID: H1
+Agent: full-stack-developer
+Task: خط أساس Prisma Migrations (البند الأول من المرحلة H في MASTER_PLAN v2.0): migration تأسيسي يمثل المخطط الحالي كما هو بلا أي تغيير تصميمي + تعليم قاعدة التطوير + إثبات المسار النظيف + تحويل migrations إلى المسار الرسمي الوحيد
+
+Work Log:
+- قراءة worklog.md بالكامل والقسم 5 (H1) من MASTER_PLAN.md؛ التحقق من الحالة الابتدائية: .env = file:/home/z/my-project/db/custom.db، لا مجلد prisma/migrations، الخادم حي (200)، المخطط فعليًا 22 نموذجًا (الوصف التاريخي «20 نموذجًا» في الوثائق تقريبي — النصاب الحقيقي: 22 جدولًا)
+- bunx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > /tmp/baseline.sql → 374 سطرًا: 22 CREATE TABLE لكل جداول المخطط (Hotel و21 جدولًا بـ @@map) + 14 CREATE INDEX (منها 9 UNIQUE: rooms.number، guests.phone، reservations.bookingReference، stays.reference، stays.reservationId، access_codes.codeHash، sessions.token، service_requests.reference، feedback.stayId) + 5 فهارس مركبة/عادية + كل قيود FOREIGN KEY — صفر تغيير تصميمي
+- إنشاء prisma/migrations/20260901000000_baseline/migration.sql بمحتوى المخرجات (تحقق لاحقًا بـ diff: مطابق 100%) + prisma/migration_lock.toml بمحتوى provider = "sqlite" كما في التعليمات
+- bunx prisma migrate resolve --applied 20260901000000_baseline → نجح من أول محاولة (لم يحدث قفل SQLite رغم عمل الخادم) — أنشأ جدول _prisma_migrations وسجّل الخط الأساس (finished_at=1، rolled_back=0) دون أي مساس بالبيانات
+- bunx prisma migrate status → «1 migration found in prisma/migrations / Database schema is up to date!» — صفر معلّقة
+- اختبار أمان قبل المسار النظيف: أثبتّ أن متغير البيئة الصريح يتقدّم على .env في Prisma CLI والعميل معًا (DATABASE_URL=file:/tmp/prec-test.db → الـ CLI طبع «Datasource: prec-test.db at file:/tmp/prec-test.db» والعميل أخفق بـ «table main.Hotel does not exist» في الملف الجديد) — أي أن فحص scratch لا يمكنه أن يلمس custom.db بصمت
+- المسار النظيف (محاكاة استنساخ جديد من الصفر) على قاعدة scratch منفصلة: DATABASE_URL="file:/home/z/my-project/db/migrate-check.db" bunx prisma migrate deploy → «SQLite database migrate-check.db created + Applying 20260901000000_baseline + All migrations have been successfully applied»؛ ثم DATABASE_URL="file:...migrate-check.db" bun prisma/seed.ts → اكتمل بلا أي أخطاء (فندق + 14 غرفة + 4 أنواع + أكواد)؛ العدّ: hotel=1, rooms=14, reservations=5, stays=2, guests=5, serviceRequests=2؛ وmigrate status على الـ scratch أيضًا up to date؛ ثم rm -f db/migrate-check.db db/migrate-check.db-journal (تحقق: db/ يحوي custom.db فقط)
+- مفاجأة مكتشفة (حالة سابقة لعملي، موثقة بشفافية): قاعدة custom.db كانت فارغة تمامًا من البيانات عند بدئي — ملف القاعدة وُلد 2026-09-02 00:24 مع تهيئة بيئة هذه الجلسة (كل الجداول موجودة بصفر صفوف، ولا _prisma_migrations قبل resolve) وخادم dev (بدأ 00:24) كان يرجع 503 على /api/public/hotel و/api/public/room-types منذ ذلك الحين (كل نافذة dev.log الحالية 503 قبل الاستعادة). أوامري كلها (diff/resolve/status + قراءات count) لا تحذف بيانات — المسح سابق لعملي بالكامل (على الأرجح إعادة تهيئة البيئة شغّلت مسار إنشاء المخطط القديم دون seed)
+- الاستعادة بالمسار الرسمي: bun prisma/seed.ts على custom.db (بلا db:push وبلا لمس يدوي — السكربت الرسمي نفسه الذي يستخدمه الوكلاء لاستعادة بيانات العرض) → تحقق بعدها مباشرة: /api/public/hotel = 200 بالبيانات الكاملة، /api/public/room-types = 200 بأربعة أنواع، وكود الضيف H834729X7 يرجع جلسة GUEST لخالد يوسف
+- README.md قسم «التشغيل محليًا»: استبدال خطوة bun run db:push بالمسار الرسمي bunx prisma migrate deploy (مع الإشارة للأمر المختصر bun run db:deploy) + ملاحظة صريحة بالنص المطلوب: «db:push مسموح فقط على قواعد scratch تجريبية وممنوع منعًا باتًا على أي قاعدة تحمل بيانات حقيقية — كل تغيير مخطط مستقبلي يجتاز ملف migration جديد» مع إرشاد إنشاء migration عبر migrate dev --name
+- package.json: إضافة "db:deploy": "prisma migrate deploy" ضمن scripts مع إبقاء كل السكربتات القائمة كما هي (لم يُحذف db:push — القيد توثيقي في README)
+- التحقق النهائي الشامل: curl / → HTTP 200؛ bun run lint → exit 0 نظيف؛ git status --short → فقط: M README.md، M package.json، ?? prisma/migration_lock.toml، ?? prisma/migrations/؛ آخر أسطر dev.log: 200 على room-types و auth/validate بلا أي خطأ runtime
+- كتابة سجل الوكيل في agent-ctx/H1-full-stack-developer.md
+
+Stage Summary:
+- الملفات المنشأة: prisma/migrations/20260901000000_baseline/migration.sql (374 سطرًا: 22 جدولًا + 14 فهرسًا + القيود) وprisma/migration_lock.toml؛ المعدلة: README.md (قسم التشغيل محليًا) وpackage.json (سكربت db:deploy)
+- المنجز: H1.1 (التأسيس) + H1.2 (التعليم) + H1.3 (المسار النظيف مجرَّب فعليًا من الصفر على scratch ثم حُذفت) + H1.4 (تحديث التدفق والسكربتات) — البند مقفل بمعايير قبوله كلها
+- لم يُلمس: prisma/schema.prisma، db/custom.db يدويًا، src/، tests/، docs/CONTRACTS.md؛ لم يُشغَّل db:push ولا bun run build إطلاقًا
+- من الآن: كل تغيير مخطط مستقبلي يجتاز migration جديدًا (أول مستخدم متوقع H3.1 — توسيع الجلسة إلى توكن bearer عبر migration لا push)
+- تنبيه للوكيل الرئيسي: بيانات قاعدة التطوير كانت ممسوحة منذ تهيئة بيئة هذه الجلسة (وليست نتيجة عملي) — استُعادت بالـ seed الرسمي والمنصة سليمة الآن (أكواد العرض: H834729X7 / H119922K4 / R492671M3 / A371849L9). إن مُسحت البيانات مجددًا بعد إعادة تهيئة بيئة مستقبلية فالمسار الصحيح هو migrate deploy ثم seed كما في README الآن — ولإزالة الالتباس مستقبلًا يُستحسن تصحيح وصف «20 نموذجًا» في الوثائق إلى 22
+- وكلاء متوازيون نشطون أثناء عملي (tests/unit ظهر 02:17 ثم أُخلي؛ ومحاولة تشغيل dev ثانية فشلت بـ EADDRINUSE وبترت بداية dev.log) — لم يؤثروا على H1 ولم ألمس ملكياتهم
+
+---
+Task ID: H2-a
+Agent: full-stack-developer
+Task: حامل الاختبارات + اختبارات الوحدة لمسارات المال (H2.1 + H2.2 من MASTER_PLAN v2.0) — tests/unit فقط، نقية بلا DB/شبكة
+
+Work Log:
+- قراءة worklog.md كاملًا + MASTER_PLAN.md §5 (H2) و§12 (I1-I12 وقواعد المال §12.2 وآلات الحالة §12.3)
+- قراءة عميقة قبل الكتابة للتوقيعات الفعلية: src/lib/{pricing,codes,refs,format}.ts + مواضع استدعائها (bookings/availability/extension) + قيم seed الواقعية (tax 15% · weekend 10% · ديلوكس 16000)
+- تحقق أن bun (1.3.14) يقرأ paths من tsconfig تلقائيًا — alias @/lib/* يعمل في bun test — لم يلزم bunfig.toml
+- إنشاء tests/unit/ بأربعة ملفات *.test.ts (bun:test): pricing (44 اختبارًا) · codes (23) · refs (18) · format (31) = 124 اختبارًا / 25 مجموعة، كل مجموعة معلقة بثابت موثق (I5/I6/I9/§12.2/§12.3/§12.4/§12.6/§12.7/H2.2)
+- refs اختُبرت بمحاكاة في الذاكرة تنفذ عقد Prisma نفسه (count startsWith + findUnique) — بلا قاعدة بيانات؛ أرقام إنتاج حقيقية مجمّدة (55200 سنتًا وعربون 27600 = HTL-2026-000421)؛ متجهات sha256 مرجعية مثبتة نصيًا
+- العربون 50%: الصيغة Math.round(grandTotalCents/2) مضمّنة في فرع CARD من api/public/bookings (ليست دالة مصدّرة) → جمّدت القاعدة الرقمية فوق مخرجات computeQuote الحقيقية (زوجي/فردي/نصف سنت لأعلى) والفرض من طرف المسار موثق لـ H2-b
+- صفر تعديلات تحت src/ أو prisma/ أو README أو package.json أو docs/ — AD-06 مطاعة بلا استثناءات (لا خللًا حقيقيًا في المنطق المالي اكتُشف)
+- bun test tests/unit → 124 pass / 0 fail؛ bun test (أمر واحد من الجذر — H2.7 متحقق الآن) → نفس النتيجة؛ bun run lint → صفر أخطاء وتحذيرات؛ خادم dev:3000 حي (200) وdev.log نظيف
+- كتابة agent-ctx/H2-a-full-stack-developer.md
+
+Stage Summary:
+- H2.1 + H2.2 منجزة: حامل الاختبارات مفعل (bun test أخضر بأمر واحد، 124/124) ومحرك التسعير والأكواد والمراجع والعرض المالي تحت شبكة أمان آلية — الدومين المالي مثبت بالاختبار لا بالعين
+- انحراف توثيقي يُعرض على H4-a (لا يعد خلل كود): §12.3 تذكر ServiceRequest بـ SUBMITTED بينما المنفَّذ NEW → ACKNOWLEDGED → ASSIGNED/IN_PROGRESS/WAITING → COMPLETED/CANCELLED/REJECTED (schema + routes + REQUEST_STATUS_LABELS متسقة داخليًا) — تصويب صياغة في docs/CONTRACTS.md يكفي
+- المتبقي من H2 للوكيل التالي (H2-b — يحتاج قاعدة اختبار معزولة عبر migrations لا قاعدة التطوير أبدًا): H2.3 التوفر (سعة/معكوسة/أفق/ذرية لا-oversell) · H2.4 رصيد الفاتورة (grand + Σcharges − Σpaid، خروج برصيد موجب/صفر، تمديد/تغيير غرفة) · H2.5 دورة الأكواد (منتهٍ/ملغي، I11 موت كود الضيف عند الخروج) · H2.6 الرحلة الذهبية بتأكيد مالي في كل محطة (وفيها فرض عربون 50% من طرف المسار) · دمجها كلها تحت bun test واحد
+- إرشادات مفصلة للوكيل التالي في agent-ctx/H2-a-full-stack-developer.md (نمط محاكاة refs، ملاحظات الحدود الموثقة، انحراف التوثيق)
+
+---
+Task ID: H4-a
+Agent: full-stack-developer
+Task: جرد العقود الكامل — docs/CONTRACTS.md v0.9 (H4.1 من MASTER_PLAN v2.0): توثيق كل مسارات API المنفَّذة كما هي في الكود (العقد المستقر المرجعي لتطبيق Flutter)
+
+Work Log:
+- قراءة worklog.md كاملًا وMASTER_PLAN.md (§5 H4 وقاعدة الاستقرار، §12.5) قبل أي كتابة
+- قراءة سطرية لكل ملفات المسارات تحت src/app/api (67 ملفًا: 6 public + 2 auth + 14 guest + 22 reception + 22 admin + 1 جذر) + _lib/_shared/_helpers + src/lib/{api,auth,rate-limit,audit,events,pricing,availability,codes}.ts
+- عدّ فعلي بالأدوات: 67 ملف مسار = 82 نقطة نهاية (method+path): 6+2+16+23+34+1 — الخطة قالت 57 (انحراف موثق)
+- كتابة docs/CONTRACTS.md v0.9 (~1865 سطرًا، 11 قسمًا): مقدمة (مغلف ok/fail بدلالاته، نموذج المصادقة الفعلي، دلالات الحالات، حدود المعدل، أشكال مشتركة، Enums) + بطاقة لكل نقطة نهاية: الدور/الطلب بالتحقق/النجاح حقليًا بمثال واقعي بالسنت/الأخطاء برسائلها العربية الحرفية/الآثار الجانبية (تدقيق+بث socket+إشعارات)/المستهلك (W/F1/F4/F5)/الحالة DRAFT
+- قسم placeholder «عقد المصادقة للجوال — يُستكمل بعد H3» (§1.2.1) جاهز لاستكمال وكيل H3
+- حزمة F1 (§8): 16 نقطة نهاية أساسية + مكملات + 7 قواعد عقدية (Bearer، موت الجلسة اللحظي عند الخروج/الإبطال، 403 الكيان مقابل الصلاحية، السنت الصحيح، socket اختياري عبر /?XTransformPort=3002)
+- قاعدة الاستقرار (§9) منقولة من H4.2 + جدول وسم STABLE فارغ + سجل تغييرات الوثيقة
+- ملاحظات انحراف (§10، 11 بندًا) — أهمها: المصادقة اليوم Bearer في Authorization لا كوكي؛ GET /api بقايا سقالة خارج المغلف؛ غرفة socket admin معرفة بلا بث؛ تفاصيل audit تُعاد نصًا خامًا؛ تفاوتات عدّ (departuresToday سقف 5، unreadCount داخل العينة، 201/200 غير متسق)؛ حالة بيانات حية: db/custom.db (H1) بلا سجل Hotel → public يعيد 503 بالرسالة الحرفية (مسار الكود سليم)
+- تحقق curl مقيد بالقراءة وحالات خطأ غير مكتوبة (صفر كتابة بيانات): public/hotel 503 حرفية، /api «Hello, world!»، validate بكود غير موجود 400 حرفي، bookings بجسم فارغ 400 حرفي، و401 الحرفي لمسارات محمية
+- المراجعة العشوائية الإلزامية: 5 مسارات من 5 قنوات (validate، bookings، guest/bill، reception/rooms/[id]/status، admin/codes) × قراءتين كود↔وثيقة — صفر انحراف؛ النتائج الحية مطابقة حرفيًا
+- كتابة سجل العمل في agent-ctx/H4-a-full-stack-developer.md
+
+Stage Summary:
+- docs/CONTRACTS.md v0.9 مكتمل ومغطٍ 100% لملفات المسارات (67 ملفًا/82 نقطة نهاية موثقة، العدد موثق صراحة)
+- كل رسائل الأخطاء العربية منقولة حرفيًا من الكود (جزء من العقد)؛ حزمة F1 مجمعة وكاملة؛ قاعدة الاستقرار + placeholder عقد الجوال موجودان
+- المراجعة العشوائية الخماسية المزدوجة: صفر انحراف (وثيقة↔كود) — الانحرافات المكتشفة كلها «خطة↔كود» وموثقة في §10
+- لا يُلمس أي ملف غير docs/CONTRACTS.md؛ الخادم يعمل بلا أي تأثير من عملي
+
+---
+Task ID: H3
+Agent: full-stack-developer
+Task: عقد المصادقة للعميل الثاني — تجديد التوكن (H3 من المرحلة H في MASTER_PLAN v2.0): POST /api/auth/renew يمديد نفس التوكن + لمسة lastSeenAt في getAuth + اختبارات العقد a-g + توثيق §1.2.1 في CONTRACTS.md
+
+Work Log:
+- قراءة worklog.md كاملًا (H1/H2-a/H4-a) + MASTER_PLAN.md §5 (H3 وبوابة الثقة)؛ تأكيد اكتشاف H4-a من الكود: Bearer مطبَّق بالفعل (getAuth يفحص الجلسة+الكود+الإقامة مع كل طلب) — **لا تغيير مخطط مطلوب**؛ الفجوة الوحيدة = لا آلية تجديد
+- إنشاء src/app/api/auth/renew/route.ts: rate-limit أولًا (10/دقيقة لكل IP بنمط validate → 429 بالرسالة المتسقة) → getAuth للتوكن الحالي (أي فشل → 401 بالرسالة الحرفية لـ requireRole) → العمر الجديد min(الآن+12س، accessCode.expiresAt) → معاملة $transaction واحدة: session.update لنفس التوكن (expiresAt + lastSeenAt) + سطر تدقيق AUTH_RENEW (actor/actorRole من سياق الجلسة) → الرد ok({ expiresAt }) — **لا توكن جديد يُصدر**، التوكن المخزَّن لدى العميل يبقى صالحًا
+- لمسة lastSeenAt في src/lib/auth.ts (التعديل الوحيد على كود قائم): داخل getAuth بعد فحوص الصلاحية وقبل تفريع الأدوار — كتابة فقط إذا كان lastSeenAt أقدم من 60 ثانية، مغلَّفة try/catch فارغ (فشلها لا يُفشل الطلب أبدًا) — تقييم المخاطر موثق في agent-ctx/H3-full-stack-developer.md: صفر تغيير لقيم الإرجاع أو حقول الصلاحية
+- tests/auth/flows.test.ts (ملف واحد): البنية المشتركة حرفيًا (أول سطر DATABASE_URL لقاعدة test-auth.db المعزولة → setupTestDb('auth') عبر migrate deploy + seed الرسمي → استيراد ديناميكي فقط) + استدعاء مباشر بلا شبكة؛ ترويسة x-forwarded-for مستقلة لكل نداء إصدار/تجديد (3 validate + 5 renew — تحت السقوف)
+- السيناريوهات a-g كلها خضراء من أول تشغيل: (a) دخول H834729X7 → 200 + توكن GUEST مسطح · (b) GET /api/guest/dashboard بالتوكن → 200 + عزل إقامة خالد · (c) renew → 200 + expiresAt لاحقة + لا حقل token في الرد + نفس التوكن يظل يعمل + السجل نفسه امتُد في القاعدة · (d) renew بعد revoked=true يدويًا → 401 · (e) renew بعد expiresAt في الماضي → 401 · (f) نداء محمي بعد accessCode.status=REVOKED → 401 (I4، بعد إثبات 200 قبله) · (g) renew بلا ترويسة/بتوكن ملفق → 401
+- docs/CONTRACTS.md: استبدال القسم placeholder §1.2.1 فقط بالعقد النهائي — قرار H3 الموثَّق (توحيد على Bearer بدل كوكي H3.2: الواقع أفضل، الويب والجوال نفس العقد بلا كسر سلوك ويب) + جدول العقد + عقد renew الكامل بالرسائل الحرفية + سياسة العميل المحمول (renew عند الإطلاق/العودة للمقدمة؛ 401 → شاشة الكود) + ملاحظة جرد داخلية: قناة auth أصبحت 3 مسارات (بطاقة §3 لصاحب الوثيقة) — لم يُلمس أي جزء آخر من الوثيقة
+- التحقق الحي (معيار القبول الحرفي): validate بـ R492671M3 → توكن → GET /api/reception/dashboard بالتوكن → 200 → renew → 200 ({"ok":true,"expiresAt":"2026-09-02T14:46:26.006Z"}) → dashboard مجددًا → 200 (نفس التوكن بعد التمديد)؛ بلا توكن → 401 بالرسالة الحرفية؛ سطر AUTH_RENEW مؤكد في قاعدة التطوير بقراءة فقط (actor «أحمد الاستقبال»/RECEPTION)
+- bun test tests/auth/ → 7 pass / 0 fail (41 expect) · bun test tests/unit/ → 124 pass / 0 fail (لا انحدار) · bun run lint → exit 0 · خادم dev:3000 حي طوال العمل وdev.log نظيف (renew مجمّع 200)
+- كتابة سجل الوكيل في agent-ctx/H3-full-stack-developer.md
+
+Stage Summary:
+- الملفات المنشأة: src/app/api/auth/renew/route.ts وtests/auth/flows.test.ts؛ المعدلة: src/lib/auth.ts (لمسة lastSeenAt المشروطة فقط) وdocs/CONTRACTS.md (القسم 1.2.1 فقط)
+- المنجز: H3 كاملة بلا أي تغيير مخطط — H3.1 كانت منجزة بنيويًا (نموذج Session جاهز من الأساس)، H3.2 تحققت بقرار موثَّق (توحيد Bearer بدل إضافة كوكي — أفضل من الخطة)، H3.3 (حماية 10/د + إبطال التوكن مع الكود/الخروج قائم أصلًا + تدقيق AUTH_RENEW)، H3.4 (اختبارات a-g + سيناريو عميل محمول حي)
+- **بوابة الثقة 5.5 البند 3 مقفل**: توكن بعمر وتجديد صالح للجوال والويب نفسه بلا كسر — تنتظر البوابة إغلاق H2-b فقط
+- لم يُلمس: prisma/schema.prisma (لا migration ولا db:push)، أي كود عميل ويب (store/api-client/مكونات)، tests/integration (H2-b)، قاعدة التطوير إلا بنداءات معيار القبول
+- لـ F0: عقد الجوال جاهز في CONTRACTS.md §1.2.1 (سياسة renew عند الإطلاق/العودة للمقدمة + 401 → شاشة الكود)؛ lastSeenAt صار جاهزًا لأي لوحة «جلسات نشطة» مستقبلية بلا عمل إضافي
+- تنبيه لصاحب CONTRACTS.md: قناة auth الآن 3 مسارات (renew بلا بطاقة في §3) — موثق داخل §1.2.1
+
+---
+Task ID: H2-b
+Agent: full-stack-developer
+Task: اختبارات التكامل H2.3 + H2.4 + H2.5 + H2.6 من MASTER_PLAN v2.0 §5 (H2) — فوق قاعدة اختبار معزولة (migrate deploy + seed بالمسار الرسمي) تستدعي معالجات المسارات مباشرة وتثبت الثوابت التجارية من طرف إلى طرف
+
+Work Log:
+- قراءة worklog.md كاملًا (H2-a «للوكيل التالي» + H1 + H4-a + H3 الذي اكتمل أثناء عملي) + MASTER_PLAN §5 (H2) و§12 (I1-I12 وقواعد المال §12.2) + prisma/seed.ts سطرًا سطرًا (حسبت كل القيم المالية المتوقعة من المصدر) + كود كل مسار مستدعى (availability/bookings/validate/arrivals/check-in/check-out/charges/payments/requests+status/bill/billing/dashboard) + docs/CONTRACTS.md للمطابقة
+- تحقق بنيتين قبل الكتابة (مسبار محذوف بعده): (1) استيراد معالجات المسارات ديناميكيًا يعمل في bun test وأن NextRequest يُبنى بـ nextUrl.searchParams (لازم لمسارات arrivals/requests) والنمط `{ params: Promise.resolve({ id }) }` لمسارات الباراميتر الديناميكي في Next 16 · (2) **الذرية تحت التزامن حقيقية**: طلبا حجز متزامنان (Promise.all) على آخر مخزون → واحد 201 وواحد 409 — المعاملة التفاعلية تعيد فحص التوفر وتمنع الـ oversell
+- إنشاء tests/integration/flows.test.ts (ملف واحد متسلسل، 1161 سطرًا): أول سطر حرفي يضبط DATABASE_URL على db/test-integration.db ثم setupTestDb('integration') ثم استيراد ديناميكي فقط لـ 14 معالجًا + @/lib/db — نداء مباشر بلا شبكة، IP فريد (x-forwarded-for متزايد) لكل نداء لتفادي حدود المعدل في الذاكرة (validate 5/دقيقة، bookings 10/ساعة)، وتواريخ نسبية لـ«اليوم» تُحسب داخل الاختبار، والرحلة الذهبية في نافذة أحد→ثلاثاء بلا زيادة نهاية أسبوع
+- H2.3 (8 اختبارات · I1/I7/I8/I6/I9): التوفر بمدى صالح → الأنواع الأربعة الفعالة بسعات seed الحرفية (مفردة 2 · مزدوجة 4 · ديلوكس 4 بعد حجز أحمد المتداخل · عائلي 2 مع استبعاد 303 خارج الخدمة) + الأسعار deep-equal مع إعادة حساب مستقلة من قواعد §12.2 (شاملة زيادة الجمعة/السبت 10% إن أصابت المدى) · تواريخ معكوسة → 400 بالرسالة الحرفية · حجز PAY_AT_HOTEL → 201 + مرجع HTL-YYYY-NNNNNN + totals بالسنت + snapshot مجمد (I9) · Idempotency: نفس المفتاح يعيد نفس الحجز replayed=true والقاعدة فيها حجز واحد فقط · الماضي/الأفق (365)/الحد الأقصى (30 ليلة) → رسائل الكود الحرفية · **I1/I7**: حجز كل مخزون المفردة (غرفتان) بطلبين متزامنين → 201+409 ثم النوع يختفي من التوفر ثم محاولة متسلسلة → 409 وaggregate=2 (لا oversell)
+- H2.4 (5 اختبارات · §12.2): فاتورة خالد (H834729X7) مطابقة لـ seed بالسنت: 55200 + 6500 − 30000 = **31700** (roomNights 3 · roomSubtotal 48000 · roomTax 7200) · رسم 1200 عبر الاستقبال → الرصيد 32900 فورًا في فاتورة الضيف · دفعة 10000 → paidCents 40000 وPARTIALLY_PAID والرصيد 22900 · مسار الاستقبال billing/[stayId] بنفس الأرقام حرفيًا · **خروج برصيد موجب** (نورا): رفض 400 برسالة الرصيد + balanceCents=5000 في الجسم ثم نجاح مع confirmOutstanding (وإغلاق كامل: CLOSED/DIRTY/REVOKED)
+- H2.5 (5 اختبارات · I4/I11/§12.4): arrivals اليوم يحوي HTL-2026-000421 بأرقامه (55200/عربون 27600/ديلوكس/بلا إقامة) · check-in بغرفة 202 → 200 + **كود ضيف خام H\d{6}[A-Z0-9]{2} مرة واحدة** + هاش SHA-256 والقناع مطابقان في القاعدة والغرفة OCCUPIED · validate بالكود الجديد → GUEST يعمل على لوحة الضيف (204→202) · الخروج: رفض مع رصيد $276.00 حرفيًا → دفعة تسوية 27600 → خروج برصيد صفر · **I11**: الكود القديم «تم إلغاء هذا الكود. تواصل مع إدارة الفندق» حرفيًا + التوكن القديم 401 «جلسة غير صالحة...» + من القاعدة: CLOSED + actualCheckOutAt + DIRTY + REVOKED + كل الجلسات revoked + الحجز COMPLETED
+- H2.6 (8 اختبارات a→h · الرحلة الذهبية كاملة برحلة جديدة): a) توفر المزدوجة بquote مطابق (27600 محسوبًا) · b) حجز باسم/هاتف جديدين → 201 + مرجع + totals بالسنت (24000+3600=27600) · c) arrivals بتاريخ الحجز يحويه → check-in بغرفة 104 → كود خام · d) لوحة الضيف: غرفة 104 + رصيد افتتاحي 27600 · e) طلب خدمة → 201 → الاستقبال يراه (NEW) → ACKNOWLEDGED → IN_PROGRESS → COMPLETED (الخط الزمني NEW+3 في القاعدة + completedAt + حماية الطرفية «لا يمكن تعديل طلب منتهٍ») · f) رسم 2500 + دفعة 30100 → **27600 + 2500 − 30100 = 0** في فاتورة الضيف · g) خروج → 200 → تحقق نهائي شامل من القاعدة: CLOSED + DIRTY + REVOKED + جلسات مبطلة + reservation COMPLETED/paidCents 30100/PAID + معادلة الرصيد صفري من القاعدة مباشرة · h) **I10**: auditLog يوثق RESERVATION_CREATED/CHECK_IN/CODE_GENERATED/REQUEST_CREATED/REQUEST_UPDATED/CHARGE_ADDED/PAYMENT_RECORDED/CHECK_OUT كلها مربوطة بكيانات الرحلة (الفاعل «أحمد الاستقبال»/RECEPTION والمبلغ 30100 في تفاصيل الدفع)
+- النتائج: `bun test tests/integration/` → **26 pass / 0 fail / 243 expect** (شغّل مرتين متتاليتين للتأكد من إعادة التهيئة النظيفة) · `bun test tests/unit/` → 124/0 (لا انحدار على H2-a) · `bun run lint` → exit 0 · خادم dev:3000 حي (200) وdev.log نظيف ولم يُلمس · تنظيف db/test-integration.db* بعد آخر تشغيل ناجح
+- **صفر تعديلات تحت src/** (AD-09/AD-06: لم أكتشف خللًا حقيقيًا واحدًا في منطق المال/الدومين من طرف إلى طرف — كل الأرقام طابقت المحسوب من seed/المسارات من أول تشغيل، والفشلان الوحيدان كانا خطأين في اختباري نفسه صُححا فورًا: مفتاح أسماء عربي/لاتيني في مصفوفة BASE، وحقل guestName المسطح بدل guest.fullName المتداخل في arrivals)
+- تصويبان لق نص المهمة (لا خلل كود — الكود والعقد متسقان): `/api/public/availability` **POST بجسم JSON** لا GET بباراميترات (كما في CONTRACTS PUB-03) · وصيغة مرجع الحجز **6 أرقام** HTL-YYYY-NNNNNN (refs.ts + seed + CONTRACTS) لا 7 كما ورد في نص المهمة
+- كتابة سجل الوكيل في agent-ctx/H2-b-full-stack-developer.md (فيه أيضًا إرشادات تقنية مفصلة للنمط: NextRequest للـ nextUrl · params كوعد · IP فريد لكل نداء)
+
+Stage Summary:
+- H2.3 + H2.4 + H2.5 + H2.6 منجزة بالكامل: 26 اختبار تكامل حقيقي فوق قاعدة معزولة عبر migrations الرسمية، معالجات المسارات مستدعاة مباشرة، وكل قيمة مالية بالسنت محققة ضد المحسوب من seed/المسارات — الثوابت I1/I4/I7/I8/I10/I11 و§12.2/§12.4/§12.6 مغطاة ومعلقة فوق اختباراتها
+- **بوابة الثقة 5.5 البند 2 مقفل**: أمر اختبار أخضر يغطي التسعير والعربون (عبر seed لأحمد: 27600 = 50%) والرصيد والإلغاء (نصوص حرفية) والأكواد — الدومين المثبت بالاختبار لا بالعين؛ تنتظر البوابة اعتماد الوكيل الرئيسي (H2.7/الحالة الهيكلية أدناه)
+- **تنبيه هيكلي لـ H2.7 (قرار للوكيل الرئيسي — ليس خلل كود)**: `bun test` العاري يشغّل كل الملفات في عملية واحدة و`src/lib/db.ts` يخزّن PrismaClient في globalThis — أول ملف DB يُحمَّل أبجديًا (tests/auth/ لـ H3) يثبّت العميل على قاعدة auth ويتجاهل DATABASE_URL اللاحق لملف integration → «أمر واحد أخضر» يتطلب تشغيل كل مجموعة في عملية مستقلة (مثل سكربت ي chained: bun test tests/unit/ && bun test tests/auth/ && bun test tests/integration/) — والملف المساعد المجمد يمنع حلًا داخلية؛ لم أشغّل bun test عاريًا قط التزامًا بالقيود
+- لم يُلمس: src/ (صفر) · prisma/ · tests/helpers/test-db.ts (مجمدة) · tests/auth/ (H3) · tests/unit/ (H2-a) · docs/ · db/custom.db — H3 أنهى عمله أثناء جلستي واختباراتي ركضت خضراء بعد تغييره في src/lib/auth.ts (لا انحدار متبادل)
+
+---
+Task ID: 11
+Agent: Main Agent (Z.ai Code)
+Task: تنفيذ المرحلة H كاملة (التحصين) بتوزيع متوازٍ على وكلاء فرعيين + إغلاق بوابة الثقة + رفع كل شيء إلى GitHub
+
+Work Log:
+- بناء خطة التوازي: موجة 1 (H1 migrations + H2-a وحدات + H4-a جرد العقارات — بلا تبعيات بينها) ثم موجة 2 (H3 تجديد التوكن + H2-b تكامل) ثم موجة 3 (تكامل وتحقق وإغلاق) — ملكيات ملفات صارمة لكل وكيل منعًا للتعارض
+- قبل الموجة 2: تجربة أثبتت أن bun test يشغّل الملفات في عملية واحدة (نفس PID) → بنية tests/helpers/test-db.ts (setupTestDb باسم مستقل لكل مجموعة + حارس مرة واحدة/عملية + قواعد الاستيراد الديناميكي بعد ضبط DATABASE_URL) + التحقق بنمط «الاستدعاء المباشر لمعالجات المسارات» فوق قاعدة معزولة (smoke أخضر ثم حذفه) — بنية مشتركة مجمدة استهلكها وكولا الموجة 2 بأمان (قاعدتان منفصلتان test-auth.db/test-integration.db منعًا لسباق الملفات بينهما)
+- الموجة 1 (3 وكلاء بالتوازي): H1 (baseline migration بـ22 نموذجًا + resolve + مسار نظيف deploy+seed+عدّ ثم حذف الـ scratch + README/سكربت db:deploy — واستعاد قاعدة بيئة الجلسة الفارغة عبر seed الرسمي) · H2-a (124 اختبار وحدة: تسعير/أكواد/مراجع/تنسيق — صفر تعديلات src) · H4-a (docs/CONTRACTS.md: 67 ملفًا/82 نقطة نهاية موثقة من الكود + حزمة F1 + اكتشاف أن المصادقة Bearer أصلًا لا كوكي)
+- الموجة 2 (وكيلان بالتوازي): H3 (POST /api/auth/renew: نفس التوكن يُمدّد min(12س، صلاحية الكود) + rate-limit 10/د + تدقيق AUTH_RENEW + لمسة lastSeenAt كل 60ث في getAuth + 7 اختبارات سيناريو + عقد الجوال §1.2.1 — بلا أي تغيير مخطط) · H2-b (26 اختبار تكامل/243 تأكيدًا: I1/I7 بطلبين متزامنين و409، I8 idempotency، §12.2 أرصدة بالسنت، I4/I11 موت الكود والجلسات، الرحلة الذهبية a→h كاملة، I10 تدقيق — صفر تعديلات src)
+- موجة 3 (التكامل): حل القضية الهيكلية التي نبّه إليها H2-b: سكربت رسمي `"test": "bun test tests/unit/ && bun test tests/auth/ && bun test tests/integration/"` بسلاسل عمليات معزولة → **الأمر الواحد أخضر: 157 اختبارًا (124+7+26)** · bun run lint نظيف (exit 0) · تحقق حي: renew بالتوكن 200 + بلا توكن 401
+- تحقق المتصفح (agent-browser): الموقع يعرض RTL سليمًا (عنوان + ودجت بحث + أنواع الغرف) · دخول الضيف H834729X7 → لوحة خالد (غرفة 201 + إشعارات) · دخول الاستقبال R492671M3 → لوحة بأرقام حية (وصول 2/مغادرة 1/مقيمون 2/طلب عاجل) · دخول الإدارة A371849L9 → كل الأقسام · صفر أخطاء console وصفحة · موبايل 390px: NO-OVERFLOW · سلوك الويب لم يتغير إطلاقًا بعد H3
+- إغلاق H4.2: CONTRACTS.md → v1.0 (مجموعة F1 §8 + عقد مصادقة الجوال §1.2.1 + مكملات F1 معلَنة STABLE بقرار موثق في جدول §9.2؛ reception/admin تبقى DRAFT حتى F4/F5)
+- تحديث MASTER_PLAN → v2.1: المرحلة H مكتملة ومقفلة 2026-09-02 (كل بنودها ب evidence) · بوابة الثقة §5.5 مقفلة بالأدلة الأربعة · تصويبات الجرد (22 نموذجًا · 67/82 · ServiceRequest تبدأ NEW · H3: بلا migration والواقع أفضل من الخطة) · خريطة المسار تعلم ✅ على H وبوابة الثقة · سجل تغييرات v2.1 · README: قسم الاختبارات الرسمي (`bun run test` + سبب عزل العمليات + AD-09)
+
+Stage Summary:
+- **المرحلة H مقفلة بالكامل وبوابة الثقة مقفلة**: migrations رسمية (H1) · 157 اختبارًا آليًا بأمر واحد (H2) · عقد جوال موحّد Bearer + renew (H3) · CONTRACTS.md v1.0 ومجموعة F1 STABLE (H4)
+- التنفيذ المتوازي احترم القائمة المغلقة حرفيًا (صفر «بينما نحن هنا»: لم يُلمس الدومين ولا الـ SPA ولا أي منطق مثبت — تعديلات src الكلية = ملف renew جديد + لمسة additive واحدة في auth.ts)
+- الموجة التالية بحسب الخطة: **المرحلة F (Flutter)** — بوابة الثقة مفتوحة رسميًا؛ ملاحظة تشغيلية: Flutter SDK غير مثبت في بيئة التطوير هذه (فُحص) — F0 يحتاج قرار تثبيت SDK أو سقالة هيكلية يبنيها المالك محليًا؛ W0 (قرار مزود واتساب) جاهز للبدء بالتوازي بقرار عمل من المالك
