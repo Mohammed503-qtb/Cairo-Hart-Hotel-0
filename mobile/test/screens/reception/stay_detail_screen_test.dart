@@ -235,6 +235,10 @@ Future<void> _openStay(
 void main() {
   group('شاشة تفصيل الإقامة', () {
     testWidgets('التحميل والتبويبات الخمسة تعرض مفاتيحها', (tester) async {
+      // نافذة أطول: تبويب الضيف ListView يبني بكسولًا — «طلبات خاصة»
+      // آخر عنصر خارج 600px الافتراضية فلا يُبنى أصلًا (فتّاش لا يجد غير المبني)
+      await tester.binding.setSurfaceSize(const Size(800, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
       final store = ReceptionStore(_api(_mock(
         paymentBodies: [],
         decideBodies: [],
