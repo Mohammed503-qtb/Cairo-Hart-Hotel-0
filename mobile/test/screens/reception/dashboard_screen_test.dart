@@ -114,10 +114,10 @@ void main() {
     expect(find.text('21%'), findsOneWidget);
     expect(find.text('3 مشغولة من 14 غرفة'), findsOneWidget);
 
-    // أقسام اليوم: وصول + مغادرة + طلب معلق عاجل
+    // أقسام اليوم: وصول + مغادرة + طلب معلق عاجل (الاسم داخل نص مدمج — textContaining)
     expect(find.text('أحمد محمد'), findsOneWidget);
     expect(find.text('نورا سالم'), findsOneWidget);
-    expect(find.text('خالد يوسف'), findsOneWidget);
+    expect(find.textContaining('خالد يوسف'), findsOneWidget);
     expect(find.text('المكيف لا يبرد'), findsOneWidget);
     expect(find.text('غرفة 103'), findsOneWidget);
     expect(find.text('تسجيل وصول'), findsOneWidget);

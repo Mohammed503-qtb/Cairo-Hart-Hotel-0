@@ -403,15 +403,18 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
               ),
               _Row(
                 'الإجمالي / المدفوع',
-                Row(mainAxisSize: MainAxisSize.min, children: [
-                  MoneyText(a.grandTotalCents),
-                  const SizedBox(width: 4),
-                  const Text(' / '),
-                  const SizedBox(width: 4),
-                  MoneyText(a.paidCents, colored: true),
-                  const SizedBox(width: 6),
-                  StatusChip.paymentStatus(context, a.paymentStatus),
-                ]),
+                // Wrap بدل Row: محتوى نقدي يتجاوز العرض على الخطوط الضيقة (تلتف كالويب)
+                Wrap(
+                  spacing: 4,
+                  runSpacing: 2,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    MoneyText(a.grandTotalCents),
+                    const Text(' / '),
+                    MoneyText(a.paidCents, colored: true),
+                    StatusChip.paymentStatus(context, a.paymentStatus),
+                  ],
+                ),
               ),
             ],
           ),
@@ -745,12 +748,15 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Icon(Icons.warning_amber_rounded, size: 14, color: AppColors.danger),
           const SizedBox(width: 6),
-          Text(
-            'احتفظ بالكود الآن — لن يمكن استرجعه لاحقًا',
-            style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: AppColors.danger),
+          Flexible(
+            child: Text(
+              'احتفظ بالكود الآن — لن يمكن استرجعه لاحقًا',
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.danger),
+            ),
           ),
         ]),
         const SizedBox(height: 14),
