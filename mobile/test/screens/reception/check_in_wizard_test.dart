@@ -174,15 +174,17 @@ Future<void> _pumpOpener(
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
-        body: Center(
-          child: TextButton(
-            onPressed: () => showCheckInWizard(
-              context,
-              store: store,
-              reservationId: reservationId,
-              checkInIso: '2026-09-02T14:00:00.000Z',
+        body: Builder(
+          builder: (context) => Center(
+            child: TextButton(
+              onPressed: () => showCheckInWizard(
+                context,
+                store: store,
+                reservationId: reservationId,
+                checkInIso: '2026-09-02T14:00:00.000Z',
+              ),
+              child: const Text('افتح المعالج'),
             ),
-            child: const Text('افتح المعالج'),
           ),
         ),
       ),

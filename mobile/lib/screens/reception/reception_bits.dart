@@ -152,7 +152,7 @@ class KpiCard extends StatelessWidget {
     final body = Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: scheme.card,
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: scheme.outlineVariant),
       ),
