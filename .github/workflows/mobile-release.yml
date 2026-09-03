@@ -60,6 +60,9 @@ jobs:
         working-directory: mobile
         run: flutter pub get
 
+      - name: Extract app version (pubspec → APP_VERSION)
+        run: echo "APP_VERSION=$(grep -m1 '^version:' mobile/pubspec.yaml | sed 's/version: *//' | cut -d+ -f1)" >> "$GITHUB_ENV"
+
       - name: Build prod APK
         working-directory: mobile
         run: |
@@ -67,12 +70,12 @@ jobs:
           if [ -n "${{ inputs.api_base_url }}" ]; then
             ARGS="--dart-define=API_BASE_URL=${{ inputs.api_base_url }}"
           fi
-          flutter build apk --release --flavor prod --dart-define=APP_ENV=prod $ARGS
+          flutter build apk --release --flavor prod --dart-define=APP_ENV=prod --dart-define=APP_VERSION=${{ env.APP_VERSION }} $ARGS
 
       - name: Build dev APK
         if: ${{ inputs.build_dev != false }}
         working-directory: mobile
-        run: flutter build apk --release --flavor dev --dart-define=APP_ENV=dev
+        run: flutter build apk --release --flavor dev --dart-define=APP_ENV=dev --dart-define=APP_VERSION=${{ env.APP_VERSION }}
 
       - name: Rename APKs
         run: |

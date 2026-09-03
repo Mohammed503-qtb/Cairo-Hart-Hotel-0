@@ -47,6 +47,7 @@ export interface HotelAdmin {
   childrenPolicy: string
   petsPolicy: string
   smokingPolicy: string
+  minAppVersion: string
   [key: string]: unknown
 }
 

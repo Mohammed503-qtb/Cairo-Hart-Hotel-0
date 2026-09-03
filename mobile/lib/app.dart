@@ -10,10 +10,13 @@ import 'screens/guest_shell.dart';
 import 'screens/login_screen.dart';
 import 'screens/role_placeholder.dart';
 import 'screens/splash_gate.dart';
+import 'screens/update_required_screen.dart';
 import 'services/socket_service.dart';
 import 'state/guest_store.dart';
 import 'state/session.dart';
 import 'ui/theme.dart';
+import 'core/app_version.dart';
+import 'config.dart';
 
 class AppRoot extends StatefulWidget {
   const AppRoot({super.key, required this.session});
@@ -30,6 +33,11 @@ class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
   late final RealtimeService _realtime;
   bool _guestBooted = false;
 
+  // F6 — حارس الحد الأدنى للإصدار (PUB-07 عند الإطلاق)
+  bool _updateRequired = false;
+  bool _updateRechecking = false;
+  String _lastMinVersion = '';
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +47,7 @@ class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
     _realtime = RealtimeService();
     _session.addListener(_onSessionChanged);
     _session.restore();
+    _checkMinAppVersion();
   }
 
   @override
@@ -71,6 +80,25 @@ class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
     }
   }
 
+  /// F6: فحص PUB-07 عند الإطلاق — بلا خادم مضبوط نتجاوز (شاشة الدخول
+  /// تطلب العنوان أولًا). فشل الفحص متسامح (fail-open) — الحجب فقط
+  /// عندما يجيب الخادم صراحة بحد أعلى من إصدار هذا البناء.
+  Future<void> _checkMinAppVersion() async {
+    if (!AppConfig.hasBaseUrl) return;
+    final min = await fetchMinAppVersion(AppConfig.baseUrl);
+    if (!mounted) return;
+    setState(() {
+      _lastMinVersion = min ?? '';
+      _updateRequired = min != null && needsUpdate(min);
+      _updateRechecking = false;
+    });
+  }
+
+  Future<void> _recheckMinAppVersion() async {
+    setState(() => _updateRechecking = true);
+    await _checkMinAppVersion();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -96,6 +124,15 @@ class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
   }
 
   Widget _home() {
+    // F6: إعادة فحص جارية (بعد «إعادة المحاولة») → شاشة الانتظار
+    if (_updateRechecking) return const SplashGate();
+    // F6: حجب كامل عند إصدار أقل من حد الخادم
+    if (_updateRequired) {
+      return UpdateRequiredScreen(
+        minVersion: _lastMinVersion,
+        onRetry: _recheckMinAppVersion,
+      );
+    }
     switch (_session.status) {
       case AppStatus.booting:
         return const SplashGate();

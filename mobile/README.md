@@ -36,7 +36,7 @@ flutter test
 flutter run --flavor dev --dart-define=APP_ENV=dev
 
 # بناء إصدار:
-flutter build apk --release --flavor prod --dart-define=APP_ENV=prod --dart-define=API_BASE_URL=https://YOUR-HOTEL-DOMAIN
+flutter build apk --release --flavor prod --dart-define=APP_ENV=prod --dart-define=API_BASE_URL=https://YOUR-HOTEL-DOMAIN --dart-define=APP_VERSION=1.0.0
 ```
 
 ## عنوان الخادم
@@ -44,6 +44,12 @@ flutter build apk --release --flavor prod --dart-define=APP_ENV=prod --dart-defi
 - عند البناء بـ `--dart-define=API_BASE_URL=https://…` يصبح العنوان ثابتًا ولا يظهر للمستخدم.
 - بدونه: تظهر «إعدادات الخادم» في شاشة الدخول ويُخزَّن العنوان محليًا (لكل بناء dev الافتراضي).
 - Realtime: socket.io على `/` مع `XTransformPort=3002` (نفس طوبولوجيا الويب).
+
+## إصدار التطبيق وحد التحديث (F6)
+
+- إصدار البناء يُدمج عبر `--dart-define=APP_VERSION=x.y.z` — CI يستخرجه تلقائيًا من `pubspec.yaml` (الافتراضي المحلي `0.0.0`).
+- عند الإطلاق يفحص التطبيق `GET /api/public/app-config` (PUB-07، بلا مصادقة): إن كان `minAppVersion` أعلى من إصدار البناء → شاشة حجب «يتوفر تحديث مطلوب» برابط الإصدارات (قابل للنسخ) وزر «إعادة المحاولة».
+- الأدمن يضبط الحد من إعدادات الفندق (A-03: حقل «أقل إصدار مسموح للتطبيق») — فارغ = لا فرض. فشل الفحص متسامح (التطبيق يُكمل تشغيله).
 
 ## المصادقة (عقد §1.2.1 — STABLE)
 

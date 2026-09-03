@@ -30,11 +30,14 @@ jobs:
       - name: Pub get
         run: flutter pub get
 
+      - name: Extract app version (pubspec → APP_VERSION)
+        run: echo "APP_VERSION=$(grep -m1 '^version:' pubspec.yaml | sed 's/version: *//' | cut -d+ -f1)" >> "$GITHUB_ENV"
+
       - name: Analyze
         run: flutter analyze --no-fatal-infos
 
       - name: Test
-        run: flutter test
+        run: flutter test --dart-define=APP_VERSION=${{ env.APP_VERSION }}
 
   build-smoke:
     name: Android build smoke (dev flavor)
@@ -59,8 +62,11 @@ jobs:
       - name: Pub get
         run: flutter pub get
 
+      - name: Extract app version (pubspec → APP_VERSION)
+        run: echo "APP_VERSION=$(grep -m1 '^version:' pubspec.yaml | sed 's/version: *//' | cut -d+ -f1)" >> "$GITHUB_ENV"
+
       - name: Build debug APK (dev flavor)
-        run: flutter build apk --debug --flavor dev --dart-define=APP_ENV=dev
+        run: flutter build apk --debug --flavor dev --dart-define=APP_ENV=dev --dart-define=APP_VERSION=${{ env.APP_VERSION }}
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

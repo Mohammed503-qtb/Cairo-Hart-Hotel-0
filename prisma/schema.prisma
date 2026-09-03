@@ -41,6 +41,8 @@ model Hotel {
   petsPolicy              String   @default("")
   smokingPolicy           String   @default("")
   logoUrl                 String   @default("")
+  // F6-minAppVersion: الحد الأدنى لإصدار تطبيق الضيف (x.y.z) — فارغ = لا فرض
+  minAppVersion           String   @default("")
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 }

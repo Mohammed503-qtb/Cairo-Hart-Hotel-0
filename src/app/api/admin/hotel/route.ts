@@ -62,6 +62,17 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
+  // الحد الأدنى لإصدار تطبيق الضيف (F6) — x.y.z أو فارغ لإلغاء الفرض
+  const minApp = asString(body.minAppVersion)
+  if (minApp !== undefined) {
+    const v = minApp.trim()
+    if (v !== '' && !/^\d+\.\d+\.\d+$/.test(v)) return fail('صيغة إصدار التطبيق يجب أن تكون ثلاثية رقمية (مثال: 1.2.0)')
+    if (v !== hotel.minAppVersion) {
+      data.minAppVersion = v
+      changed.minAppVersion = v
+    }
+  }
+
   // النسب 0-100
   for (const f of ['taxPercent', 'weekendSurchargePercent'] as const) {
     const v = asInt(body[f])

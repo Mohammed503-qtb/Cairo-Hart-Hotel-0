@@ -4,7 +4,7 @@
 // HOTEL SETTINGS — إعدادات الفندق
 // ─────────────────────────────────────────────────────────────
 import { useMemo, useState } from 'react'
-import { Save, Loader2, Info, Hotel, Phone, SlidersHorizontal, FileText } from 'lucide-react'
+import { Save, Loader2, Info, Hotel, Phone, SlidersHorizontal, FileText, Smartphone } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -40,7 +40,7 @@ export default function HotelSettingsSection() {
       'name', 'tagline', 'description', 'phone', 'whatsapp', 'email', 'address', 'city', 'currency',
       'checkInTime', 'checkOutTime', 'taxPercent', 'weekendSurchargePercent', 'minStayNights',
       'maxStayNights', 'bookingHorizonDays', 'cancellationPolicy', 'paymentPolicy', 'childrenPolicy',
-      'petsPolicy', 'smokingPolicy',
+      'petsPolicy', 'smokingPolicy', 'minAppVersion',
     ]) {
       f[key] = String(hotel[key] ?? '')
     }
@@ -205,6 +205,28 @@ export default function HotelSettingsSection() {
               ))}
               <p className="col-span-2 md:col-span-4 text-xs text-muted-foreground -mt-1">
                 زيادة نهاية الأسبوع تُطبق على ليالي الجمعة والسبت للحجوزات الجديدة.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* تطبيق الضيف */}
+          <Card className="border-border/60">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2"><Smartphone className="w-4 h-4 text-primary" /> تطبيق الضيف (Flutter)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="space-y-1.5 max-w-xs">
+                <Label htmlFor="minAppVersion">أقل إصدار مسموح للتطبيق</Label>
+                <Input
+                  id="minAppVersion"
+                  value={state.minAppVersion}
+                  onChange={(e) => set('minAppVersion', e.target.value)}
+                  placeholder="مثال: 1.2.0"
+                  dir="ltr"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                اتركه فارغًا لإلغاء الفرض. عند تعيينه: تطبيق الضيف بإصدار أقل يُحجب عند الإطلاق بشاشة «تحديث مطلوب» حتى يُحدَّث من صفحة الإصدارات. يُستخدم عند بطلان إصدار قائم (كسر عقد) — لا يؤثر على الويب إطلاقًا.
               </p>
             </CardContent>
           </Card>
