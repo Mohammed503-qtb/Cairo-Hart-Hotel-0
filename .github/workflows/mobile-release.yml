@@ -61,7 +61,8 @@ jobs:
         run: flutter pub get
 
       - name: Extract app version (pubspec → APP_VERSION)
-        run: echo "APP_VERSION=$(grep -m1 '^version:' mobile/pubspec.yaml | sed 's/version: *//' | cut -d+ -f1)" >> "$GITHUB_ENV"
+        run: |
+          echo "APP_VERSION=$(grep -m1 '^version:' mobile/pubspec.yaml | sed 's/version: *//' | cut -d+ -f1)" >> "$GITHUB_ENV"
 
       - name: Build prod APK
         working-directory: mobile
