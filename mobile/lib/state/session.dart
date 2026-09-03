@@ -32,6 +32,9 @@ class SessionController extends ChangeNotifier {
 
   bool get isGuest => _session?.isGuest ?? false;
 
+  /// دور الجلسة الحالية (GUEST | RECEPTION | ADMIN) — null عند غيابها
+  String? get role => _session?.role;
+
   /// الاسترجاع عند الإطلاق: إن وُجد توكن → renew (سياسة §1.2.1)
   Future<void> restore() async {
     final token = AppConfig.prefs.getString(AppConfig.kSessionToken);

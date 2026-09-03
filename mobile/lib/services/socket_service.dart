@@ -1,7 +1,8 @@
 // ─────────────────────────────────────────────────────────────
-// REALTIME — عميل Socket.IO (F2) بمطابقة سلوك الويب
-// io('/?XTransformPort=3002') + join غرفة stay:{id}
-// أحداث §1.5: chat:message · request:updated · notification:new · stay:updated
+// REALTIME — عميل Socket.IO (F2/F4) بمطابقة سلوك الويب
+// io('/?XTransformPort=3002') + join غرفة stay:{id} (ضيف) أو reception (استقبال)
+// أحداث §1.5: chat:message · request:new/updated · notification:new
+// · stay:updated · room:status · reservation:new
 // ─────────────────────────────────────────────────────────────
 import 'dart:async';
 
@@ -22,6 +23,15 @@ class RealtimeEvent {
       return p['title'] as String;
     }
     return 'إشعار جديد';
+  }
+
+  /// قيمة نصية من الحمولة إن وجدت (مثل senderName/title/roomNumber)
+  String? textValue(String key) {
+    final p = payload;
+    if (p is Map<String, dynamic> && p[key] is String) {
+      return p[key] as String;
+    }
+    return null;
   }
 }
 
@@ -48,11 +58,21 @@ class RealtimeService {
     'request:updated',
     'notification:new',
     'stay:updated',
+    'room:status',
+    'reservation:new',
   ];
 
   /// الانضمام لغرفة الإقامة — يعيد الاتصال عند تغير الغرفة
   void joinStayRoom(String stayId) {
     final room = 'stay:$stayId';
+    if (_joinedRoom == room && _socket != null) return;
+    _joinedRoom = room;
+    _connect();
+  }
+
+  /// الانضمام لغرفة الاستقبال (F4) — كما في useSocket('reception') بالويب
+  void joinReceptionRoom() {
+    const room = 'reception';
     if (_joinedRoom == room && _socket != null) return;
     _joinedRoom = room;
     _connect();

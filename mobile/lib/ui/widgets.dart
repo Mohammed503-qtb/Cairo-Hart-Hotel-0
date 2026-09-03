@@ -116,6 +116,61 @@ class StatusChip extends StatelessWidget {
     );
   }
 
+  factory StatusChip.reservationStatus(BuildContext context, String status) {
+    final scheme = Theme.of(context).colorScheme;
+    final (fg, bg) = switch (status) {
+      'PENDING' => (AppColors.warning, AppColors.warningContainer),
+      'CONFIRMED' => (AppColors.success, AppColors.successContainer),
+      'CHECKED_IN' => (AppColors.info, AppColors.infoContainer),
+      'COMPLETED' => (AppColors.info, AppColors.infoContainer),
+      'NO_SHOW' => (AppColors.danger, AppColors.dangerContainer),
+      _ => (scheme.onSurfaceVariant, scheme.surfaceContainerHighest),
+    };
+    return StatusChip(
+      label: fmt.label(fmt.reservationStatusLabels, status),
+      foreground: scheme.brightness == Brightness.light ? fg : scheme.onSurface,
+      background: bg,
+    );
+  }
+
+  factory StatusChip.roomStatus(BuildContext context, String status) {
+    final scheme = Theme.of(context).colorScheme;
+    final (fg, bg) = switch (status) {
+      'AVAILABLE' => (AppColors.success, AppColors.successContainer),
+      'OCCUPIED' => (AppColors.danger, AppColors.dangerContainer),
+      'RESERVED' => (AppColors.info, AppColors.infoContainer),
+      'CLEANING' => (AppColors.gold, AppColors.goldContainer),
+      'DIRTY' => (AppColors.warning, AppColors.warningContainer),
+      'OUT_OF_ORDER' => (
+          scheme.brightness == Brightness.light
+              ? const Color(0xFF444444)
+              : scheme.onSurfaceVariant,
+          scheme.surfaceContainerHighest
+        ),
+      _ => (scheme.onSurfaceVariant, scheme.surfaceContainerHighest),
+    };
+    return StatusChip(
+      label: fmt.label(fmt.roomStatusLabels, status),
+      foreground: fg,
+      background: bg,
+    );
+  }
+
+  factory StatusChip.extensionStatus(BuildContext context, String status) {
+    final scheme = Theme.of(context).colorScheme;
+    final (fg, bg) = switch (status) {
+      'PENDING' => (AppColors.warning, AppColors.warningContainer),
+      'APPROVED' => (AppColors.success, AppColors.successContainer),
+      'REJECTED' => (AppColors.danger, AppColors.dangerContainer),
+      _ => (scheme.onSurfaceVariant, scheme.surfaceContainerHighest),
+    };
+    return StatusChip(
+      label: fmt.label(fmt.extensionStatusLabels, status),
+      foreground: scheme.brightness == Brightness.light ? fg : scheme.onSurface,
+      background: bg,
+    );
+  }
+
   factory StatusChip.priority(BuildContext context, String priority) {
     final urgent = priority == 'URGENT';
     return StatusChip(
