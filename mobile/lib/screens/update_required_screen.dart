@@ -75,11 +75,11 @@ class UpdateRequiredScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         InfoRow(
-                          label: 'إصدارك الحالي',
+                          labelText: 'إصدارك الحالي',
                           value: kAppVersion,
                         ),
                         InfoRow(
-                          label: 'الحد الأدنى المطلوب',
+                          labelText: 'الحد الأدنى المطلوب',
                           value: minVersion,
                         ),
                         const SizedBox(height: 8),
