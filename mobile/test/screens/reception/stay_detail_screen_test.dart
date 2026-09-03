@@ -288,11 +288,11 @@ void main() {
     testWidgets('تسجيل دفعة: جسم POST حرفي + توست النجاح بالرصيد الجديد',
         (tester) async {
       final paymentBodies = <Map<String, dynamic>>[];
-      final store = ReceptionStore(_mock(
+      final store = ReceptionStore(_api(_mock(
         paymentBodies: paymentBodies,
         decideBodies: [],
         messageBodies: [],
-      ));
+      )));
       await _openStay(tester, store, initialTab: 'bill');
       await tester.pumpAndSettle();
 
@@ -333,11 +333,11 @@ void main() {
     testWidgets('قرار تمديد PENDING: جسم {approve:true} + توست الموافقة',
         (tester) async {
       final decideBodies = <Map<String, dynamic>>[];
-      final store = ReceptionStore(_mock(
+      final store = ReceptionStore(_api(_mock(
         paymentBodies: [],
         decideBodies: decideBodies,
         messageBodies: [],
-      ));
+      )));
       await _openStay(tester, store, initialTab: 'actions');
       await tester.pumpAndSettle();
 
@@ -365,11 +365,11 @@ void main() {
     testWidgets('إرسال رسالة: جسم {stayId,body} حرفي + ظهور الفقاعة',
         (tester) async {
       final messageBodies = <Map<String, dynamic>>[];
-      final store = ReceptionStore(_mock(
+      final store = ReceptionStore(_api(_mock(
         paymentBodies: [],
         decideBodies: [],
         messageBodies: messageBodies,
-      ));
+      )));
       await _openStay(tester, store, initialTab: 'messages');
       await tester.pumpAndSettle();
 

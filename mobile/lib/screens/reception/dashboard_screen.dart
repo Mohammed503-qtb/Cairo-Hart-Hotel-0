@@ -296,8 +296,7 @@ class _DashboardBody extends StatelessWidget {
               subtitle: 'كل شيء تحت السيطرة')
         else
           for (final r in data.pendingRequests) ...[
-            _RequestRow(
-                store: widget.store, request: r),
+            _RequestRow(store: store, request: r),
             const SizedBox(height: 8),
           ],
       ],
@@ -325,8 +324,7 @@ class _DashboardBody extends StatelessWidget {
               label: const Text('لوحة الغرف'),
             ),
             OutlinedButton.icon(
-              onPressed: () =>
-                  showReceptionSearch(context, store: widget.store),
+              onPressed: () => showReceptionSearch(context, store: store),
               icon: const Icon(Icons.search_rounded, size: 18),
               label: const Text('بحث عام'),
             ),
