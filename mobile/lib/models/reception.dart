@@ -1051,3 +1051,100 @@ class ReceptionNotification {
         createdAt: _s(j, 'createdAt'),
       );
 }
+
+// ───────────── R-19 · البحث العام ─────────────
+
+/// نتيجة حجز في البحث (R-19) — stayId=null يعني لم يُسجَّل وصوله بعد
+class SearchReservationItem {
+  const SearchReservationItem({
+    required this.id,
+    required this.bookingReference,
+    required this.guestName,
+    required this.guestPhone,
+    required this.status,
+    required this.checkIn,
+    required this.checkOut,
+    required this.roomTypeName,
+    required this.paymentStatus,
+    this.stayId,
+  });
+
+  final String id;
+  final String bookingReference;
+  final String guestName;
+  final String guestPhone;
+  final String status;
+  final String checkIn;
+  final String checkOut;
+  final String roomTypeName;
+  final String paymentStatus;
+  final String? stayId;
+
+  static SearchReservationItem fromJson(Map<String, dynamic> j) =>
+      SearchReservationItem(
+        id: _s(j, 'id'),
+        bookingReference: _s(j, 'bookingReference'),
+        guestName: _s(j, 'guestName'),
+        guestPhone: _s(j, 'guestPhone'),
+        status: _s(j, 'status'),
+        checkIn: _s(j, 'checkIn'),
+        checkOut: _s(j, 'checkOut'),
+        roomTypeName: _s(j, 'roomTypeName'),
+        paymentStatus: _s(j, 'paymentStatus'),
+        stayId: _sn(j, 'stayId'),
+      );
+}
+
+/// نتيجة إقامة نشطة في البحث (R-19)
+class SearchStayItem {
+  const SearchStayItem({
+    required this.id,
+    required this.reference,
+    required this.guestName,
+    required this.guestPhone,
+    required this.roomNumber,
+    required this.roomTypeName,
+    required this.status,
+    required this.expectedCheckOutAt,
+  });
+
+  final String id;
+  final String reference;
+  final String guestName;
+  final String guestPhone;
+  final String roomNumber;
+  final String roomTypeName;
+  final String status;
+  final String expectedCheckOutAt;
+
+  static SearchStayItem fromJson(Map<String, dynamic> j) => SearchStayItem(
+        id: _s(j, 'id'),
+        reference: _s(j, 'reference'),
+        guestName: _s(j, 'guestName'),
+        guestPhone: _s(j, 'guestPhone'),
+        roomNumber: _s(j, 'roomNumber'),
+        roomTypeName: _s(j, 'roomTypeName'),
+        status: _s(j, 'status'),
+        expectedCheckOutAt: _s(j, 'expectedCheckOutAt'),
+      );
+}
+
+/// نتيجات البحث العام (R-19): {reservations, stays}
+class SearchResults {
+  const SearchResults({
+    required this.reservations,
+    required this.stays,
+  });
+
+  final List<SearchReservationItem> reservations;
+  final List<SearchStayItem> stays;
+
+  static SearchResults fromJson(Map<String, dynamic> j) => SearchResults(
+        reservations: _ml(j, 'reservations')
+            .map(SearchReservationItem.fromJson)
+            .toList(growable: false),
+        stays: _ml(j, 'stays')
+            .map(SearchStayItem.fromJson)
+            .toList(growable: false),
+      );
+}

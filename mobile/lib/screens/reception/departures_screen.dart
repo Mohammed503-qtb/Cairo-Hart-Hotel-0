@@ -12,6 +12,7 @@ import '../../state/reception_store.dart';
 import '../../ui/theme.dart';
 import '../../ui/widgets.dart';
 import 'reception_bits.dart';
+import 'stay_detail_screen.dart';
 import 'wizards/check_out_wizard.dart';
 
 /// ليالي بين تاريخَي ISO كاملين (نقل nightsBetweenDates في الويب).
@@ -261,10 +262,21 @@ class _DepartureCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           // الأزرار: تحت المحتوى (flex-wrap في الويب يلفها على الشاشات الضيقة)
-          // زر الفاتورة يُضاف مع شاشة تفصيل الإقامة في F4-b
+          // الفاتورة (secondary + Receipt في الويب) → تفصيل الإقامة بتبويب الفاتورة
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              OutlinedButton.icon(
+                onPressed: () => showStayDetail(
+                  context,
+                  store: store,
+                  stayId: dep.id,
+                  initialTab: 'bill',
+                ),
+                icon: const Icon(Icons.receipt_rounded, size: 18),
+                label: const Text('الفاتورة'),
+              ),
+              const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: () => showCheckOutWizard(
                   context,

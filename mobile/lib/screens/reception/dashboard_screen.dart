@@ -11,6 +11,9 @@ import '../../state/reception_store.dart';
 import '../../ui/theme.dart';
 import '../../ui/widgets.dart';
 import 'reception_bits.dart';
+import 'request_detail_screen.dart';
+import 'search_screen.dart';
+import 'stay_detail_screen.dart';
 import 'wizards/check_in_wizard.dart';
 import 'wizards/check_out_wizard.dart';
 
@@ -132,7 +135,7 @@ class _DashboardBody extends StatelessWidget {
           const SizedBox(height: 16),
           _requestsSection(context),
           const SizedBox(height: 16),
-          _quickActions(),
+          _quickActions(context),
         ],
       );
     });
@@ -142,7 +145,7 @@ class _DashboardBody extends StatelessWidget {
   Widget _kpiGrid(int cols, double maxWidth, ReceptionStats stats) {
     const gap = 10.0;
     final width = (maxWidth - gap * (cols - 1)) / cols;
-    // KPI المقيمين والطلبات بلا نقرة — شاشتاهما تُفتحان في F4-b
+    // F4-b: بطاقتا المقيمين والطلبات أصبحتا قابلتين للنقر (شاشتاهما جاهزتان)
     return Wrap(
       spacing: gap,
       runSpacing: gap,
@@ -164,7 +167,7 @@ class _DashboardBody extends StatelessWidget {
             label: 'مغادرة اليوم',
             value: stats.departuresToday,
             tone: KpiTone.coral,
-            onTap: () => onGoTab(2),
+            onTap: () => onGoTab(4),
           ),
         ),
         SizedBox(
@@ -174,6 +177,7 @@ class _DashboardBody extends StatelessWidget {
             label: 'المقيمون الآن',
             value: stats.inHouseStays,
             tone: KpiTone.success,
+            onTap: () => onGoTab(2),
           ),
         ),
         SizedBox(
@@ -186,6 +190,7 @@ class _DashboardBody extends StatelessWidget {
             sub: stats.urgentRequests > 0
                 ? 'منها ${stats.urgentRequests} عاجل ⚡'
                 : null,
+            onTap: () => onGoTab(3),
           ),
         ),
       ],
@@ -263,7 +268,7 @@ class _DashboardBody extends StatelessWidget {
           icon: Icons.flight_takeoff_rounded,
           iconColor: AppColors.danger,
           action: TextButton(
-              onPressed: () => onGoTab(2), child: const Text('الكل')),
+              onPressed: () => onGoTab(4), child: const Text('الكل')),
         ),
         if (data.departures.isEmpty)
           const EmptyState(
@@ -277,7 +282,7 @@ class _DashboardBody extends StatelessWidget {
     );
   }
 
-  // ── الطلبات المعلقة (عرض فقط) ──
+  // ── الطلبات المعلقة (النقر يفتح تفصيل الطلب — F4-b) ──
   Widget _requestsSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,9 +295,9 @@ class _DashboardBody extends StatelessWidget {
               title: 'لا طلبات معلقة ✨',
               subtitle: 'كل شيء تحت السيطرة')
         else
-          // الإدارة والتخصيص يُفتحان مع شاشة الطلبات في F4-b
           for (final r in data.pendingRequests) ...[
-            _RequestRow(request: r),
+            _RequestRow(
+                store: widget.store, request: r),
             const SizedBox(height: 8),
           ],
       ],
@@ -300,20 +305,30 @@ class _DashboardBody extends StatelessWidget {
   }
 
   // ── إجراءات سريعة ──
-  Widget _quickActions() {
+  Widget _quickActions(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const ReceptionSectionTitle('إجراءات سريعة'),
-        // زرا «لوحة الغرف» و«بحث» يُفتحان مع شاشات F4-b
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
             OutlinedButton.icon(
-              onPressed: () => onGoTab(2),
+              onPressed: () => onGoTab(4),
               icon: const Icon(Icons.flight_takeoff_rounded, size: 18),
               label: const Text('المغادرون'),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => onGoTab(5),
+              icon: const Icon(Icons.grid_view_rounded, size: 18),
+              label: const Text('لوحة الغرف'),
+            ),
+            OutlinedButton.icon(
+              onPressed: () =>
+                  showReceptionSearch(context, store: widget.store),
+              icon: const Icon(Icons.search_rounded, size: 18),
+              label: const Text('بحث عام'),
             ),
           ],
         ),
@@ -443,7 +458,23 @@ class _DepartureRow extends StatelessWidget {
           const SizedBox(height: 8),
           Row(children: [
             const Spacer(),
-            // زر الفاتورة يُضاف مع شاشة تفصيل الإقامة في F4-b
+            // الفاتورة (secondary في الويب) → تفصيل الإقامة بتبويب الفاتورة
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(64, 38),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                textStyle: const TextStyle(
+                    fontSize: 13, fontWeight: FontWeight.w700),
+              ),
+              onPressed: () => showStayDetail(
+                context,
+                store: store,
+                stayId: d.stayId,
+                initialTab: 'bill',
+              ),
+              child: const Text('الفاتورة'),
+            ),
+            const SizedBox(width: 8),
             FilledButton(
               style: FilledButton.styleFrom(
                 minimumSize: const Size(64, 38),
@@ -465,10 +496,11 @@ class _DepartureRow extends StatelessWidget {
   }
 }
 
-/// صف طلب معلق (قراءة فقط — بلا نقرة حتى F4-b)
+/// صف طلب معلق (النقر يفتح تفصيل الطلب — F4-b)
 class _RequestRow extends StatelessWidget {
-  const _RequestRow({required this.request});
+  const _RequestRow({required this.store, required this.request});
 
+  final ReceptionStore store;
   final DashboardRequest request;
 
   @override
@@ -478,7 +510,14 @@ class _RequestRow extends StatelessWidget {
     final urgent = r.priority == 'URGENT';
     return AppCard(
       padding: const EdgeInsets.all(12),
-      child: Row(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => showRequestDetail(
+          context,
+          store: store,
+          requestId: r.id,
+        ),
+        child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
@@ -532,8 +571,9 @@ class _RequestRow extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
+          ),
+        ),
+      );
   }
 }
 
