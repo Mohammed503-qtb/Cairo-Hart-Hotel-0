@@ -260,7 +260,8 @@ void main() {
       expect(find.text('998877'), findsOneWidget);
       expect(find.text('لقطة سعر الليالي (عند الحجز)'), findsOneWidget);
       expect(find.text('المجموع + الضريبة'), findsOneWidget);
-      expect(find.text('طلبات خاصة:'), findsOneWidget);
+      // Text.rich يدمج «💬 طلبات خاصة: …» في نص واحد — المطابقة بالاحتواء
+      expect(find.textContaining('طلبات خاصة'), findsOneWidget);
 
       // الفاتورة
       await tester.tap(find.text('الفاتورة'));
