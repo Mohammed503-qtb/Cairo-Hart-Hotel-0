@@ -36,8 +36,10 @@ void main() {
       UpdateRequiredScreen(minVersion: '2.0.0', onRetry: () => retried++),
     ));
 
+    // الزر أسفل قائمة قابلة للتمرير — نضمن رؤيته داخل نافذة الاختبار قبل النقر
+    await tester.ensureVisible(find.text('إعادة المحاولة'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('إعادة المحاولة'));
-    await tester.pump();
 
     expect(retried, 1);
   });
@@ -47,7 +49,10 @@ void main() {
       UpdateRequiredScreen(minVersion: '9.9.9', onRetry: () {}),
     ));
     // الأزرار الوحيدة: نسخ الرابط + إعادة المحاولة — لا «تخطٍ» ولا رجوع
-    expect(find.byType(OutlinedButton), findsNWidgets(2));
+    // (العدّ بالنص لا byType: OutlinedButton.icon يُنشئ نوعًا فرعيًا خاصًا)
+    expect(find.text('نسخ رابط الإصدارات'), findsOneWidget);
+    expect(find.text('إعادة المحاولة'), findsOneWidget);
     expect(find.text('تخطي'), findsNothing);
+    expect(find.byType(BackButton), findsNothing);
   });
 }

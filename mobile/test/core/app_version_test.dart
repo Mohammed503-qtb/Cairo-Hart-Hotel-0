@@ -53,8 +53,10 @@ void main() {
       expect(needsUpdate('1.2.0', '2.0.0'), isFalse);
     });
 
-    test('الافتراض 0.0.0: أي حد غير فارغ يحجب (اتجاه آمن fail-closed)', () {
-      expect(needsUpdate('1.0.0', kAppVersion), isTrue);
+    test('بناء بلا define (0.0.0): أي حد غير فارغ يحجبه (اتجاه آمن fail-closed)', () {
+      // مستقلة عن kAppVersion المدمجة (CI يمرر APP_VERSION من pubspec):
+      // نختبر قيمة 0.0.0 صراحة — سلوك البناء المحلي بلا define
+      expect(needsUpdate('1.0.0', '0.0.0'), isTrue);
     });
   });
 
