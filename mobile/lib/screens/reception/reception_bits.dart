@@ -115,6 +115,7 @@ class KpiCard extends StatelessWidget {
     this.sub,
     this.onTap,
     this.tone = KpiTone.primary,
+    this.valueText,
   });
 
   final IconData icon;
@@ -123,6 +124,9 @@ class KpiCard extends StatelessWidget {
   final String? sub;
   final VoidCallback? onTap;
   final KpiTone tone;
+
+  /// نص القيمة كما هو (بدل رقم) — F5: للمال مثل «$940» (الويب)
+  final String? valueText;
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +191,7 @@ class KpiCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            '$value',
+            valueText ?? '$value',
             textDirection: TextDirection.ltr,
             style: TextStyle(
               fontSize: 26,

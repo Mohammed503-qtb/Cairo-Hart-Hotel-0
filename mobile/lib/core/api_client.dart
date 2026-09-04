@@ -58,6 +58,9 @@ class ApiClient {
   Future<Map<String, dynamic>> patch(String path, {Object? body}) =>
       _send('PATCH', path, body: body);
 
+  Future<Map<String, dynamic>> delete(String path, {Object? body}) =>
+      _send('DELETE', path, body: body);
+
   Future<Map<String, dynamic>> _send(
     String method,
     String path, {
@@ -73,6 +76,7 @@ class ApiClient {
         'GET' => await _http.get(uri, headers: headers),
         'POST' => await _http.post(uri, headers: headers, body: encoded),
         'PATCH' => await _http.patch(uri, headers: headers, body: encoded),
+        'DELETE' => await _http.delete(uri, headers: headers, body: encoded),
         _ => throw StateError('unsupported method $method'),
       };
     } catch (_) {

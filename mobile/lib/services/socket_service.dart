@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────────────────────
-// REALTIME — عميل Socket.IO (F2/F4) بمطابقة سلوك الويب
-// io('/?XTransformPort=3002') + join غرفة stay:{id} (ضيف) أو reception (استقبال)
+// REALTIME — عميل Socket.IO (F2/F4/F5) بمطابقة سلوك الويب
+// io('/?XTransformPort=3002') + join غرفة stay:{id} (ضيف) أو reception (استقبال) أو admin (إدارة)
 // أحداث §1.5: chat:message · request:new/updated · notification:new
 // · stay:updated · room:status · reservation:new
 // ─────────────────────────────────────────────────────────────
@@ -73,6 +73,14 @@ class RealtimeService {
   /// الانضمام لغرفة الاستقبال (F4) — كما في useSocket('reception') بالويب
   void joinReceptionRoom() {
     const room = 'reception';
+    if (_joinedRoom == room && _socket != null) return;
+    _joinedRoom = room;
+    _connect();
+  }
+
+  /// الانضمام لغرفة الإدارة (F5) — كما في useSocket('admin') بالويب
+  void joinAdminRoom() {
+    const room = 'admin';
     if (_joinedRoom == room && _socket != null) return;
     _joinedRoom = room;
     _connect();

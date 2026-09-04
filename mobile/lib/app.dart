@@ -1,18 +1,19 @@
 // ─────────────────────────────────────────────────────────────
 // APP ROOT — MaterialApp + RTL عربي + ثيم الفندق + دورة حياة الجلسة
-// توجيه الجذور: booting → login → (ضيف: GuestShell | استقبال: ReceptionShell | إدارة: RolePlaceholder)
-// + renew عند العودة للمقدمة (سياسة §1.2.1) + إدارة Realtime/GuestStore/ReceptionStore
+// توجيه الجذور: booting → login → (ضيف: GuestShell | استقبال: ReceptionShell | إدارة: AdminShell)
+// + renew عند العودة للمقدمة (سياسة §1.2.1) + إدارة Realtime/GuestStore/ReceptionStore/AdminStore
 // ─────────────────────────────────────────────────────────────
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'screens/admin/admin_shell.dart';
 import 'screens/guest_shell.dart';
 import 'screens/login_screen.dart';
 import 'screens/reception/reception_shell.dart';
-import 'screens/role_placeholder.dart';
 import 'screens/splash_gate.dart';
 import 'screens/update_required_screen.dart';
 import 'services/socket_service.dart';
+import 'state/admin_store.dart';
 import 'state/guest_store.dart';
 import 'state/reception_store.dart';
 import 'state/session.dart';
@@ -33,9 +34,11 @@ class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
   late final SessionController _session;
   late final GuestStore _guestStore;
   late final ReceptionStore _receptionStore;
+  late final AdminStore _adminStore;
   late final RealtimeService _realtime;
   bool _guestBooted = false;
   bool _receptionBooted = false;
+  bool _adminBooted = false;
 
   // F6 — حارس الحد الأدنى للإصدار (PUB-07 عند الإطلاق)
   bool _updateRequired = false;
@@ -49,6 +52,7 @@ class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
     _session = widget.session;
     _guestStore = GuestStore(_session.api);
     _receptionStore = ReceptionStore(_session.api);
+    _adminStore = AdminStore(_session.api);
     _realtime = RealtimeService();
     _session.addListener(_onSessionChanged);
     _session.restore();
@@ -62,6 +66,7 @@ class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
     _realtime.dispose();
     _guestStore.dispose();
     _receptionStore.dispose();
+    _adminStore.dispose();
     super.dispose();
   }
 
@@ -75,12 +80,18 @@ class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
         _receptionBooted = true;
         _receptionStore.bootstrap();
       }
+      if (_session.role == 'ADMIN' && !_adminBooted) {
+        _adminBooted = true;
+        // الإقلاع الرسمي في AdminShell.initState (غرفة admin + bootstrap)
+      }
     } else if (_session.status == AppStatus.loggedOut) {
       _guestBooted = false;
       _receptionBooted = false;
+      _adminBooted = false;
       _realtime.disconnect();
       _guestStore.reset();
       _receptionStore.reset();
+      _adminStore.reset();
     }
   }
 
@@ -166,7 +177,14 @@ class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
             realtime: _realtime,
           );
         }
-        return RolePlaceholder(session: _session);
+        if (_session.role == 'ADMIN') {
+          return AdminShell(
+            session: _session,
+            store: _adminStore,
+            realtime: _realtime,
+          );
+        }
+        return LoginScreen(session: _session);
     }
   }
 }
