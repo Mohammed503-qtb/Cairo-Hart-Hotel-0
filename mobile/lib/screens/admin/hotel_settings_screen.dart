@@ -374,8 +374,8 @@ class _HotelSettingsScreenState extends State<HotelSettingsScreen> {
             children: [
               Icon(icon, size: 16, color: scheme.primary),
               const SizedBox(width: 6),
-              const Text(title,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+              Text(title,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
             ],
           ),
           const SizedBox(height: 12),

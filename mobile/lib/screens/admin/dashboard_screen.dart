@@ -136,7 +136,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _kpis(BuildContext context, AdminDashboard d) {
     final k = d.kpis;
     return LayoutBuilder(builder: (context, c) {
-      final cross = c.width >= 620 ? 4 : 2;
+      final cross = c.maxWidth >= 620 ? 4 : 2;
       return GridView.count(
         crossAxisCount: cross,
         shrinkWrap: true,

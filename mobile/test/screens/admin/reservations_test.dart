@@ -393,7 +393,7 @@ void main() {
 
     // المدفوعات
     expect(find.text('المدفوعات'), findsOneWidget);
-    expect(find.textContaining('المدفوع $200.00 من $552.00'), findsOneWidget);
+    expect(find.textContaining(r'المدفوع $200.00 من $552.00'), findsOneWidget);
     expect(find.text('نقدًا'), findsOneWidget);
     expect(find.textContaining(' · سالم'), findsOneWidget);
 

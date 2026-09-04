@@ -423,7 +423,7 @@ class _StaffCodesScreenState extends State<StaffCodesScreen> {
                 textStyle: const TextStyle(
                     fontSize: 13, fontWeight: FontWeight.w700),
               ),
-              onPressed: _openStaffDialog,
+              onPressed: () => _openStaffDialog(null),
               icon: const Icon(Icons.add_rounded, size: 18),
               label: const Text('إضافة موظف'),
             ),

@@ -865,8 +865,8 @@ class _RoomTypeFormDialogState extends State<_RoomTypeFormDialog> {
                         fontWeight: FontWeight.w700,
                         fontFeatures: [FontFeature.tabularFigures()],
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'السعر الأساسي لليلة ($) *',
+                      decoration: InputDecoration(
+                        labelText: r'السعر الأساسي لليلة ($) *',
                         hintText: '50',
                       ),
                     ),

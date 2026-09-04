@@ -821,8 +821,8 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 textDirection: TextDirection.ltr,
-                decoration: const InputDecoration(
-                  labelText: 'السعر ($) — اتركه فارغًا للمجانية',
+                decoration: InputDecoration(
+                  labelText: r'السعر ($) — اتركه فارغًا للمجانية',
                   hintText: '5',
                 ),
               ),
