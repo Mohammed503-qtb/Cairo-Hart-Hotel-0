@@ -237,10 +237,19 @@ void main() {
         ' ملاحظة ',
       );
 
-      // نوع الغرفة من القائمة المنسدلة
-      await tester.tap(find.text('اختر النوع'));
+      // نوع الغرفة من القائمة المنسدلة — tap على الزر نفسه
+      // (نص التلميح لا يستقبل الأحداث — نفس نمط اختبار (د))
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(Dialog),
+              matching: find.byType(DropdownButton<String>),
+            )
+            .first,
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('غرفة اقتصادية — 3 غرف'));
+      // عنصر القائمة بصيغة الويب الحرفية: «{name} — {roomsCount} غرفة»
+      await tester.tap(find.text('غرفة اقتصادية — 3 غرفة'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('إضافة'));

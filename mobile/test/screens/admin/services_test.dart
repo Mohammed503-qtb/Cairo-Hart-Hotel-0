@@ -133,7 +133,8 @@ void main() {
     await tester.tap(find.text('إضافة خدمة'));
     await tester.pumpAndSettle();
 
-    expect(find.text('إضافة خدمة'), findsOneWidget); // عنوان الحوار
+    // زر الشاشة + عنوان الحوار — نصّان متطابقان بعد الفتح
+    expect(find.text('إضافة خدمة'), findsNWidgets(2));
     expect(find.text('ستظهر للضيوف في تطبيق الإقامة حسب قسمها'),
         findsOneWidget);
 
@@ -308,7 +309,8 @@ void main() {
     await tester.tap(find.text('إضافة قسم'));
     await tester.pumpAndSettle();
 
-    expect(find.text('إضافة قسم'), findsOneWidget); // عنوان الحوار
+    // زر الشاشة + عنوان الحوار — نصّان متطابقان بعد الفتح
+    expect(find.text('إضافة قسم'), findsNWidgets(2));
     expect(find.text('الأقسام تُصنّف الخدمات في تطبيق الضيف والاستقبال'),
         findsOneWidget);
 

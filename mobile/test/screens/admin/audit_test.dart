@@ -145,7 +145,8 @@ void main() {
       expect(find.text('مدير فندق · الإدارة'), findsOneWidget);
       expect(find.text('AccessCode'), findsOneWidget);
       expect(find.text('Staff'), findsOneWidget);
-      expect(find.textContaining('ac_9fullidentifi'), findsOneWidget);
+      // المعرّف يُعرض مقتطعًا إلى 14 محرفًا + «…» كما الويب
+      expect(find.textContaining('ac_9fullidenti'), findsOneWidget);
       // التفاصيل: خريطة (مفتاح: قيمة) قراءة-friendly
       expect(find.textContaining('op: CREATE'), findsOneWidget);
       expect(find.textContaining('fullName: خالد يوسف'), findsOneWidget);
@@ -501,7 +502,8 @@ void main() {
       // متوسط الإنجاز null → «—» (انتهائي null آمن)
       expect(find.text('متوسط الإنجاز'), findsOneWidget);
       expect(find.text('—'), findsOneWidget);
-      expect(find.text('2'), findsNWidgets(2)); // الإجمالي + نشط
+      // الإجمالي + نشط + عدد أعلى خدمة (إفطار: 2) — ثلاثة نصوص «2»
+      expect(find.text('2'), findsNWidgets(3));
       expect(find.text('0'), findsOneWidget); // مكتمل
       expect(find.text('إفطار'), findsOneWidget);
       // الجنسيات الفارغة

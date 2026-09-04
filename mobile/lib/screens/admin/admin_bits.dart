@@ -170,8 +170,11 @@ class AdminBarChart extends StatelessWidget {
                     child: LayoutBuilder(
                       builder: (context, c) {
                         final (label, value) = bars[i];
-                        final h =
-                            maxVal <= 0 ? 2.0 : (value / maxVal) * (height - 26);
+                        // ميزانية التسميتين (فوق/تحت) + هامش أمان —
+                        // Flexible تحت العمود يمنع أي فيض بخطوط مختلفة
+                        final h = maxVal <= 0
+                            ? 2.0
+                            : (value / maxVal) * (height - 34);
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -189,15 +192,17 @@ class AdminBarChart extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            Container(
-                              width: double.infinity,
-                              height: h,
-                              decoration: BoxDecoration(
-                                color: value > 0
-                                    ? color
-                                    : color.withValues(alpha: 0.25),
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(4),
+                            Flexible(
+                              child: Container(
+                                width: double.infinity,
+                                height: h,
+                                decoration: BoxDecoration(
+                                  color: value > 0
+                                      ? color
+                                      : color.withValues(alpha: 0.25),
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(4),
+                                  ),
                                 ),
                               ),
                             ),

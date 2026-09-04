@@ -101,9 +101,11 @@ void main() {
     expect(find.textContaining('الحجوزات القديمة تحتفظ بلقطة سعرها وقت الحجز'),
         findsOneWidget);
 
-    // قيم من الخادم في الحقول (find.text يطابق EditableText أيضًا)
+    // قيم من الخادم في الحقول — الشعار يظهر مرتين: قيمة الحقل
+    // (EditableText) + نص التلميح الذي يبقيه InputDecorator في
+    // الشجرة لأغراض القياس حتى مع وجود قيمة
     expect(find.text('فندق قلب القاهرة'), findsOneWidget);
-    expect(find.text('ضيافة راقية في قلب المدينة'), findsOneWidget);
+    expect(find.text('ضيافة راقية في قلب المدينة'), findsNWidgets(2));
 
     // غير متغير → زر الحفظ خامد (تسمية الرأس الخاملة)
     expect(find.text('حفظ'), findsOneWidget);
