@@ -195,7 +195,6 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
   // ───────────── الفلاتر: الإجراء + البحث الحر ─────────────
 
   Widget _filtersBar(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final action = _selectShell(
       context,
       DropdownButton<String>(

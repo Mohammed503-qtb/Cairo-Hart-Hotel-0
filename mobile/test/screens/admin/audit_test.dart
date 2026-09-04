@@ -39,13 +39,7 @@ Future<void> _prepare(WidgetTester tester) async {
   addTearDown(() => tester.binding.setSurfaceSize(null));
 }
 
-Future<void> _drainToast(WidgetTester tester) async {
-  await tester.pump(const Duration(seconds: 4));
-  await tester.pumpAndSettle();
-}
-
 // ═══════════════════ سجل التدقيق ═══════════════════
-
 Map<String, dynamic> _auditJson({
   required String id,
   required String action,
@@ -110,7 +104,7 @@ MockClient _auditMock({
 }) {
   return MockClient((req) async {
     if (req.method == 'GET' && req.url.path == '/api/admin/audit') {
-      final query = req.url.query ?? '';
+      final query = req.url.query;
       onGet?.call(query);
       final params = req.url.queryParameters;
       final page = params['page'] ?? '1';

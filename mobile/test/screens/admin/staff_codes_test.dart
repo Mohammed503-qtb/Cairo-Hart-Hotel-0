@@ -107,7 +107,7 @@ MockClient _staffCodesMock(
     final path = req.url.path;
     if (req.method == 'GET') {
       if (path == '/api/admin/codes') {
-        rec.codeGets.add(req.url.query ?? '');
+        rec.codeGets.add(req.url.query);
         return jsonRes({'ok': true, 'codes': codes});
       }
       if (path == '/api/admin/staff') {

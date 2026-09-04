@@ -9,8 +9,6 @@ import 'package:flutter/services.dart';
 import '../../core/format.dart' as fmt;
 import '../../models/admin.dart';
 import '../../ui/theme.dart';
-import '../reception/reception_bits.dart'
-    show KpiCard, KpiTone, RefCodeText, MoneyText, InfoBox, loadingBlocks;
 
 export '../reception/reception_bits.dart'
     show KpiCard, KpiTone, RefCodeText, MoneyText, InfoBox, loadingBlocks;
