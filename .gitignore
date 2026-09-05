@@ -62,5 +62,7 @@ prompt
 
 server.log
 # Skills directory
-/skills/backups/
+/skills
 rollbacks/
+
+backups/
