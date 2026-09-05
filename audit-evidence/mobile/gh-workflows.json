@@ -1,0 +1,41 @@
+{
+  "total_count": 3,
+  "workflows": [
+    {
+      "id": 348124692,
+      "node_id": "W_kwDOUKh2hM4Uv_YU",
+      "name": "Mobile CI",
+      "path": ".github/workflows/mobile-ci.yml",
+      "state": "active",
+      "created_at": "2026-09-02T08:22:20.000+03:00",
+      "updated_at": "2026-09-03T05:00:20.000+03:00",
+      "url": "https://api.github.com/repos/Mohammed503-qtb/Cairo-Hart-Hotel-0/actions/workflows/348124692",
+      "html_url": "https://github.com/Mohammed503-qtb/Cairo-Hart-Hotel-0/blob/main/.github/workflows/mobile-ci.yml",
+      "badge_url": "https://github.com/Mohammed503-qtb/Cairo-Hart-Hotel-0/workflows/Mobile%20CI/badge.svg"
+    },
+    {
+      "id": 348124693,
+      "node_id": "W_kwDOUKh2hM4Uv_YV",
+      "name": "Mobile Release",
+      "path": ".github/workflows/mobile-release.yml",
+      "state": "active",
+      "created_at": "2026-09-02T08:22:20.000+03:00",
+      "updated_at": "2026-09-03T05:00:20.000+03:00",
+      "url": "https://api.github.com/repos/Mohammed503-qtb/Cairo-Hart-Hotel-0/actions/workflows/348124693",
+      "html_url": "https://github.com/Mohammed503-qtb/Cairo-Hart-Hotel-0/blob/main/.github/workflows/mobile-release.yml",
+      "badge_url": "https://github.com/Mohammed503-qtb/Cairo-Hart-Hotel-0/workflows/Mobile%20Release/badge.svg"
+    },
+    {
+      "id": 348124694,
+      "node_id": "W_kwDOUKh2hM4Uv_YW",
+      "name": "Web CI",
+      "path": ".github/workflows/web-ci.yml",
+      "state": "active",
+      "created_at": "2026-09-02T08:22:20.000+03:00",
+      "updated_at": "2026-09-02T08:22:20.000+03:00",
+      "url": "https://api.github.com/repos/Mohammed503-qtb/Cairo-Hart-Hotel-0/actions/workflows/348124694",
+      "html_url": "https://github.com/Mohammed503-qtb/Cairo-Hart-Hotel-0/blob/main/.github/workflows/web-ci.yml",
+      "badge_url": "https://github.com/Mohammed503-qtb/Cairo-Hart-Hotel-0/workflows/Web%20CI/badge.svg"
+    }
+  ]
+}

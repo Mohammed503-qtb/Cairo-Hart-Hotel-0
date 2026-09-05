@@ -1,0 +1,645 @@
+﻿2026-09-04T02:03:11.3827709Z Current runner version: '2.337.0'
+2026-09-04T02:03:11.3850928Z ##[group]Runner Image Provisioner
+2026-09-04T02:03:11.3851893Z Hosted Compute Agent
+2026-09-04T02:03:11.3852530Z Version: 20260819.586
+2026-09-04T02:03:11.3853215Z Commit: 3cc4a88dfa507ef76119ad1bb3eccc6378bb2b76
+2026-09-04T02:03:11.3854256Z Build Date: 2026-08-18T23:20:18Z
+2026-09-04T02:03:11.3854929Z Worker ID: {0ae7b2bc-605d-487e-97e4-4c603015e891}
+2026-09-04T02:03:11.3855725Z Azure Region: westcentralus
+2026-09-04T02:03:11.3856330Z ##[endgroup]
+2026-09-04T02:03:11.3857981Z ##[group]Operating System
+2026-09-04T02:03:11.3858688Z Ubuntu
+2026-09-04T02:03:11.3859222Z 24.04.4
+2026-09-04T02:03:11.3859793Z LTS
+2026-09-04T02:03:11.3860337Z ##[endgroup]
+2026-09-04T02:03:11.3860913Z ##[group]Runner Image
+2026-09-04T02:03:11.3861553Z Image: ubuntu-24.04
+2026-09-04T02:03:11.3862119Z Version: 20260823.283.1
+2026-09-04T02:03:11.3863581Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260823.283/images/ubuntu/Ubuntu2404-Readme.md
+2026-09-04T02:03:11.3865178Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260823.283
+2026-09-04T02:03:11.3866200Z ##[endgroup]
+2026-09-04T02:03:11.3867656Z ##[group]GITHUB_TOKEN Permissions
+2026-09-04T02:03:11.3869866Z Contents: read
+2026-09-04T02:03:11.3870485Z Metadata: read
+2026-09-04T02:03:11.3871191Z Packages: read
+2026-09-04T02:03:11.3871744Z ##[endgroup]
+2026-09-04T02:03:11.3874146Z Secret source: Actions
+2026-09-04T02:03:11.3875362Z Prepare workflow directory
+2026-09-04T02:03:11.5124437Z Prepare all required actions
+2026-09-04T02:03:11.5167327Z Getting action download info
+2026-09-04T02:03:11.7605780Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-09-04T02:03:12.2838858Z Download action repository 'subosito/flutter-action@v2' (SHA:1a449444c387b1966244ae4d4f8c696479add0b2)
+2026-09-04T02:03:13.0001698Z Getting action download info
+2026-09-04T02:03:13.0989407Z Download action repository 'actions/cache@v5' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+2026-09-04T02:03:13.2570999Z Complete job name: Flutter analyze + test
+2026-09-04T02:03:13.3449046Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-09-04T02:03:13.3459544Z ##[group]Run actions/checkout@v4
+2026-09-04T02:03:13.3460743Z with:
+2026-09-04T02:03:13.3461660Z   repository: Mohammed503-qtb/Cairo-Hart-Hotel-0
+2026-09-04T02:03:13.3470305Z   token: ***
+2026-09-04T02:03:13.3471208Z   ssh-strict: true
+2026-09-04T02:03:13.3472112Z   ssh-user: git
+2026-09-04T02:03:13.3473022Z   persist-credentials: true
+2026-09-04T02:03:13.3474152Z   clean: true
+2026-09-04T02:03:13.3475075Z   sparse-checkout-cone-mode: true
+2026-09-04T02:03:13.3476141Z   fetch-depth: 1
+2026-09-04T02:03:13.3477040Z   fetch-tags: false
+2026-09-04T02:03:13.3477989Z   show-progress: true
+2026-09-04T02:03:13.3478912Z   lfs: false
+2026-09-04T02:03:13.3479795Z   submodules: false
+2026-09-04T02:03:13.3480657Z   set-safe-directory: true
+2026-09-04T02:03:13.3481623Z   allow-unsafe-pr-checkout: false
+2026-09-04T02:03:13.3482926Z ##[endgroup]
+2026-09-04T02:03:13.4646046Z Syncing repository: Mohammed503-qtb/Cairo-Hart-Hotel-0
+2026-09-04T02:03:13.4649240Z ##[group]Getting Git version info
+2026-09-04T02:03:13.4650996Z Working directory is '/home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0'
+2026-09-04T02:03:13.4654071Z [command]/usr/bin/git version
+2026-09-04T02:03:13.4665274Z git version 2.55.0
+2026-09-04T02:03:13.4690301Z ##[endgroup]
+2026-09-04T02:03:13.4705846Z Temporarily overriding HOME='/home/runner/work/_temp/91c456d7-1e1c-4fb1-a501-7bac839ef859' before making global git config changes
+2026-09-04T02:03:13.4710880Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-04T02:03:13.4715605Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0
+2026-09-04T02:03:13.4762666Z Deleting the contents of '/home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0'
+2026-09-04T02:03:13.4767236Z ##[group]Initializing the repository
+2026-09-04T02:03:13.4778495Z [command]/usr/bin/git init /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0
+2026-09-04T02:03:13.4882843Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-09-04T02:03:13.4885515Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-09-04T02:03:13.4892686Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-09-04T02:03:13.4896156Z hint: call:
+2026-09-04T02:03:13.4898085Z hint:
+2026-09-04T02:03:13.4900165Z hint: 	git config --global init.defaultBranch <name>
+2026-09-04T02:03:13.4903040Z hint:
+2026-09-04T02:03:13.4907161Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-09-04T02:03:13.4912409Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-09-04T02:03:13.4915620Z hint:
+2026-09-04T02:03:13.4917313Z hint: 	git branch -m <name>
+2026-09-04T02:03:13.4919201Z hint:
+2026-09-04T02:03:13.4921291Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-09-04T02:03:13.4925022Z Initialized empty Git repository in /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/.git/
+2026-09-04T02:03:13.4930194Z [command]/usr/bin/git remote add origin https://github.com/Mohammed503-qtb/Cairo-Hart-Hotel-0
+2026-09-04T02:03:13.4992076Z ##[endgroup]
+2026-09-04T02:03:13.4996015Z ##[group]Disabling automatic garbage collection
+2026-09-04T02:03:13.4998123Z [command]/usr/bin/git config --local gc.auto 0
+2026-09-04T02:03:13.5028177Z ##[endgroup]
+2026-09-04T02:03:13.5030559Z ##[group]Setting up auth
+2026-09-04T02:03:13.5035082Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-04T02:03:13.5068957Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-04T02:03:13.5411019Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-04T02:03:13.5454569Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-04T02:03:13.5675822Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-04T02:03:13.5714052Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-04T02:03:13.5924184Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-09-04T02:03:13.5960115Z ##[endgroup]
+2026-09-04T02:03:13.5961509Z ##[group]Fetching the repository
+2026-09-04T02:03:13.5970146Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +1a0b0d249161dc2661f908da6883731a70c5ad5f:refs/remotes/origin/main
+2026-09-04T02:03:14.8917674Z From https://github.com/Mohammed503-qtb/Cairo-Hart-Hotel-0
+2026-09-04T02:03:14.8918647Z  * [new ref]         1a0b0d249161dc2661f908da6883731a70c5ad5f -> origin/main
+2026-09-04T02:03:14.8921919Z ##[endgroup]
+2026-09-04T02:03:14.8923147Z ##[group]Determining the checkout info
+2026-09-04T02:03:14.8925035Z ##[endgroup]
+2026-09-04T02:03:14.8930522Z [command]/usr/bin/git sparse-checkout disable
+2026-09-04T02:03:14.8975781Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-09-04T02:03:14.9004521Z ##[group]Checking out the ref
+2026-09-04T02:03:14.9008933Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-09-04T02:03:14.9431432Z Switched to a new branch 'main'
+2026-09-04T02:03:14.9436027Z branch 'main' set up to track 'origin/main'.
+2026-09-04T02:03:14.9441283Z ##[endgroup]
+2026-09-04T02:03:14.9479357Z [command]/usr/bin/git log -1 --format=%H
+2026-09-04T02:03:14.9503389Z 1a0b0d249161dc2661f908da6883731a70c5ad5f
+2026-09-04T02:03:14.9904084Z ##[group]Run subosito/flutter-action@v2
+2026-09-04T02:03:14.9904434Z with:
+2026-09-04T02:03:14.9904637Z   flutter-version: 3.29.2
+2026-09-04T02:03:14.9904866Z   channel: stable
+2026-09-04T02:03:14.9905058Z   cache: true
+2026-09-04T02:03:14.9905255Z   architecture: X64
+2026-09-04T02:03:14.9905468Z   pub-cache-path: default
+2026-09-04T02:03:14.9905681Z   dry-run: false
+2026-09-04T02:03:14.9905948Z   git-source: https://github.com/flutter/flutter.git
+2026-09-04T02:03:14.9906247Z ##[endgroup]
+2026-09-04T02:03:14.9958843Z ##[start-action display=Make yq tool available on Windows runners;id=__subosito_flutter-action.__run]
+2026-09-04T02:03:14.9980006Z ##[end-action id=__subosito_flutter-action.__run;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-09-04T02:03:14.9982114Z ##[start-action display=Make setup script executable;id=__subosito_flutter-action.__run_2]
+2026-09-04T02:03:15.0015190Z ##[group]Run chmod +x "$GITHUB_ACTION_PATH/setup.sh"
+2026-09-04T02:03:15.0015652Z [36;1mchmod +x "$GITHUB_ACTION_PATH/setup.sh"[0m
+2026-09-04T02:03:15.0053004Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-04T02:03:15.0053604Z ##[endgroup]
+2026-09-04T02:03:15.0144670Z ##[end-action id=__subosito_flutter-action.__run_2;outcome=success;conclusion=success;duration_ms=16]
+2026-09-04T02:03:15.0146792Z ##[start-action display=Set action inputs;id=__subosito_flutter-action.flutter-action]
+2026-09-04T02:03:15.0182824Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh -p \
+2026-09-04T02:03:15.0183189Z [36;1m$GITHUB_ACTION_PATH/setup.sh -p \[0m
+2026-09-04T02:03:15.0183785Z [36;1m  -n '3.29.2' \[0m
+2026-09-04T02:03:15.0184008Z [36;1m  -f '' \[0m
+2026-09-04T02:03:15.0184204Z [36;1m  -a 'X64' \[0m
+2026-09-04T02:03:15.0184408Z [36;1m  -k '' \[0m
+2026-09-04T02:03:15.0184603Z [36;1m  -c '' \[0m
+2026-09-04T02:03:15.0184788Z [36;1m  -l '' \[0m
+2026-09-04T02:03:15.0184980Z [36;1m  -d 'default' \[0m
+2026-09-04T02:03:15.0185295Z [36;1m  -g 'https://github.com/flutter/flutter.git' \[0m
+2026-09-04T02:03:15.0185615Z [36;1m  stable[0m
+2026-09-04T02:03:15.0215596Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-04T02:03:15.0215934Z ##[endgroup]
+2026-09-04T02:03:15.2314820Z ##[end-action id=__subosito_flutter-action.flutter-action;outcome=success;conclusion=success;duration_ms=216]
+2026-09-04T02:03:15.2319135Z ##[start-action display=Cache Flutter;id=__subosito_flutter-action.cache-flutter]
+2026-09-04T02:03:15.2368477Z ##[group]Run actions/cache@v5
+2026-09-04T02:03:15.2368757Z with:
+2026-09-04T02:03:15.2369033Z   path: /opt/hostedtoolcache/flutter/stable-3.29.2-x64
+2026-09-04T02:03:15.2369517Z   key: flutter-linux-stable-3.29.2-x64-c23637390482d4cf9598c3ce3f2be31aa7332daf
+2026-09-04T02:03:15.2369955Z   enableCrossOsArchive: false
+2026-09-04T02:03:15.2370231Z   fail-on-cache-miss: false
+2026-09-04T02:03:15.2370472Z   lookup-only: false
+2026-09-04T02:03:15.2370688Z   save-always: false
+2026-09-04T02:03:15.2370893Z ##[endgroup]
+2026-09-04T02:03:15.5408546Z Cache hit for: flutter-linux-stable-3.29.2-x64-c23637390482d4cf9598c3ce3f2be31aa7332daf
+2026-09-04T02:03:16.7874108Z Received 20971520 of 906700429 (2.3%), 20.0 MBs/sec
+2026-09-04T02:03:17.7914314Z Received 171966464 of 906700429 (19.0%), 81.8 MBs/sec
+2026-09-04T02:03:18.7911486Z Received 318767104 of 906700429 (35.2%), 101.2 MBs/sec
+2026-09-04T02:03:19.7918737Z Received 520093696 of 906700429 (57.4%), 123.8 MBs/sec
+2026-09-04T02:03:20.7921808Z Received 671088640 of 906700429 (74.0%), 127.9 MBs/sec
+2026-09-04T02:03:21.7920681Z Received 826277888 of 906700429 (91.1%), 131.2 MBs/sec
+2026-09-04T02:03:22.2784764Z Received 906700429 of 906700429 (100.0%), 133.2 MBs/sec
+2026-09-04T02:03:22.2787313Z Cache Size: ~865 MB (906700429 B)
+2026-09-04T02:03:22.2900493Z [command]/usr/bin/tar -xf /home/runner/work/_temp/a40717e3-010b-405e-ba0b-4e690f3ee454/cache.tzst -P -C /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0 --use-compress-program unzstd
+2026-09-04T02:03:26.0530434Z Cache restored successfully
+2026-09-04T02:03:26.4244380Z Cache restored from key: flutter-linux-stable-3.29.2-x64-c23637390482d4cf9598c3ce3f2be31aa7332daf
+2026-09-04T02:03:26.4355488Z ##[end-action id=__subosito_flutter-action.cache-flutter;outcome=success;conclusion=success;duration_ms=11203]
+2026-09-04T02:03:26.4358067Z ##[start-action display=Cache pub dependencies;id=__subosito_flutter-action.cache-pub]
+2026-09-04T02:03:26.5530599Z ##[group]Run actions/cache@v5
+2026-09-04T02:03:26.5530837Z with:
+2026-09-04T02:03:26.5531029Z   path: /home/runner/.pub-cache
+2026-09-04T02:03:26.5531424Z   key: flutter-pub-linux-stable-3.29.2-x64-c23637390482d4cf9598c3ce3f2be31aa7332daf-
+2026-09-04T02:03:26.5531834Z   enableCrossOsArchive: false
+2026-09-04T02:03:26.5532071Z   fail-on-cache-miss: false
+2026-09-04T02:03:26.5532284Z   lookup-only: false
+2026-09-04T02:03:26.5532490Z   save-always: false
+2026-09-04T02:03:26.5532686Z ##[endgroup]
+2026-09-04T02:03:26.8584311Z Cache hit for: flutter-pub-linux-stable-3.29.2-x64-c23637390482d4cf9598c3ce3f2be31aa7332daf-
+2026-09-04T02:03:28.0807376Z Received 32319373 of 32319373 (100.0%), 31.1 MBs/sec
+2026-09-04T02:03:28.0808285Z Cache Size: ~31 MB (32319373 B)
+2026-09-04T02:03:28.0909156Z [command]/usr/bin/tar -xf /home/runner/work/_temp/155b67d1-91e5-4a57-9427-97dce2b00a1a/cache.tzst -P -C /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0 --use-compress-program unzstd
+2026-09-04T02:03:28.5672170Z Cache restored successfully
+2026-09-04T02:03:28.5766842Z Cache restored from key: flutter-pub-linux-stable-3.29.2-x64-c23637390482d4cf9598c3ce3f2be31aa7332daf-
+2026-09-04T02:03:28.5841553Z ##[end-action id=__subosito_flutter-action.cache-pub;outcome=success;conclusion=success;duration_ms=2148]
+2026-09-04T02:03:28.5844469Z ##[start-action display=Run setup script;id=__subosito_flutter-action.__run_3]
+2026-09-04T02:03:28.5876017Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh \
+2026-09-04T02:03:28.5876373Z [36;1m$GITHUB_ACTION_PATH/setup.sh \[0m
+2026-09-04T02:03:28.5876637Z [36;1m  -n '3.29.2' \[0m
+2026-09-04T02:03:28.5876859Z [36;1m  -a 'x64' \[0m
+2026-09-04T02:03:28.5877160Z [36;1m  -c '/opt/hostedtoolcache/flutter/stable-3.29.2-x64' \[0m
+2026-09-04T02:03:28.5877505Z [36;1m  -d '/home/runner/.pub-cache' \[0m
+2026-09-04T02:03:28.5877765Z [36;1m  stable[0m
+2026-09-04T02:03:28.5911523Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-04T02:03:28.5911850Z ##[endgroup]
+2026-09-04T02:03:28.7769318Z ##[end-action id=__subosito_flutter-action.__run_3;outcome=success;conclusion=success;duration_ms=192]
+2026-09-04T02:03:28.7834572Z ##[group]Run flutter pub get
+2026-09-04T02:03:28.7834859Z [36;1mflutter pub get[0m
+2026-09-04T02:03:28.7869757Z shell: /usr/bin/bash -e {0}
+2026-09-04T02:03:28.7870003Z env:
+2026-09-04T02:03:28.7870294Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.29.2-x64/flutter
+2026-09-04T02:03:28.7870679Z   PUB_CACHE: /home/runner/.pub-cache
+2026-09-04T02:03:28.7870931Z ##[endgroup]
+2026-09-04T02:03:29.0930157Z 
+2026-09-04T02:03:29.0958008Z   ╔════════════════════════════════════════════════════════════════════════════╗
+2026-09-04T02:03:29.0958616Z   ║                 Welcome to Flutter! - https://flutter.dev                  ║
+2026-09-04T02:03:29.0959098Z   ║                                                                            ║
+2026-09-04T02:03:29.0959600Z   ║ The Flutter tool uses Google Analytics to anonymously report feature usage ║
+2026-09-04T02:03:29.0960168Z   ║ statistics and basic crash reports. This data is used to help improve      ║
+2026-09-04T02:03:29.0960747Z   ║ Flutter tools over time.                                                   ║
+2026-09-04T02:03:29.0961185Z   ║                                                                            ║
+2026-09-04T02:03:29.0961666Z   ║ Flutter tool analytics are not sent on the very first run. To disable      ║
+2026-09-04T02:03:29.0962471Z   ║ reporting, type 'flutter config --no-analytics'. To display the current    ║
+2026-09-04T02:03:29.0963027Z   ║ setting, type 'flutter config'. If you opt out of analytics, an opt-out    ║
+2026-09-04T02:03:29.0964122Z   ║ event will be sent, and then no further information will be sent by the    ║
+2026-09-04T02:03:29.0964644Z   ║ Flutter tool.                                                              ║
+2026-09-04T02:03:29.0965076Z   ║                                                                            ║
+2026-09-04T02:03:29.0965549Z   ║ By downloading the Flutter SDK, you agree to the Google Terms of Service.  ║
+2026-09-04T02:03:29.0966129Z   ║ The Google Privacy Policy describes how data is handled in this service.   ║
+2026-09-04T02:03:29.0966615Z   ║                                                                            ║
+2026-09-04T02:03:29.0967092Z   ║ Moreover, Flutter includes the Dart SDK, which may send usage metrics and  ║
+2026-09-04T02:03:29.0967624Z   ║ crash reports to Google.                                                   ║
+2026-09-04T02:03:29.0968070Z   ║                                                                            ║
+2026-09-04T02:03:29.0968524Z   ║ Read about data we send with crash reports:                                ║
+2026-09-04T02:03:29.0969073Z   ║ https://flutter.dev/to/crash-reporting                                     ║
+2026-09-04T02:03:29.0969538Z   ║                                                                            ║
+2026-09-04T02:03:29.0969999Z   ║ See Google's privacy policy:                                               ║
+2026-09-04T02:03:29.0970528Z   ║ https://policies.google.com/privacy                                        ║
+2026-09-04T02:03:29.0971015Z   ║                                                                            ║
+2026-09-04T02:03:29.0971480Z   ║ To disable animations in this tool, use                                    ║
+2026-09-04T02:03:29.0972013Z   ║ 'flutter config --no-cli-animations'.                                      ║
+2026-09-04T02:03:29.0972553Z   ╚════════════════════════════════════════════════════════════════════════════╝
+2026-09-04T02:03:29.0972795Z 
+2026-09-04T02:03:29.3619771Z Resolving dependencies...
+2026-09-04T02:03:30.1144347Z Downloading packages...
+2026-09-04T02:03:30.4275894Z + async 2.12.0 (2.13.1 available)
+2026-09-04T02:03:30.4276426Z + boolean_selector 2.1.2
+2026-09-04T02:03:30.4276844Z + characters 1.4.0 (1.4.1 available)
+2026-09-04T02:03:30.4277280Z + clock 1.1.2 (1.1.3 available)
+2026-09-04T02:03:30.4277685Z + collection 1.19.1
+2026-09-04T02:03:30.4278079Z + cupertino_icons 1.0.8 (1.0.9 available)
+2026-09-04T02:03:30.4278544Z + fake_async 1.3.2 (1.3.3 available)
+2026-09-04T02:03:30.4279296Z + ffi 2.2.0
+2026-09-04T02:03:30.4279639Z + file 7.0.1
+2026-09-04T02:03:30.4279992Z + flutter 0.0.0 from sdk flutter
+2026-09-04T02:03:30.4280441Z + flutter_lints 4.0.0 (6.0.0 available)
+2026-09-04T02:03:30.4280932Z + flutter_localizations 0.0.0 from sdk flutter
+2026-09-04T02:03:30.4281431Z + flutter_test 0.0.0 from sdk flutter
+2026-09-04T02:03:30.4281937Z + flutter_web_plugins 0.0.0 from sdk flutter
+2026-09-04T02:03:30.4282404Z + http 1.6.0
+2026-09-04T02:03:30.4282756Z + http_parser 4.1.2
+2026-09-04T02:03:30.4283124Z + intl 0.19.0 (0.20.3 available)
+2026-09-04T02:03:30.4283786Z + leak_tracker 10.0.8 (11.0.2 available)
+2026-09-04T02:03:30.4284320Z + leak_tracker_flutter_testing 3.0.9 (3.0.10 available)
+2026-09-04T02:03:30.4284866Z + leak_tracker_testing 3.0.1 (3.0.2 available)
+2026-09-04T02:03:30.4285371Z + lints 4.0.0 (6.1.0 available)
+2026-09-04T02:03:30.4285777Z + logging 1.3.0
+2026-09-04T02:03:30.4286147Z + matcher 0.12.17 (0.12.20 available)
+2026-09-04T02:03:30.4286643Z + material_color_utilities 0.11.1 (0.13.1 available)
+2026-09-04T02:03:30.4287141Z + meta 1.16.0 (1.19.0 available)
+2026-09-04T02:03:30.4287544Z + path 1.9.1
+2026-09-04T02:03:30.4287919Z + path_provider_linux 2.2.1 (2.2.2 available)
+2026-09-04T02:03:30.4288626Z + path_provider_platform_interface 2.1.2 (2.1.3 available)
+2026-09-04T02:03:30.4289482Z + path_provider_windows 2.3.0
+2026-09-04T02:03:30.4289896Z + platform 3.1.6
+2026-09-04T02:03:30.4290263Z + plugin_platform_interface 2.1.8
+2026-09-04T02:03:30.4290726Z + shared_preferences 2.5.3 (2.5.5 available)
+2026-09-04T02:03:30.4291263Z + shared_preferences_android 2.4.13 (2.4.28 available)
+2026-09-04T02:03:30.4291874Z + shared_preferences_foundation 2.5.4 (2.5.7 available)
+2026-09-04T02:03:30.4292439Z + shared_preferences_linux 2.4.1
+2026-09-04T02:03:30.4292991Z + shared_preferences_platform_interface 2.4.1 (2.4.2 available)
+2026-09-04T02:03:30.4293749Z + shared_preferences_web 2.4.3
+2026-09-04T02:03:30.4294185Z + shared_preferences_windows 2.4.1
+2026-09-04T02:03:30.4294651Z + sky_engine 0.0.0 from sdk flutter
+2026-09-04T02:03:30.4295091Z + socket_io_client 3.1.6
+2026-09-04T02:03:30.4295480Z + socket_io_common 3.1.1
+2026-09-04T02:03:30.4295884Z + source_span 1.10.1 (1.10.2 available)
+2026-09-04T02:03:30.4296332Z + stack_trace 1.12.1 (1.12.2 available)
+2026-09-04T02:03:30.4296762Z + stream_channel 2.1.4
+2026-09-04T02:03:30.4297131Z + string_scanner 1.4.1
+2026-09-04T02:03:30.4297969Z + term_glyph 1.2.2
+2026-09-04T02:03:30.4298368Z + test_api 0.7.4 (0.7.14 available)
+2026-09-04T02:03:30.4299006Z + typed_data 1.4.0
+2026-09-04T02:03:30.4299361Z + url_launcher 6.3.2
+2026-09-04T02:03:30.4299781Z + url_launcher_android 6.3.20 (6.3.33 available)
+2026-09-04T02:03:30.4300297Z + url_launcher_ios 6.3.4 (6.4.2 available)
+2026-09-04T02:03:30.4300772Z + url_launcher_linux 3.2.1 (3.2.3 available)
+2026-09-04T02:03:30.4301255Z + url_launcher_macos 3.2.3 (3.2.6 available)
+2026-09-04T02:03:30.4301720Z + url_launcher_platform_interface 2.3.2
+2026-09-04T02:03:30.4302200Z + url_launcher_web 2.4.1 (2.4.3 available)
+2026-09-04T02:03:30.4302683Z + url_launcher_windows 3.1.4 (3.1.6 available)
+2026-09-04T02:03:30.4303170Z + vector_math 2.1.4 (2.4.2 available)
+2026-09-04T02:03:30.4303884Z + vm_service 14.3.1 (15.3.0 available)
+2026-09-04T02:03:30.4304316Z + web 1.1.1
+2026-09-04T02:03:30.4304643Z + web_socket 1.0.1
+2026-09-04T02:03:30.4305010Z + xdg_directories 1.1.0
+2026-09-04T02:03:30.4305417Z Changed 61 dependencies!
+2026-09-04T02:03:30.4311564Z 31 packages have newer versions incompatible with dependency constraints.
+2026-09-04T02:03:30.4312019Z Try `flutter pub outdated` for more information.
+2026-09-04T02:03:30.7122000Z ##[group]Run echo "APP_VERSION=$(grep -m1 '^version:' pubspec.yaml | sed 's/version: *//' | cut -d+ -f1)" >> "$GITHUB_ENV"
+2026-09-04T02:03:30.7122853Z [36;1mecho "APP_VERSION=$(grep -m1 '^version:' pubspec.yaml | sed 's/version: *//' | cut -d+ -f1)" >> "$GITHUB_ENV"[0m
+2026-09-04T02:03:30.7160123Z shell: /usr/bin/bash -e {0}
+2026-09-04T02:03:30.7160388Z env:
+2026-09-04T02:03:30.7160704Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.29.2-x64/flutter
+2026-09-04T02:03:30.7161105Z   PUB_CACHE: /home/runner/.pub-cache
+2026-09-04T02:03:30.7161383Z ##[endgroup]
+2026-09-04T02:03:30.7262001Z ##[group]Run flutter analyze --no-fatal-infos
+2026-09-04T02:03:30.7262371Z [36;1mflutter analyze --no-fatal-infos[0m
+2026-09-04T02:03:30.7295119Z shell: /usr/bin/bash -e {0}
+2026-09-04T02:03:30.7295379Z env:
+2026-09-04T02:03:30.7295690Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.29.2-x64/flutter
+2026-09-04T02:03:30.7296081Z   PUB_CACHE: /home/runner/.pub-cache
+2026-09-04T02:03:30.7296348Z   APP_VERSION: 1.0.0
+2026-09-04T02:03:30.7296577Z ##[endgroup]
+2026-09-04T02:03:44.7581015Z Analyzing mobile...                                             
+2026-09-04T02:03:44.7587270Z 
+2026-09-04T02:03:44.7619931Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_bits.dart:101:11 • prefer_const_constructors
+2026-09-04T02:03:44.7622417Z    info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/admin/admin_bits.dart:103:23 • prefer_const_literals_to_create_immutables
+2026-09-04T02:03:44.7625253Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_bits.dart:107:15 • prefer_const_constructors
+2026-09-04T02:03:44.7627700Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_bits.dart:108:24 • prefer_const_constructors
+2026-09-04T02:03:44.7629658Z    info • Dangling library doc comment • lib/screens/admin/admin_shell.dart:5:1 • dangling_library_doc_comments
+2026-09-04T02:03:44.7631902Z    info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/admin/admin_shell.dart:432:24 • prefer_const_literals_to_create_immutables
+2026-09-04T02:03:44.7634474Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_shell.dart:453:19 • prefer_const_constructors
+2026-09-04T02:03:44.7636641Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/dashboard_screen.dart:328:9 • prefer_const_constructors
+2026-09-04T02:03:44.7638911Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/dashboard_screen.dart:417:15 • prefer_const_constructors
+2026-09-04T02:03:44.7641130Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/reports_screen.dart:217:14 • prefer_const_constructors
+2026-09-04T02:03:44.7643500Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/reports_screen.dart:218:16 • prefer_const_constructors
+2026-09-04T02:03:44.7645922Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/reservations_screen.dart:153:17 • prefer_const_constructors
+2026-09-04T02:03:44.7648133Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/reservations_screen.dart:407:23 • prefer_const_constructors
+2026-09-04T02:03:44.7650343Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/reservations_screen.dart:409:32 • prefer_const_constructors
+2026-09-04T02:03:44.7652562Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/room_types_screen.dart:868:35 • prefer_const_constructors
+2026-09-04T02:03:44.7654938Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/services_screen.dart:266:17 • prefer_const_constructors
+2026-09-04T02:03:44.7657072Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/services_screen.dart:824:29 • prefer_const_constructors
+2026-09-04T02:03:44.7659209Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/staff_codes_screen.dart:835:36 • prefer_const_constructors
+2026-09-04T02:03:44.7661356Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/staff_codes_screen.dart:947:15 • prefer_const_constructors
+2026-09-04T02:03:44.7664131Z    info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/admin/staff_codes_screen.dart:948:27 • prefer_const_literals_to_create_immutables
+2026-09-04T02:03:44.7666063Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/staff_codes_screen.dart:949:19 • prefer_const_constructors
+2026-09-04T02:03:44.7668233Z    info • Use 'const' with the constructor to improve performance • lib/screens/admin/staff_codes_screen.dart:1133:28 • prefer_const_constructors
+2026-09-04T02:03:44.7670087Z    info • Unnecessary 'const' keyword • lib/screens/home/home_screen.dart:122:27 • unnecessary_const
+2026-09-04T02:03:44.7671643Z    info • Unnecessary 'const' keyword • lib/screens/home/home_screen.dart:169:36 • unnecessary_const
+2026-09-04T02:03:44.7673500Z    info • Unnecessary 'const' keyword • lib/screens/home/home_screen.dart:258:36 • unnecessary_const
+2026-09-04T02:03:44.7675481Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/arrivals_screen.dart:262:17 • prefer_const_constructors
+2026-09-04T02:03:44.7677415Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/arrivals_screen.dart:412:23 • prefer_const_constructors
+2026-09-04T02:03:44.7679600Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/dashboard_screen.dart:290:9 • prefer_const_constructors
+2026-09-04T02:03:44.7682047Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/dashboard_screen.dart:376:28 • prefer_const_constructors
+2026-09-04T02:03:44.7684563Z    info • Unnecessary braces in a string interpolation • lib/screens/reception/departures_screen.dart:219:21 • unnecessary_brace_in_string_interps
+2026-09-04T02:03:44.7686808Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/reception_bits.dart:207:22 • prefer_const_constructors
+2026-09-04T02:03:44.7689174Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/request_detail_screen.dart:747:24 • prefer_const_constructors
+2026-09-04T02:03:44.7691428Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/rooms_screen.dart:634:23 • prefer_const_constructors
+2026-09-04T02:03:44.7693950Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/search_screen.dart:75:17 • prefer_const_constructors
+2026-09-04T02:03:44.7696211Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/stay_detail_screen.dart:244:21 • prefer_const_constructors
+2026-09-04T02:03:44.7698611Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/stay_detail_screen.dart:249:21 • prefer_const_constructors
+2026-09-04T02:03:44.7700835Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/stay_detail_screen.dart:264:21 • prefer_const_constructors
+2026-09-04T02:03:44.7703217Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/stay_detail_screen.dart:272:21 • prefer_const_constructors
+2026-09-04T02:03:44.7705706Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/stay_dialogs.dart:131:15 • prefer_const_constructors
+2026-09-04T02:03:44.7708248Z    info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/reception/stay_dialogs.dart:131:29 • prefer_const_literals_to_create_immutables
+2026-09-04T02:03:44.7710624Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/stay_dialogs.dart:311:15 • prefer_const_constructors
+2026-09-04T02:03:44.7713147Z    info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/reception/stay_dialogs.dart:311:29 • prefer_const_literals_to_create_immutables
+2026-09-04T02:03:44.7715809Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:335:11 • prefer_const_constructors
+2026-09-04T02:03:44.7718491Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:435:17 • prefer_const_constructors
+2026-09-04T02:03:44.7720781Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:610:26 • prefer_const_constructors
+2026-09-04T02:03:44.7723223Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:695:18 • prefer_const_constructors
+2026-09-04T02:03:44.7725765Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:713:24 • prefer_const_constructors
+2026-09-04T02:03:44.7728153Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:748:9 • prefer_const_constructors
+2026-09-04T02:03:44.7730787Z    info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/reception/wizards/check_in_wizard.dart:748:68 • prefer_const_literals_to_create_immutables
+2026-09-04T02:03:44.7733722Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:749:11 • prefer_const_constructors
+2026-09-04T02:03:44.7736315Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:751:11 • prefer_const_constructors
+2026-09-04T02:03:44.7738792Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:752:20 • prefer_const_constructors
+2026-09-04T02:03:44.7741142Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:755:22 • prefer_const_constructors
+2026-09-04T02:03:44.7743787Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:893:26 • prefer_const_constructors
+2026-09-04T02:03:44.7746153Z    info • Use 'const' with the constructor to improve performance • lib/screens/reception/wizards/check_in_wizard.dart:903:19 • prefer_const_constructors
+2026-09-04T02:03:44.7748497Z    info • Use 'const' with the constructor to improve performance • lib/screens/update_required_screen.dart:77:25 • prefer_const_constructors
+2026-09-04T02:03:44.7750532Z    info • Use 'const' with the constructor to improve performance • lib/ui/theme.dart:28:18 • prefer_const_constructors
+2026-09-04T02:03:44.7752482Z    info • Use 'const' with the constructor to improve performance • lib/ui/theme.dart:54:18 • prefer_const_constructors
+2026-09-04T02:03:44.7754810Z    info • The local variable '_reportsJson' starts with an underscore • test/screens/admin/audit_test.dart:363:24 • no_leading_underscores_for_local_identifiers
+2026-09-04T02:03:44.7756171Z 
+2026-09-04T02:03:44.7842479Z 59 issues found. (ran in 13.0s)
+2026-09-04T02:03:44.7930045Z ##[group]Run flutter test --dart-define=APP_VERSION=1.0.0
+2026-09-04T02:03:44.7930501Z [36;1mflutter test --dart-define=APP_VERSION=1.0.0[0m
+2026-09-04T02:03:44.7967279Z shell: /usr/bin/bash -e {0}
+2026-09-04T02:03:44.7967527Z env:
+2026-09-04T02:03:44.7967897Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.29.2-x64/flutter
+2026-09-04T02:03:44.7968325Z   PUB_CACHE: /home/runner/.pub-cache
+2026-09-04T02:03:44.7968596Z   APP_VERSION: 1.0.0
+2026-09-04T02:03:44.7968810Z ##[endgroup]
+2026-09-04T02:03:45.8129336Z 
+2026-09-04T02:03:53.2058791Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-01 AdminDashboard يحلل KPIs والتنبيهات والرسوم والقيم الناقصة بأمان
+2026-09-04T02:03:53.2091278Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-01 AdminDashboard payload فارغ لا يرمي
+2026-09-04T02:03:53.2119303Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-02 HotelSettings يحلل الحقول المعروفة ويتحمل النواقص
+2026-09-04T02:03:53.2150829Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-04 AdminRoomType amenities/images كقوائم نصية
+2026-09-04T02:03:53.2177881Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-08 AdminRoom guestName/expectedCheckOut قابلة للفراغ
+2026-09-04T02:03:53.2205775Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-23/A-26 الطاقم والأكواد lastCode مفقود = null وموجود = ملخص
+2026-09-04T02:03:53.2232163Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-23/A-26 الطاقم والأكواد A-26 كود ضيف يحمل سياق الإقامة
+2026-09-04T02:03:53.2260800Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-27 GeneratedCodeResult الكود الخام يُستخرج مرة واحدة
+2026-09-04T02:03:53.2291366Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-29/A-30 الحجوزات الصفحة تُفكك مع pagination
+2026-09-04T02:03:53.2329288Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-29/A-30 الحجوزات A-30 التفصيل: الضيف والنوع والدفعات ولقطة السعر
+2026-09-04T02:03:53.2364105Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-32 AuditLogItem details خريطة و يتحمل الفراغ
+2026-09-04T02:03:53.2407773Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-33 AdminReports الإشغال والإيراد وإحصاءات الطلبات والجنسيات
+2026-09-04T02:03:53.2428941Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/admin_models_test.dart: A-33 AdminReports avgCompletionMinutes null مسموح
+2026-09-04T02:03:53.3071015Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/guest_models_test.dart: AuthSession (AUTH-01) تحليل رد validate
+2026-09-04T02:03:53.3140485Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/guest_models_test.dart: GuestDashboard (G-01) الأرقام بالسنت + الإقامة + الفندق
+2026-09-04T02:03:53.3191849Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/guest_models_test.dart: GuestBill (G-09) معادلة الرصيد = مجموع + إضافي − مدفوع
+2026-09-04T02:03:53.3231806Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/guest_models_test.dart: ServiceRequestModel (G-04/05) الحالة والتحديثات والفاعل النشط
+2026-09-04T02:03:53.3265224Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/guest_models_test.dart: ServiceRequestModel (G-04/05) الطلب المنتهي ليس نشطًا
+2026-09-04T02:03:53.3291963Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/guest_models_test.dart: RoomOptions (G-11) diffCents سالب = أوفر
+2026-09-04T02:03:53.8595206Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/reception_models_test.dart: ArrivalItem (R-02) تحليل كامل: ضيف + نوع غرفة + مالي بالسنت
+2026-09-04T02:03:53.8634788Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/reception_models_test.dart: ArrivalItem (R-02) حقول غائبة → قيم آمنة (نص فارغ وصفر) لا رمي
+2026-09-04T02:03:53.8697756Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/reception_models_test.dart: DepartureItem (R-03) المتأخر والطلبات النشطة والرصيد
+2026-09-04T02:03:53.8735032Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/reception_models_test.dart: RoomItem (R-10) isAvailable فقط لAVAILABLE
+2026-09-04T02:03:53.8800599Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/reception_models_test.dart: ReceptionDashboard (R-01) الإحصاءات والقوائم الثلاث
+2026-09-04T02:03:53.8835171Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/reception_models_test.dart: CheckInResult (R-06) الكود الخام يُحفظ كما هو (مرة واحدة — لا هاش)
+2026-09-04T02:03:53.8859016Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/reception_models_test.dart: CheckOutResult (R-07) closed + roomNumber + balanceCents
+2026-09-04T02:03:53.8943105Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/reception_models_test.dart: StayDetailData (R-05) تحليل متداخل كامل: فاتورة + طلبات + تمديد + تغيير + رسائل
+2026-09-04T02:03:53.8970355Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/reception_models_test.dart: StayDetailData (R-05) أقسام غائبة → قوائم فارغة بلا رمي (فاتورة صفرية)
+2026-09-04T02:03:53.9014925Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/reception_models_test.dart: InHouseStay (R-04 — نموذج F4-b) التداخل المتشعّب (guest/room/roomType/reservation)
+2026-09-04T02:03:53.9032692Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/models/reception_models_test.dart: ReceptionNotification (R-22) غير المقروء والنوع والعنوان
+2026-09-04T02:03:54.1196947Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/reception_store_test.dart: refreshArrivals يضبط التاريخ المطلوب ويفكك القائمة
+2026-09-04T02:03:54.1453017Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/reception_store_test.dart: checkIn: جسم R-06 الحرفي (idNumber فقط عند غير الفارغ) + تحديث القوائم
+2026-09-04T02:03:54.1544918Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/reception_store_test.dart: checkIn بلا idNumber: الحقل غائب تمامًا من الجسم
+2026-09-04T02:03:54.1630723Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/reception_store_test.dart: checkOut يرسل confirmOutstanding كما هو (R-07)
+2026-09-04T02:03:54.1688387Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/reception_store_test.dart: recordPayment: جسم R-12 الحرفي (stayId/method/amountCents/note)
+2026-09-04T02:03:54.1757269Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/reception_store_test.dart: loadStayDetail يفكك R-05 المتداخل (bill.balanceCents)
+2026-09-04T02:03:54.1847224Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/reception_store_test.dart: الإشعارات: unreadCount + تعليم المعروض غير المقروء (R-22/R-23)
+2026-09-04T02:03:54.1886850Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/reception_store_test.dart: reset يعيد كل الحالة والتواريخ لليوم
+2026-09-04T02:03:54.1964754Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/reception_store_test.dart: onRealtimeBump يصمت عند فشل التحديث (لا يرمي)
+2026-09-04T02:03:54.4815098Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/admin_store_test.dart: A-03 updateHotel: PATCH بالجسم كما هو + يعيد note الخادم
+2026-09-04T02:03:54.4925477Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/admin_store_test.dart: A-27 generateCode: الجسم الحرفي + الكود الخام + تحديث القوائم
+2026-09-04T02:03:54.4975714Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/admin_store_test.dart: A-28 revokeCode: الجسم + يعيد رسالة الخادم
+2026-09-04T02:03:54.5005916Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/admin_store_test.dart: A-26 refreshCodes: فلاتر المخزن تذهب في الاستعلام
+2026-09-04T02:03:54.5058675Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/admin_store_test.dart: A-29 refreshReservations: الصفحة + الفلتر + البحث في الاستعلام
+2026-09-04T02:03:54.5093921Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/admin_store_test.dart: A-32 refreshAudit: الصفحة والفلتر في الاستعلام
+2026-09-04T02:03:54.5167432Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/admin_store_test.dart: A-09 createRoom: الجسم الحرفي + notes تُقص
+2026-09-04T02:03:54.5222904Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/admin_store_test.dart: A-13 createRate: يعيد المعدل وتحذير التداخل الاختياري
+2026-09-04T02:03:54.5279352Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/admin_store_test.dart: A-34 refreshNotifications: unreadCount من الخادم
+2026-09-04T02:03:54.5305883Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/admin_store_test.dart: reset يمسح كل الحالة بما فيها الفلاتر والصفحات
+2026-09-04T02:03:54.5422735Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/state/admin_store_test.dart: DELETE (A-07/A-11/A-14/A-18/A-22) عبر api.delete
+2026-09-04T02:03:55.6925996Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/requests_screen_test.dart: شاشة الطلبات (أ) بطاقة طلب معلقة + الفلتر الافتراضي «المعلقة»
+2026-09-04T02:03:55.9011087Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/requests_screen_test.dart: شاشة الطلبات (ب) نقرة رقاقة «مكتمل» تفلتر القائمة
+2026-09-04T02:03:56.0367153Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/requests_screen_test.dart: شاشة الطلبات (ج) مفتاح «العاجل فقط» يخفي غير العاجل
+2026-09-04T02:03:56.6834721Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/check_out_wizard_test.dart: معالج تسجيل الخروج المسار الكامل: دفعة سريعة ثم خروج نظيف
+2026-09-04T02:03:56.8859451Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/check_out_wizard_test.dart: معالج تسجيل الخروج مسار الخروج مع رصيد غير مسدد (confirmOutstanding=true)
+2026-09-04T02:03:58.0568592Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/check_in_wizard_test.dart: المسار الكامل: تحقق → غرفة → تأكيد → كود الضيف
+2026-09-04T02:03:58.1195980Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/check_in_wizard_test.dart: حجز غير موجود في وصولات اليوم → الرسالة الحرفية والزر معطّل
+2026-09-04T02:03:58.4628420Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/arrivals_screen_test.dart: يعرض الوصولين ويعطّل زر الوصول للحجز غير المؤكد
+2026-09-04T02:03:58.5685167Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/arrivals_screen_test.dart: يوم بلا وصولات → حالة الفراغ
+2026-09-04T02:03:59.8402691Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/inhouse_screen_test.dart: شاشة المقيمون تعرض بطاقة المقيم (الاسم/الغرفة/الرصيد) وزر التفاصيل
+2026-09-04T02:03:59.8804204Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/inhouse_screen_test.dart: شاشة المقيمون لا إقامات نشطة: حالة الفراغ مع العدّاد صفرًا
+2026-09-04T02:03:59.9881696Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/inhouse_screen_test.dart: شاشة المقيمون فشل الجلب: EmptyState برسالة الخادم + توست الخطأ
+2026-09-04T02:04:00.5387050Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/stay_dialogs_test.dart: حوارا الدفعة والبند تحقق الدفعة: مبلغ غير رقمي → توست حرفي بلا POST
+2026-09-04T02:04:00.7135314Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/stay_dialogs_test.dart: حوارا الدفعة والبند تحقق البند: وصف قصير → «أدخل وصفًا للبند (3 أحرف على الأقل)»
+2026-09-04T02:04:00.8862172Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/stay_dialogs_test.dart: حوارا الدفعة والبند نجاح البند: جسم {stayId,description,amountCents,category} + إغلاق
+2026-09-04T02:04:02.1736172Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/stay_detail_screen_test.dart: شاشة تفصيل الإقامة التحميل والتبويبات الخمسة تعرض مفاتيحها
+2026-09-04T02:04:02.3086177Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/reception_notifications_screen_test.dart: شاشة إشعارات الاستقبال تعرض الإشعارات وتعلّم المعروض غير المقروء تلقائيًا عند الفتح
+2026-09-04T02:04:02.4847590Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/reception_notifications_screen_test.dart: شاشة إشعارات الاستقبال زر «تحديد الكل كمقروء» يرسل معرفات غير المقروء المعروضة
+2026-09-04T02:04:02.5910373Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/stay_detail_screen_test.dart: شاشة تفصيل الإقامة تسجيل دفعة: جسم POST حرفي + توست النجاح بالرصيد الجديد
+2026-09-04T02:04:02.8195045Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/stay_detail_screen_test.dart: شاشة تفصيل الإقامة قرار تمديد PENDING: جسم {approve:true} + توست الموافقة
+2026-09-04T02:04:03.0752501Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/stay_detail_screen_test.dart: شاشة تفصيل الإقامة إرسال رسالة: جسم {stayId,body} حرفي + ظهور الفقاعة
+2026-09-04T02:04:03.9058933Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/rooms_screen_test.dart: لوحة الغرف (أ) الشبكة تعرض غرفتين بطابقيهما + دليل الألوان
+2026-09-04T02:04:04.2816932Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/rooms_screen_test.dart: لوحة الغرف (ب) DIRTY → «بدء التنظيف» → جسم {status: CLEANING} + توست
+2026-09-04T02:04:04.7964373Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/rooms_screen_test.dart: لوحة الغرف (ج) AVAILABLE → «خارج الخدمة» بتأكيد → جسم notes
+2026-09-04T02:04:04.8354507Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/request_detail_screen_test.dart: حوار تفاصيل الطلب (أ) يعرض الطلب والوصف والخط الزمني
+2026-09-04T02:04:05.1855464Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/request_detail_screen_test.dart: حوار تفاصيل الطلب (ب) «استلام»: جسم POST الحرفي + توست النجاح
+2026-09-04T02:04:05.5134853Z ##[group]✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/request_detail_screen_test.dart: حوار تفاصيل الطلب (ج) «إسناد» معطّل بلا فريق → فريق → جسم assignedTo
+2026-09-04T02:04:05.5135633Z 
+2026-09-04T02:04:05.5136030Z Warning: A call to tap() with finder "Found 1 widget with text "اختر فريقًا": [
+2026-09-04T02:04:05.5137392Z   Text("اختر فريقًا", inherit: true, color: Color(alpha: 1.0000, red: 0.2863, green: 0.2706, blue: 0.3098, colorSpace: ColorSpace.sRGB), size: 12.0, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery, _ScrollableScope]),
+2026-09-04T02:04:05.5138940Z ]" derived an Offset (Offset(333.5, 340.0)) that would not hit test on the specified widget.
+2026-09-04T02:04:05.5201572Z Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+2026-09-04T02:04:05.5202694Z The finder corresponds to this RenderBox: RenderParagraph#d3ef0 relayoutBoundary=up41
+2026-09-04T02:04:05.5226065Z The hit test result at that offset is: HitTestResult(RenderPointerListener#9e481@Offset(49.0, 24.0), RenderSemanticsAnnotations#55660@Offset(49.0, 24.0), RenderMouseRegion#d4f06@Offset(49.0, 24.0), RenderSemanticsAnnotations#56349@Offset(49.0, 24.0), RenderSemanticsAnnotations#af47a@Offset(49.0, 24.0), RenderPadding#1cb59@Offset(60.0, 25.0), RenderDecoratedBox#9bb9c@Offset(60.0, 25.0), RenderConstrainedBox#8b948@Offset(60.0, 25.0), RenderFlex#72dfe@Offset(180.5, 25.0), RenderFlex#d6ac4@Offset(180.5, 125.0), RenderPadding#370a3@Offset(193.5, 138.0), RenderDecoratedBox#2da55@Offset(193.5, 138.0), RenderConstrainedBox#f79aa@Offset(193.5, 138.0), RenderFlex#0adbe@Offset(193.5, 369.0), RenderPadding#707a9@Offset(213.5, 389.0), _RenderSingleChildViewport#7600e@Offset(213.5, 316.0), RenderIgnorePointer#04fbe@Offset(213.5, 316.0), RenderSemanticsAnnotations#f60cb@Offset(213.5, 316.0), RenderPointerListener#5d755@Offset(213.5, 316.0), RenderSemanticsGestureHandler#f3a83@Offset(213.5, 316.0), RenderPointerListener#b7099@Offset(213.5, 316.0), _RenderScrollSemantics#7914c@Offset(213.5, 316.0), RenderClipRect#e0b66@Offset(213.5, 316.0), RenderConstrainedBox#c7af9@Offset(213.5, 316.0), _RenderInkFeatures#7a6a4@Offset(213.5, 316.0), RenderCustomPaint#63ba7@Offset(213.5, 316.0), RenderPhysicalShape#96d1a@Offset(213.5, 316.0), RenderConstrainedBox#691ed@Offset(213.5, 316.0), RenderPositionedBox#d7b0a@Offset(293.5, 316.0), RenderPadding#eaeed@Offset(333.5, 340.0), RenderPadding#6911c@Offset(333.5, 340.0), RenderPadding#16118@Offset(333.5, 340.0), RenderSemanticsAnnotations#2c5d9@Offset(333.5, 340.0), RenderRepaintBoundary#01e5b@Offset(333.5, 340.0), RenderIgnorePointer#cb0b5@Offset(333.5, 340.0), RenderAnimatedOpacity#e6830@Offset(333.5, 340.0), RenderRepaintBoundary#42a57@Offset(333.5, 340.0), RenderSemanticsAnnotations#7ce8f@Offset(333.5, 340.0), RenderOffstage#01b45@Offset(333.5, 340.0), RenderSemanticsAnnotations#5cb81@Offset(333.5, 340.0), _RenderTheater#cfbef@Offset(333.5, 340.0), RenderAbsorbPointer#bc1f9@Offset(333.5, 340.0), RenderPointerListener#68232@Offset(333.5, 340.0), RenderSemanticsAnnotations#f96c4@Offset(333.5, 340.0), RenderCustomPaint#551bb@Offset(333.5, 340.0), RenderSemanticsAnnotations#d681d@Offset(333.5, 340.0), RenderSemanticsAnnotations#f9625@Offset(333.5, 340.0), RenderTapRegionSurface#bc1ec@Offset(333.5, 340.0), RenderSemanticsAnnotations#b03c5@Offset(333.5, 340.0), RenderSemanticsAnnotations#8cc0c@Offset(333.5, 340.0), RenderSemanticsAnnotations#184ba@Offset(333.5, 340.0), HitTestEntry<HitTestTarget>#6752b(_ReusableRenderView#dad08), HitTestEntry<HitTestTarget>#6cd39(<AutomatedTestWidgetsFlutterBinding>))
+2026-09-04T02:04:05.5239696Z #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2077:25)
+2026-09-04T02:04:05.5240636Z #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1861:12)
+2026-09-04T02:04:05.5241479Z #2      WidgetController.tap (package:flutter_test/src/controller.dart:1041:7)
+2026-09-04T02:04:05.5242913Z #3      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/request_detail_screen_test.dart:216:20)
+2026-09-04T02:04:05.5244403Z <asynchronous suspension>
+2026-09-04T02:04:05.5245111Z #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:193:15)
+2026-09-04T02:04:05.5245906Z <asynchronous suspension>
+2026-09-04T02:04:05.5246908Z #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1064:5)
+2026-09-04T02:04:05.5247595Z <asynchronous suspension>
+2026-09-04T02:04:05.5248458Z #6      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+2026-09-04T02:04:05.5249437Z <asynchronous suspension>
+2026-09-04T02:04:05.5249959Z To silence this warning, pass "warnIfMissed: false" to "tap()".
+2026-09-04T02:04:05.5250703Z To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+2026-09-04T02:04:05.5251213Z 
+2026-09-04T02:04:05.5251751Z ##[endgroup]
+2026-09-04T02:04:05.6859381Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/request_detail_screen_test.dart: حوار تفاصيل الطلب (د) «رفض» بتأكيد → جسم {status: REJECTED}
+2026-09-04T02:04:06.3332149Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/departures_screen_test.dart: شاشة المغادرون تعرض المتأخرين ومستحقي اليوم ببطاقاتهم وأزرار الخروج
+2026-09-04T02:04:06.3808469Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/departures_screen_test.dart: شاشة المغادرون يوم بلا مغادرات: حالة الفراغ في قسم مستحقي اليوم
+2026-09-04T02:04:06.5009659Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/departures_screen_test.dart: شاشة المغادرون فشل الجلب: صندوق الخطأ مع رسالة الخادم وزر إعادة المحاولة
+2026-09-04T02:04:07.3282921Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/search_screen_test.dart: حوار البحث العام (أ) حرفان + debounce → قسما الحجوزات والإقامات
+2026-09-04T02:04:07.4311120Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/search_screen_test.dart: حوار البحث العام (ب) أقل من حرفين → «اكتب حرفين على الأقل للبحث…»
+2026-09-04T02:04:07.8215635Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/search_screen_test.dart: حوار البحث العام (ج) نقر نتيجة إقامة → فتح showStayDetail بجلب R-05
+2026-09-04T02:04:08.1020359Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/reception/dashboard_screen_test.dart: KPIs والإشغال وأقسام اليوم وزر «الكل»
+2026-09-04T02:04:09.1697448Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/update_required_test.dart: تعرض العنوان والحد المطلوب ورابط الإصدارات
+2026-09-04T02:04:09.3044839Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/update_required_test.dart: زر «إعادة المحاولة» يستدعي onRetry
+2026-09-04T02:04:09.3661534Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/update_required_test.dart: لا يوجد أي مسار خروج آخر من الشاشة (حجب كامل)
+2026-09-04T02:04:09.7812596Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/reservations_test.dart: القائمة: البطاقات + الشارات + الترقيم بالأرقام العربية
+2026-09-04T02:04:10.0944182Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/reservations_test.dart: فلتر الحالة: CONFIRMED في استعلام A-29 + إعادة للصفحة 1
+2026-09-04T02:04:10.3578580Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/reservations_test.dart: البحث: q في الاستعلام + مسح البحث يعيّده فارغًا
+2026-09-04T02:04:10.4988506Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/reservations_test.dart: الترقيم: التالي/السابق يغيّران صفحة الاستعلام
+2026-09-04T02:04:10.8880533Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/staff_codes_test.dart: شاشة الطاقم والأكواد — تبويب الأكواد (أ) بطاقات الأكواد: الكود/النوع/الحالة/السياق/آخر استخدام + العدّاد
+2026-09-04T02:04:11.0626168Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/reservations_test.dart: التفاصيل: كل حقول A-30 + لقطة السعر حرفيًا (ليالٍ/ضريبة/سياسة)
+2026-09-04T02:04:11.5868148Z ##[group]✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/staff_codes_test.dart: شاشة الطاقم والأكواد — تبويب الأكواد (ب) توليد كود: جسم POST الحرفي + الكود الخام يظهر مرة واحدة
+2026-09-04T02:04:11.5870338Z 
+2026-09-04T02:04:11.5871655Z Warning: A call to tap() with finder "Found 1 widget with text "اختر الموظف المطابق للدور": [
+2026-09-04T02:04:11.5874220Z   Text("اختر الموظف المطابق للدور", dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+2026-09-04T02:04:11.5875874Z ]" derived an Offset (Offset(375.5, 827.5)) that would not hit test on the specified widget.
+2026-09-04T02:04:11.5877526Z Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+2026-09-04T02:04:11.5879133Z The finder corresponds to this RenderBox: RenderParagraph#aa6e8 relayoutBoundary=up36
+2026-09-04T02:04:11.5894352Z The hit test result at that offset is: HitTestResult(RenderPointerListener#6656f@Offset(162.5, 23.0), RenderSemanticsAnnotations#da922@Offset(162.5, 23.0), RenderMouseRegion#85269@Offset(162.5, 23.0), RenderSemanticsAnnotations#944c1@Offset(162.5, 23.0), RenderSemanticsAnnotations#69bd0@Offset(162.5, 23.0), RenderPadding#969c2@Offset(175.5, 24.0), RenderDecoratedBox#4c86a@Offset(175.5, 24.0), RenderConstrainedBox#98d69@Offset(175.5, 24.0), RenderFlex#5a219@Offset(175.5, 250.0), RenderPadding#c2640@Offset(195.5, 270.0), _RenderSingleChildViewport#28cac@Offset(195.5, 270.0), RenderIgnorePointer#1dc05@Offset(195.5, 270.0), RenderSemanticsAnnotations#e09a7@Offset(195.5, 270.0), RenderPointerListener#4a0f5@Offset(195.5, 270.0), RenderSemanticsGestureHandler#a9aaa@Offset(195.5, 270.0), RenderPointerListener#3f6cc@Offset(195.5, 270.0), _RenderScrollSemantics#8b3d5@Offset(195.5, 270.0), RenderClipRect#e68e0@Offset(195.5, 270.0), RenderConstrainedBox#d1bbe@Offset(195.5, 270.0), _RenderInkFeatures#7a3c3@Offset(195.5, 270.0), RenderCustomPaint#31a39@Offset(195.5, 270.0), RenderPhysicalShape#010e2@Offset(195.5, 270.0), RenderConstrainedBox#7df76@Offset(195.5, 270.0), RenderPositionedBox#014e4@Offset(335.5, 803.5), RenderPadding#5cdd1@Offset(375.5, 827.5), RenderPadding#5f5a3@Offset(375.5, 827.5), RenderPadding#19759@Offset(375.5, 827.5), RenderSemanticsAnnotations#90f98@Offset(375.5, 827.5), RenderRepaintBoundary#fd9f8@Offset(375.5, 827.5), RenderIgnorePointer#fbe46@Offset(375.5, 827.5), RenderAnimatedOpacity#62c65@Offset(375.5, 827.5), RenderRepaintBoundary#880b2@Offset(375.5, 827.5), RenderSemanticsAnnotations#df093@Offset(375.5, 827.5), RenderOffstage#abd14@Offset(375.5, 827.5), RenderSemanticsAnnotations#e8a2e@Offset(375.5, 827.5), _RenderTheater#a3eca@Offset(375.5, 827.5), RenderAbsorbPointer#e496f@Offset(375.5, 827.5), RenderPointerListener#d7ac5@Offset(375.5, 827.5), RenderSemanticsAnnotations#06b49@Offset(375.5, 827.5), RenderCustomPaint#2c21d@Offset(375.5, 827.5), RenderSemanticsAnnotations#9333b@Offset(375.5, 827.5), RenderSemanticsAnnotations#1fb25@Offset(375.5, 827.5), RenderTapRegionSurface#1bc0a@Offset(375.5, 827.5), RenderSemanticsAnnotations#09ab6@Offset(375.5, 827.5), RenderSemanticsAnnotations#5564e@Offset(375.5, 827.5), RenderSemanticsAnnotations#579c1@Offset(375.5, 827.5), HitTestEntry<HitTestTarget>#6b9f8(_ReusableRenderView#43b9d), HitTestEntry<HitTestTarget>#6e367(<AutomatedTestWidgetsFlutterBinding>))
+2026-09-04T02:04:11.5909606Z #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2077:25)
+2026-09-04T02:04:11.5910976Z #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1861:12)
+2026-09-04T02:04:11.5912191Z #2      WidgetController.tap (package:flutter_test/src/controller.dart:1041:7)
+2026-09-04T02:04:11.5914242Z #3      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/staff_codes_test.dart:318:20)
+2026-09-04T02:04:11.5916181Z <asynchronous suspension>
+2026-09-04T02:04:11.5917307Z #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:193:15)
+2026-09-04T02:04:11.5918567Z <asynchronous suspension>
+2026-09-04T02:04:11.5919581Z #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1064:5)
+2026-09-04T02:04:11.5920670Z <asynchronous suspension>
+2026-09-04T02:04:11.5921946Z #6      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+2026-09-04T02:04:11.5923687Z <asynchronous suspension>
+2026-09-04T02:04:11.5924580Z To silence this warning, pass "warnIfMissed: false" to "tap()".
+2026-09-04T02:04:11.5925805Z To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+2026-09-04T02:04:11.5927135Z 
+2026-09-04T02:04:11.5927896Z ##[endgroup]
+2026-09-04T02:04:11.8484031Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/staff_codes_test.dart: شاشة الطاقم والأكواد — تبويب الأكواد (ج) الموظف المعطّل وغير المطابق غير قابلين للاختيار في حوار التوليد
+2026-09-04T02:04:12.0023618Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/staff_codes_test.dart: شاشة الطاقم والأكواد — تبويب الأكواد (د) إبطال كود: حوار تأكيد يذكر الجلسات + جسم {codeId} + رسالة الخادم
+2026-09-04T02:04:12.2341899Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/staff_codes_test.dart: شاشة الطاقم والأكواد — تبويب الأكواد (هـ) فلاتر الأكواد في استعلام GET: type=RECEPTION&status=ACTIVE
+2026-09-04T02:04:12.5136664Z ##[group]✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/staff_codes_test.dart: شاشة الطاقم والأكواد — تبويب الأكواد (و) رفض الخادم (تطابق الدور): رسالته الحرفية في توست الخطأ والحوار يبقى
+2026-09-04T02:04:12.5137959Z 
+2026-09-04T02:04:12.5138526Z Warning: A call to tap() with finder "Found 1 widget with text "اختر الموظف المطابق للدور": [
+2026-09-04T02:04:12.5139684Z   Text("اختر الموظف المطابق للدور", dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+2026-09-04T02:04:12.5140540Z ]" derived an Offset (Offset(375.5, 827.5)) that would not hit test on the specified widget.
+2026-09-04T02:04:12.5141842Z Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+2026-09-04T02:04:12.5142972Z The finder corresponds to this RenderBox: RenderParagraph#0356b relayoutBoundary=up36
+2026-09-04T02:04:12.5157294Z The hit test result at that offset is: HitTestResult(RenderPointerListener#de493@Offset(162.5, 23.0), RenderSemanticsAnnotations#ce788@Offset(162.5, 23.0), RenderMouseRegion#35938@Offset(162.5, 23.0), RenderSemanticsAnnotations#35801@Offset(162.5, 23.0), RenderSemanticsAnnotations#78758@Offset(162.5, 23.0), RenderPadding#68856@Offset(175.5, 24.0), RenderDecoratedBox#461b1@Offset(175.5, 24.0), RenderConstrainedBox#f2aa4@Offset(175.5, 24.0), RenderFlex#f1a35@Offset(175.5, 250.0), RenderPadding#427cb@Offset(195.5, 270.0), _RenderSingleChildViewport#9f26b@Offset(195.5, 270.0), RenderIgnorePointer#d153d@Offset(195.5, 270.0), RenderSemanticsAnnotations#7d6f2@Offset(195.5, 270.0), RenderPointerListener#d8b73@Offset(195.5, 270.0), RenderSemanticsGestureHandler#67df3@Offset(195.5, 270.0), RenderPointerListener#124c4@Offset(195.5, 270.0), _RenderScrollSemantics#03369@Offset(195.5, 270.0), RenderClipRect#2e96f@Offset(195.5, 270.0), RenderConstrainedBox#42712@Offset(195.5, 270.0), _RenderInkFeatures#901e2@Offset(195.5, 270.0), RenderCustomPaint#643bf@Offset(195.5, 270.0), RenderPhysicalShape#a2e27@Offset(195.5, 270.0), RenderConstrainedBox#7f3ce@Offset(195.5, 270.0), RenderPositionedBox#cf85f@Offset(335.5, 803.5), RenderPadding#3e7df@Offset(375.5, 827.5), RenderPadding#cae47@Offset(375.5, 827.5), RenderPadding#355c7@Offset(375.5, 827.5), RenderSemanticsAnnotations#486c4@Offset(375.5, 827.5), RenderRepaintBoundary#933e0@Offset(375.5, 827.5), RenderIgnorePointer#ddfa1@Offset(375.5, 827.5), RenderAnimatedOpacity#429c2@Offset(375.5, 827.5), RenderRepaintBoundary#8e527@Offset(375.5, 827.5), RenderSemanticsAnnotations#8d782@Offset(375.5, 827.5), RenderOffstage#52bff@Offset(375.5, 827.5), RenderSemanticsAnnotations#69fe5@Offset(375.5, 827.5), _RenderTheater#bbc6f@Offset(375.5, 827.5), RenderAbsorbPointer#086ef@Offset(375.5, 827.5), RenderPointerListener#753e2@Offset(375.5, 827.5), RenderSemanticsAnnotations#3a3ea@Offset(375.5, 827.5), RenderCustomPaint#98bd7@Offset(375.5, 827.5), RenderSemanticsAnnotations#399ed@Offset(375.5, 827.5), RenderSemanticsAnnotations#7a572@Offset(375.5, 827.5), RenderTapRegionSurface#a5afb@Offset(375.5, 827.5), RenderSemanticsAnnotations#2d2dd@Offset(375.5, 827.5), RenderSemanticsAnnotations#f5980@Offset(375.5, 827.5), RenderSemanticsAnnotations#2bbce@Offset(375.5, 827.5), HitTestEntry<HitTestTarget>#aae91(_ReusableRenderView#43b9d), HitTestEntry<HitTestTarget>#1e2cd(<AutomatedTestWidgetsFlutterBinding>))
+2026-09-04T02:04:12.5172386Z #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2077:25)
+2026-09-04T02:04:12.5173749Z #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1861:12)
+2026-09-04T02:04:12.5174738Z #2      WidgetController.tap (package:flutter_test/src/controller.dart:1041:7)
+2026-09-04T02:04:12.5176078Z #3      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/staff_codes_test.dart:493:20)
+2026-09-04T02:04:12.5177182Z <asynchronous suspension>
+2026-09-04T02:04:12.5177958Z #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:193:15)
+2026-09-04T02:04:12.5178836Z <asynchronous suspension>
+2026-09-04T02:04:12.5179504Z #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1064:5)
+2026-09-04T02:04:12.5180518Z <asynchronous suspension>
+2026-09-04T02:04:12.5181504Z #6      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+2026-09-04T02:04:12.5182509Z <asynchronous suspension>
+2026-09-04T02:04:12.5183058Z To silence this warning, pass "warnIfMissed: false" to "tap()".
+2026-09-04T02:04:12.5184119Z To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+2026-09-04T02:04:12.5184657Z 
+2026-09-04T02:04:12.5185181Z ##[endgroup]
+2026-09-04T02:04:12.9305156Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/hotel_settings_test.dart: النموذج يُبنى من بيانات الفندق بكل الحقول الحرفية
+2026-09-04T02:04:13.0509732Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/staff_codes_test.dart: شاشة الطاقم والأكواد — تبويب الطاقم (ز) إضافة موظف: جسم POST الحرفي {fullName,role,phone} مع trim
+2026-09-04T02:04:13.2971513Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/staff_codes_test.dart: شاشة الطاقم والأكواد — تبويب الطاقم (ح) تعطيل موظف: حوار تأكيد يذكر الكود والجلسات + جسم {active:false}
+2026-09-04T02:04:13.7219542Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/hotel_settings_test.dart: الحفظ: PATCH بالحقول المتغيرة فقط (الأرقام int) + note الخادم toast
+2026-09-04T02:04:14.0032610Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/hotel_settings_test.dart: التحقق العميلي: اسم فارغ → رسالة الخادم الحرفية بلا PATCH
+2026-09-04T02:04:14.2822607Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/hotel_settings_test.dart: التحقق العميلي لحقل F6: صيغة الإصدار الثلاثية
+2026-09-04T02:04:14.6045026Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/hotel_settings_test.dart: ApiError من الخادم عند الحفظ → رسالته الحرفية toast
+2026-09-04T02:04:15.0137151Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/audit_test.dart: شاشة سجل التدقيق (أ) بطاقات السجل: chip الإجراء/الفاعل ودوره/الكيان/التفاصيل + العدّاد
+2026-09-04T02:04:15.2488959Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/audit_test.dart: شاشة سجل التدقيق (ب) الصفحة التالية: page=2 في الاستعلام + عناصر الصفحة الجديدة
+2026-09-04T02:04:15.5836155Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/audit_test.dart: شاشة سجل التدقيق (ج) فلتر الإجراء: action=RESERVATION_CREATED في استعلام GET
+2026-09-04T02:04:15.9201275Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/audit_test.dart: شاشة سجل التدقيق (د) البحث الحر: q= في استعلام GET + مسح البحث
+2026-09-04T02:04:16.0789176Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/audit_test.dart: شاشة الضيوف (هـ) بطاقة الضيف (فارغ آمن) + البحث q= في استعلام GET
+2026-09-04T02:04:16.1656580Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/audit_test.dart: شاشة التقارير (و) الإشغال (نسبة فوق كل عمود) + الإيراد (تنسيق المال) + الطلبات + الجنسيات
+2026-09-04T02:04:16.2226582Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/audit_test.dart: شاشة التقارير (ز) فراغ آمن: بلا بيانات + متوسط إنجاز انتهائي null → «—»
+2026-09-04T02:04:16.3093667Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/rooms_test.dart: شاشة غرف الإدارة (أ) البطاقات: الرقم/النوع/الحالة/الضيف وموعد الخروج + العدّاد
+2026-09-04T02:04:17.0673858Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/rooms_test.dart: شاشة غرف الإدارة (ب) إنشاء غرفة: جسم POST الحرفي {number,floor,roomTypeId,notes} مع trim
+2026-09-04T02:04:17.3252883Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/rooms_test.dart: شاشة غرف الإدارة (ج) تبديل سريع للحالة: جسم {status: CLEANING} فقط + توست
+2026-09-04T02:04:17.6594373Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/rooms_test.dart: شاشة غرف الإدارة (د) تعديل: OCCUPIED غائب عن خيارات الحالة + الجسم الكامل + توست
+2026-09-04T02:04:17.8241751Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/services_test.dart: تبويب الخدمات: البطاقات بالسعر MoneyText والقسم والفعالية
+2026-09-04T02:04:17.8777535Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/rooms_test.dart: شاشة غرف الإدارة (هـ) حذف: حوار التأكيد الحرفي + DELETE + رسالة الخادم
+2026-09-04T02:04:18.0825599Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/rooms_test.dart: شاشة غرف الإدارة (و) حذف ممنوع: رسالة الخادم الحرفية في توست الخطأ
+2026-09-04T02:04:18.5382896Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/services_test.dart: إنشاء خدمة: جسم POST الحرفي بالسنت الصحيح + toast النجاح
+2026-09-04T02:04:18.6462505Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/services_test.dart: التفعيل/التعطيل: PATCH بجسم {active} فقط كما الويب
+2026-09-04T02:04:18.8850801Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/services_test.dart: حذف خدمة: حوار تأكيد حرفي + رسالة الخادم (تعطيل ناعم)
+2026-09-04T02:04:19.2295736Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/services_test.dart: تبويب الأقسام: البطاقات + إنشاء قسم بجسم {name,key,icon,sortOrder}
+2026-09-04T02:04:19.6395297Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/rates_test.dart: شاشة الأسعار الموسمية (أ) التجميع حسب النوع: الأساس/النطاق/السعر/المقارنة + فراغ النوع
+2026-09-04T02:04:20.3930010Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/rates_test.dart: شاشة الأسعار الموسمية (ب) إنشاء معدل: 25 دولارًا → priceCents 2500 + تحذير التداخل
+2026-09-04T02:04:20.6908218Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/rates_test.dart: شاشة الأسعار الموسمية (ج) إنشاء معدل بلا تداخل: توست النجاح العادي
+2026-09-04T02:04:20.7595838Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/room_types_test.dart: شاشة أنواع الغرف (أ) البطاقة: الاسم/الإنجليزي/السعر/السعة/السرير/المرافق/العدادات
+2026-09-04T02:04:20.8462137Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/rates_test.dart: شاشة الأسعار الموسمية (د) حذف معدل: حوار التأكيد الحرفي + DELETE + رسالة الخادم
+2026-09-04T02:04:21.9959075Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/room_types_test.dart: شاشة أنواع الغرف (ب) إنشاء نوع: الجسم الكامل الحرفي (45.5 دولارًا → 4550 سنت)
+2026-09-04T02:04:22.0784131Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/room_types_test.dart: شاشة أنواع الغرف (ج) تبديل التفعيل: PATCH بجسم {active: false}
+2026-09-04T02:04:22.2288962Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/admin/room_types_test.dart: شاشة أنواع الغرف (د) حذف نوع مرتبط: حوار التعطيل + رسالة الخادم الحرفية
+2026-09-04T02:04:22.5545358Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/login_widget_test.dart: تعرض العنوان وحقلي الكود والزر
+2026-09-04T02:04:22.6650598Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/login_widget_test.dart: زر الدخول معطّل مع كود فارغ
+2026-09-04T02:04:22.7470040Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/screens/login_widget_test.dart: إعدادات الخادم تظهر تلقائيًا عند غياب العنوان المخبوز
+2026-09-04T02:04:22.7741403Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/app_version_test.dart: compareSemver أصغر/أكبر/مساوٍ بالمكونات
+2026-09-04T02:04:22.7772486Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/app_version_test.dart: compareSemver أشكال مشوهة تُعامل 0 (تسامح) — لا رمي أبدًا
+2026-09-04T02:04:22.7798394Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/app_version_test.dart: needsUpdate فراغ أو بلا قيمة = لا فرض أبدًا
+2026-09-04T02:04:22.7820924Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/app_version_test.dart: needsUpdate إصدار أقل من الحد = تحديث مطلوب
+2026-09-04T02:04:22.7846832Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/app_version_test.dart: needsUpdate مساوٍ أو أعلى = لا تحديث
+2026-09-04T02:04:22.7880065Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/app_version_test.dart: needsUpdate بناء بلا define (0.0.0): أي حد غير فارغ يحجبه (اتجاه آمن fail-closed)
+2026-09-04T02:04:22.8044311Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/app_version_test.dart: fetchMinAppVersion (PUB-07) نجاح: يعيد القيمة من جسم ok
+2026-09-04T02:04:22.8073061Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/app_version_test.dart: fetchMinAppVersion (PUB-07) الطلب يذهب للمسار الصحيح بلا توكن
+2026-09-04T02:04:22.8118570Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/app_version_test.dart: fetchMinAppVersion (PUB-07) فشل متسامح: 500 / ok=false / جسم غير JSON → null
+2026-09-04T02:04:22.8166882Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/app_version_test.dart: fetchMinAppVersion (PUB-07) خطأ شبكة → null (لا رمي)
+2026-09-04T02:04:23.3142447Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: formatMoney دولار بلا كسور
+2026-09-04T02:04:23.3166260Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: formatMoney دولار بكسور
+2026-09-04T02:04:23.3187834Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: formatMoney فواصل الآلاف
+2026-09-04T02:04:23.3210490Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: formatMoney صفر وسالب — السالب بعد رمز العملة كما في الويب
+2026-09-04T02:04:23.3254602Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: formatMoney عملة أخرى
+2026-09-04T02:04:23.3325179Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: formatDateAr / الوقت تاريخ عربي
+2026-09-04T02:04:23.3360938Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: formatDateAr / الوقت وقت 12 ساعة ص/م
+2026-09-04T02:04:23.3382390Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: formatDateAr / الوقت فراغ وnull آمن
+2026-09-04T02:04:23.3413140Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: timeAgoAr الآن
+2026-09-04T02:04:23.3441716Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: timeAgoAr دقائق وساعات وأيام
+2026-09-04T02:04:23.3482368Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: التسميات العربية حالات الطلب (تبدأ NEW — MACHINE=§12.3)
+2026-09-04T02:04:23.3511405Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: التسميات العربية حالات الدفع والإقامة
+2026-09-04T02:04:23.3543947Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: التسميات العربية مجهول يعيد البديل
+2026-09-04T02:04:23.3593663Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: أدوات التاريخ todayInputValue صيغة YYYY-MM-DD
+2026-09-04T02:04:23.3619842Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: أدوات التاريخ addDaysInput
+2026-09-04T02:04:23.3657798Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/format_test.dart: أدوات التاريخ nightsBetween
+2026-09-04T02:04:23.4588752Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/api_client_test.dart: المغلف الموحد نجاح ok=true يعيد الجسم
+2026-09-04T02:04:23.4739986Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/api_client_test.dart: المغلف الموحد فشل ok=false يرمي ApiError برسالة الخادم الحرفية
+2026-09-04T02:04:23.4771763Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/api_client_test.dart: المغلف الموحد خطأ شبكة → رسالة الاتصال + status=0
+2026-09-04T02:04:23.4816380Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/api_client_test.dart: سياسة 401 (§1.2.1) 401 → renew ناجح → إعادة المحاولة بالنفس الطلب
+2026-09-04T02:04:23.4848241Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/api_client_test.dart: سياسة 401 (§1.2.1) 401 وrenew يفشل → SessionExpiredError + onSessionExpired
+2026-09-04T02:04:23.4879335Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/api_client_test.dart: سياسة 401 (§1.2.1) 401 على auth/validate نفسه لا يمس التدفق (رسالة حرفية)
+2026-09-04T02:04:23.4909968Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/api_client_test.dart: سياسة 401 (§1.2.1) 429 يمر كما هو (ليس خروجًا)
+2026-09-04T02:04:23.4938974Z ✅ /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0/mobile/test/core/api_client_test.dart: الطلبات POST يرسل JSON بالترويسة الصحيحة والBearer
+2026-09-04T02:04:23.5081434Z 
+2026-09-04T02:04:23.5088043Z 🎉 169 tests passed.
+2026-09-04T02:04:23.5850026Z Post job cleanup.
+2026-09-04T02:04:23.5854305Z ##[start-action display=Cache pub dependencies;id=__e3ab55a6-8fd9-4617-8eb9-feb76e86b1d4.cache-pub]
+2026-09-04T02:04:23.7221355Z Post job cleanup.
+2026-09-04T02:04:23.8445788Z Cache hit occurred on the primary key flutter-pub-linux-stable-3.29.2-x64-c23637390482d4cf9598c3ce3f2be31aa7332daf-, not saving cache.
+2026-09-04T02:04:23.8502252Z ##[end-action id=__e3ab55a6-8fd9-4617-8eb9-feb76e86b1d4.cache-pub;outcome=success;conclusion=success;duration_ms=264]
+2026-09-04T02:04:23.8505275Z ##[start-action display=Cache Flutter;id=__e3ab55a6-8fd9-4617-8eb9-feb76e86b1d4.cache-flutter]
+2026-09-04T02:04:23.8537984Z Post job cleanup.
+2026-09-04T02:04:23.9848577Z Cache hit occurred on the primary key flutter-linux-stable-3.29.2-x64-c23637390482d4cf9598c3ce3f2be31aa7332daf, not saving cache.
+2026-09-04T02:04:23.9918292Z ##[end-action id=__e3ab55a6-8fd9-4617-8eb9-feb76e86b1d4.cache-flutter;outcome=success;conclusion=success;duration_ms=141]
+2026-09-04T02:04:23.9999201Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-09-04T02:04:24.0000377Z Post job cleanup.
+2026-09-04T02:04:24.0847526Z [command]/usr/bin/git version
+2026-09-04T02:04:24.0889036Z git version 2.55.0
+2026-09-04T02:04:24.0930431Z Temporarily overriding HOME='/home/runner/work/_temp/5590daf6-03f7-4d33-a208-b9f3e2749488' before making global git config changes
+2026-09-04T02:04:24.0932036Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-04T02:04:24.0936969Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Cairo-Hart-Hotel-0/Cairo-Hart-Hotel-0
+2026-09-04T02:04:24.0974854Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-04T02:04:24.1010449Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-04T02:04:24.1253062Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-04T02:04:24.1279824Z http.https://github.com/.extraheader
+2026-09-04T02:04:24.1295373Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-09-04T02:04:24.1331805Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-04T02:04:24.1581360Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-04T02:04:24.1621555Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-04T02:04:24.2004415Z Cleaning up orphan processes
+2026-09-04T02:04:24.2421585Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

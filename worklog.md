@@ -624,3 +624,106 @@ Stage Summary:
 - المخرج: AUDIT_BRIEF.md في جذر المستودع (مُلتزم إلى main) — ملف مطالبة كامل جاهز للتسليم لنموذج خارجي؛ الفارق عن جولة سابقة: كل حقيقة فيه مثبتة من المستودع الفعلي + 3 انحرافات موثقة بدليل موضعي
 - صفر مساس بالكود أو المراحل المقفلة (AD-06 محفوظ — الملف يفرض على المدقق «قراءة فقط» ويمنع الإصلاح)
 - الانتقال لأي مرحلة تالية (F3/F7/W/P) متوقف بقرار المالك على نتيجة التدقيق الخارجي
+
+---
+Task ID: A-rec
+Agent: A-rec (general-purpose)
+Task: بوابة المعايرة — المرحلة الأولى (التعرف والفهم) لموجة الفحص الساكن وفق AUDIT_BRIEF.md §4: الإجابة عن الأسئلة الاثني عشر من ملفات المستودع نفسه بدليل موضعي (ملف:سطر) لكل ادعاء — قراءة ساكنة فقط (لا فحص حي، لا تعديل كود، لا لمس قاعدة البيانات).
+Work Log:
+- قراءة AUDIT_BRIEF.md كاملًا (القواعد الثلاث + الأسئلة الاثنا عشر + الضوابط) وذيل worklog.md (Task 18→22: إغلاق F5 عند fb9edf2 + إعداد المطالبة)
+- قراءة المصادر المحددة: README.md وMASTER_PLAN.md كاملًا (§2/§3/§12/§13 بالتركيز) وdocs/CONTRACTS.md (المقدمة + الفهرس + §8/§9/§10/§11) وmobile/README.md وprisma/schema.prisma (22 نموذجًا) وsrc/lib/{codes,pricing,refs,events,auth,availability}.ts
+- تتبع مسارات الكود للأجوبة: reception/check-in (نقطة تحويل Reservation→Stay + كود الضيف الخام مرة واحدة) · check-out (I11) · reception/_helpers (قاعدة الرصيد) · public/bookings (I1/I2/I6/I7/I8/I9 + عربون 50%) · guest/requests (مسار الحدث اللحظي request:new) · reception/requests/[id]/status وguest/requests/[id]/cancel (آلات الحالة) · rooms status (I12 + مصفوفة الانتقالات) · auth/validate (12 ساعة + rate-limit) · use-socket + page.tsx + store.ts + code-login.tsx (SPA/الأوضاع) · Caddyfile + mini-services/realtime/index.ts (المنافذ 3002/3004/81)
+- جرد ساكن لعدد ملفات/نقاط الـ API: 69 ملف route.ts / 84 نقطة نهاية (7 public + 3 auth + 16 guest + 23 reception + 34 admin + 1 جذر؛ 40 GET + 33 POST + 6 PATCH + 5 DELETE) — مقابل «67/82» في الخطة و«68/83» في CONTRACTS §10.1
+- كتابة التقرير الكامل في agent-ctx/A-rec.md (سؤال/إجابة/أدلة لكل بند + قسم تعارضات C1–C9 + إقرار نزاهة)
+Stage Summary:
+- الأجوبة الاثنا عشر مكتملة بالأدلة الموضعية؛ النقاط المفصلية: نقطة التحويل = POST /api/reception/check-in (CONFIRMED→CHECKED_IN + Stay ACTIVE) · الهويات الأربع والكود الخام مرة واحدة لأن المخزن SHA-256 فقط · المال بالسنت مفروض في schema.prisma:5 وpricing.ts (الضريبة round(subtotal×15/100) والرصيد grand+Σcharges−paid) · مجموعة F1 STABLE = 16 نقطة §8.1 + عقد الجوال §1.2.1 + المكملات §8.2
+- 9 تعارضات موثقة (الواقع يغلب): أبرزها عدد الـ API فعليًا 69/84 (الوثائق 67/82 و68/83 — الفارق قناة auth/renew) · طول الكود 9 خانات (الوثائق تقول بادئة+7 رموز) · NO_SHOW/EXPIRED لا يضبطهما مسار (فلتر فقط) · رأس CONTRACTS ما زال v1.0 (السجل v1.1) · README: عدد النماذج/الاختبارات/القنوات/اسم نورا
+- صفر فحص حي وصفر مساس بالكود أو القاعدة أو الخوادم — التقرير جاهز للاستهلاك في موجات التدقيق التالية
+
+---
+Task ID: A-s6
+Agent: Audit Sub-Agent (A-s6 — الفحص الساكن S6 من AUDIT_BRIEF §5)
+Task: مطابقة العقد — عدّ فعلي لملفات المسارات ونقاط النهاية تحت src/app/api/ ومطابقتها ضد docs/CONTRACTS.md + تحقق حرفي من 6 عينات + التحقق من الادعاء المرجعي «67 ملفًا / 82 نقطة» (قراءة فقط — صفر تعديل كود)
+
+Work Log:
+- [الجرد البرمجي] `rg --files src/app/api -g 'route.ts'` = **69 ملفًا** (تحقق إضافي: لا route.ts واحد خارج src/app/api/ في src/app كله) · استخراج المعالجات بـ regex على `export async function (GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)` = **84 نقطة نهاية** (GET 40 · POST 33 · PATCH 6 · DELETE 5 · PUT/HEAD/OPTIONS صفر — ولا صيغ تصدير بديلة: صفر export const GET، وصفر دالة غير async)
+- [جرد العقد] 83 بطاقة مرقمة في CONTRACTS.md (1919 سطرًا): PUB-01..07 + AUTH-01..02 + G-01..16 + R-01..23 + A-01..34 + ROOT-01 — إضافة بطاقة نصية كاملة لـ POST /api/auth/renew في §1.2.1 (سطرا 79-84) موسومة STABLE في §9.2
+- [المطابقة الثلاثية] فرق أزواج (منهج+طريق) بين الكود والبطاقات: (أ) في الكود بلا عقد = صفر · (ب) في العقد بلا كود = صفر · (ج) اختلافات منهج = صفر — `comm -13` أعاد فراغًا و`comm -23` أعاد renew فقط (موثقة في §1.2.1 لا ببطاقة §3)
+- [العينات الست + تكميلية] PUB-01 public/hotel (503/500 الحرفيان + 24 حقلاً في toHotelPublic) · AUTH-01 auth/validate (الرسائل الثماني حرفية + 12 ساعة + قفل 10/15 دقيقة + معاملة ثلاثية) · G-09 guest/bill (بنية bill بـ 16 حقلًا + 404/500) · R-11 rooms/[id]/status (مصفوفة الانتقالات الخمس + الرسائل الست + بث room:status) · A-03 admin/hotel PATCH (11 رسالة خطأ + minAppVersion بامتداد v1.1 + note الحرفية) · A-27 admin/codes POST (8 رسائل + 201 بالكود الخام مرة واحدة + CODE_GENERATED) + عينة تكميلية renew ضد §1.2.1 — **6/6 (و7/7) تطابق حرفي، صفر انحراف في الحقول/الرموز/الرسائل العربية**
+- [الادعاء المرجعي 67/82] **غير مطابق للواقع الخام**: الفعلي 69 ملفًا / 84 نقطة. الرقم 67/82 = بطاقات القنوات الخمس حصرًا (7+2+16+23+34=82 عبر 67 ملفًا) — يستثني POST /api/auth/renew (موثقة §1.2.1 ومستهلكة فعليًا من تطبيق الجوال F0/F1) وGET /api الجذر (موثق ROOT-01 و«مرشح للحذف» §10.3). CONTRACTS.md نفسها تحمل ثلاثة أعداد متضاربة داخليًا: فهرس auth=2 · §10.1=68/83 (قبل renew) · §9.3 v0.9=67/82 — وترويستها ما زالت v1.0 بينما §9.3 آخر صف v1.1
+- [ملاحظتان دقيقتان لا كسر عقد] validate يصفّر عداد فشل NOT_FOUND عند العثور على الكود (route.ts:64) لا عند النجاح الصارم كما تقول البطاقة · R-11 يثبّت actorRole='RECEPTION' في التدقيق حتى لو نفّذ ADMIN (route.ts:25,60) — العقد لا يوثّق actorRole لهذا الحدث
+- [المخرجات] تقرير كامل بجرد 69 صفًا (الطريق|المناهج|بطاقة العقد|تطابق) + العينات + انحرافات العدّ في agent-ctx/A-s6.md (274 سطرًا) · صفر مساس بأي ملف كود أو قاعدة بيانات أو git
+
+Stage Summary:
+- **S6 = ناجح مع انحراف عدّ موثق:** الكود والعقد متطابقان 84/84 على مستوى (منهج+طريق) والرسائل العربية حرفية في كل العينات السبع — لكن الرقم المرجعي «67/82» في AUDIT_BRIEF متقادم (الفعلي 69/84) والانحراف INFO توثيقي من فئة ملحق ب نفسها (ترويسة CONTRACTS v1.0 مقابل سجل v1.1 كنمط MASTER_PLAN v2.4/2.5)
+- توصية مسجَّلة بلا تنفيذ (نطاق قراءة فقط): تحديث AUDIT_BRIEF §1 إلى 69/84 + فهرس CONTRACTS «auth — 3 مسارات» + §10.1 + ترويسة الإصدار — كلها تحرير وثائق صفر كود
+
+---
+Task ID: A-mob
+Agent: general-purpose (وكيل تدقيق ساكن — المستوى C من AUDIT_BRIEF §7)
+Task: A-mob — الفحص الساكن لتطبيق الجوال (Level C): GitHub API قراءة فقط (جولات CI + خطوط + Releases/APK) + تكافؤ النقل AD-03 (ألوان/تسميات/RTL/اتصال) + جودة كود mobile/lib + حارس minAppVersion — بلا تشغيل Flutter (غير مثبت — حد بيئي صريح)
+
+Work Log:
+- [حدود البيئة أولًا] Flutter SDK غير مثبت: which flutter/dart فارغ + PATH بلا مسار Flutter + المسارات الشائعة (/usr/lib,/opt,/home/z,/snap,/root) كلها غائبة ⇒ S4/S5 محليًا مستحيلان — عُوّضا بسجلات CI الحرفية (تنزيل logs لوظيفة الاختبار). لا محاكي/جهاز (المستوى A/B خارج المتاح) · apksigner غير موجود (عُوّض بـ unzip+keytool+فحص كتلة v2 الثنائي) · db/custom.db لم يُمس
+- [CI — الادعاء الأول مؤكد] الجولة 20 (run 33828056973) عند 1a0b0d2 = completed/success بوظيفتين: «Flutter analyze + test» (كل الخطوات خضراء) و«Android build smoke (dev flavor)» ✓ — وسجل الوظيفة المنزَّل يحوي حرفيًا: «🎉 169 tests passed.» و«59 issues found» (كلها info — صفر warning/error؛ CI يمر بـ --no-fatal-infos بتصميمه)
+- [CI — الادعاء الثاني مؤكد] أربع جولات F5 بالضبط كما في worklog Task 21: 4f867de (17 فشل) → edd5895 (18 فشل) → 9803f81 (19 فشل) → 1a0b0d2 (20 نجاح) — وجولة 21 عند fb9edf2 (docs مست mobile/README فأطلقت mobile-ci بالفلتر): success. الإجمالي 27 جولة: Mobile 23 (منها جولتان أوليان باسم مسار الملف — ظاهرة YAML Task 18) + Web 3 كلها خضراء (آخرها 3429cba) + Mobile Release 2 (فشل ثم نجح)
+- [الخطوط الثلاثة موجودة وفاعلة] mobile-ci.yml: وظيفتا analyze-test (باستخراج APP_VERSION من pubspec → dart-define) وbuild-smoke (debug dev flavor + أثر 7 أيام) · mobile-release.yml: workflow_dispatch/tags v* — مفتاح التوقيع من Secrets (ANDROID_KEYSTORE_BASE64 → key.properties) + بناء prod/dev release + ncipollo/release-action · web-ci.yml: lint+test بربط /home/z/my-project ثابتًا
+- [Releases + APK موقّع] إصدار واحد v1.0.0+1+2 (من Mobile Release #2 عند 308db82 — 2026-09-02، أنشأه github-actions[bot]) بأصلين: prod (52,939,895B) وdev (52,939,896B) — حمّلت prod إلى audit-evidence/mobile/ (HTTP 200): sha256 = 7907161f130e70089656508f664ebb3568cf895f5db6c6888c5e66cdafcc5a12 · التوقيع v1 (META-INF/CERT.RSA+SF+MANIFEST.MF، X-Android-APK-Signed: 2، Signflinger/AG 8.7.3) + v2 (magic «APK Sig Block 42» موجود) · الشهادة: CN=Cairo Heart Hotel Aden ذاتية، 2026→2056، SHA256 88:51:36:43:CE:B1:A1:BE:FD:A5:2C:9B:66:DF:1D:B3:54:1F:2D:D6:89:C4:88:2F:FA:AD:FF:94:7C:3D:D8:B2
+- [MOB-01 — الأهم] فحص سلاسل libapp.so (UTF-16LE): إيجاب «فندق قلب القاهرة/الفاتورة/إقامتي/XTransformPort/3002/chat:message//api/auth/validate//api/guest/» وغياب «يتوفر تحديث مطلوب/minAppVersion/app-config/الوصولون/المغادرون/حالة الغرف/تأكيد تسجيل الوصول/سجل التدقيق/أنواع الغرف/الطاقم والأكواد» ⇒ الـ APK المنشور = وضع الضيف F1/F2 فقط (بُني قبل F4/F5/F6) — الحارس لا يحمي النسخة المنشورة
+- [AD-03 الألوان] الكحلي #1A3C6E والذهبي #D4A843 متطابقان حرفيًا في النهاري (theme.dart:10,13,29,33 ↔ globals.css:62,64,74) — انحرافات ثانوية موثقة (MOB-02): الكحلي الليلي mobile #A8C2E8 (theme.dart:55) ≠ web #8FB3E3 (globals.css:100) + خلفيتا scaffold (#F6F8FB≠#FAF8F5 و#0E1726≠#0C1320) + onSecondary (#3A2E07≠#2A2110) — COSMETIC. وملاحظة MOB-04: tailwind.config.ts موروث أجوف (hsl(var(--hex))) والنافذ هو @theme inline في globals.css (Tailwind 4)
+- [AD-03 التسميات] 24 تسمية مقارنة بملف:سطر في الطرفين (تبويبات الاستقبال الستة + معالجا الوصول/الخروج بكل أزرارهما + حالات الغرف الخمس + حالات الحجز السبع + أقسام الإدارة الأحد عشر + شاشة الدخول + حقل minAppVersion + تبويبات الضيف الأربعة + حالة الفراغ) — **صفر انحراف تسمية** (رؤوس الجدول في تقريري) · «يتوفر تحديث مطلوب» (update_required_screen.dart:56) شاشة تطبيقية بلا نظير ويب (ب التصميم)
+- [RTL] MaterialApp في app.dart:130 مع locale Locale('ar') (:136) وsupportedLocales [:137] ومندوبي flutter_localizations (:138-142) ⇒ اتجاه RTL مشتق من اللغة (لا Directionality صريح — النمط الأصيل) · 96 جزيرة LTR للرموز/الهواتف/المراجع (كنمط dir=ltr بالويب)
+- [الاتصال] http مستورد في ملفين فقط: api_client.dart:8 (العميل) + app_version.dart:12 (حارس PUB-07 قبل الجلسة — استثناء مقصود) · صفر dio/HttpClient · socket_service.dart:92-101 يبني العنوان بـ setPath('/') + setQuery({'XTransformPort': AppConfig.realtimePort='3002'} — config.dart:77) ⇒ مطابق لعقد io("/?XTransformPort=3002") بلا منفذ مباشر
+- [جودة] صفر print في lib+test (avoid_print مفعل) · صفر withOpacity (106 withValues بدلها) · صفر debugPrint · 67 ملف/32,411 سطرًا في lib و31 ملف اختبار
+- [حارس F6] الموثق حرفيًا: schema.prisma:44-45 (افتراضي ""=لا فرض) → app-config/route.ts:12-19 (نقطة عامة fail-open تعيد ok({minAppVersion})) → app_version.dart (kAppVersion من dart-define افتراضي 0.0.0 + compareSemver ثلاثي + needsUpdate: فارغ=false + مهلة 10 ث بفشل متسامح) → app.dart:109-118 (فحص عند الإطلاق، يتخطى بلا عنوان خادم) → app.dart:149-158 (حجب كامل بـ UpdateRequiredScreen مع onRetry يعيد الفحص) — والاختبار update_required_test.dart أخضر في CI
+- [النزاهة] صفر POST على GitHub وصفر إطلاق Actions وصفر تعديل كود/commit/push — الأدلة الخام في audit-evidence/mobile/ (غير متتبعة في git) والتقرير الكامل في agent-ctx/A-mob.md
+
+Stage Summary:
+- **المستوى C مكتمل بأدلة حرفية:** ادعاءا CI السابقان مؤكدان من GitHub API (1a0b0d2 خضراء: analyze+169 اختبارًا+build smoke، وأربع جولات F5 بالتسلسل الموثق) والخطوط الثلاثة فاعلة والـ APK الموقّع موجود وموثق (v1+v2، sha256، شهادة 30 سنة)
+- **MOB-01 (MAJOR تعملقي):** الـ APK المنشور نسخة ضيف فقط سابقة لـ F4/F5/F6 — حارس minAppVersion غير موجود فيها: أي فرض للحد اليوم لن يحجب النسخة العامة — توصية: إصدار جديد من main قبل أي فرض (قرار مالك)
+- **MOB-02 (COSMETIC):** انحراف قيم ألوان ثانوية (ليلي/خلفيات/onSecondary) مع تطابق حرفي للهوية الكحلي/الذهبي نهارًا · **MOB-03 (INFO):** analyze = 59 ملاحظة info (معيار S4 «صفر إشكالات» غير محقق حرفيًا — CI خضراء بـ --no-fatal-infos) · **MOB-04 (INFO):** tailwind.config.ts أجوف
+- تكافؤ AD-03 ممتاز نصيًا: 24/24 تسمية بلا انحراف + آلات حالة حرفية + RTL + socket بالبوابة — حدود البيئة: لا Flutter SDK محليًا (S4/S5 عبر سجلات CI) ولا جهاز تشغيل ولا apksigner
+---
+Task ID: A-s8
+Agent: general-purpose (A-s8 — وكيل تدقيق ساكن)
+Task: الفحص الساكن S8 من AUDIT_BRIEF.md — مراجعة الاعتماديات كاملة (package.json الجذر + mobile/pubspec.yaml + mini-services/realtime/package.json): الاستخدام الفعلي لكل حزمة، تناقضات الإصدارات مقابل bun.lock، التوافق البيني، والمخاطر الأمنية المنشورة — قراءة فقط بلا أي تعديل كود
+
+Work Log:
+- [المنهجية] مسح برمجي للاستخدام (ريجكس استيراد على كل ملفات src/ tests/ examples/ prisma/ mini-services/ + workflows + إعدادات الجذر) + تحليل سلسلة مكونات ui بمستويين (هل يستهلك التطبيق المكون الذي يستورد الحزمة؟ 58 ملف ui: 22 حي/36 ميت) + تحليل bun.lock برمجيًا (الجذر وrealtime) + تحقق Grep مستقل لكل ادعاء «لا استخدام»
+- [الأمن — مصدر حي] لا مهارة Web-Search في البيئة فاستُعملت واجهات OSV.dev وpub.dev مباشرة (استعلامات فعلية بتاريخ 2026-09-05: 34 npm + 6 Pub + 6 تبعيات realtime) — كل بند أمني بمصدره
+- [نتيجة الجذر] 68 dependencies: 32 مستخدمة فعليًا فقط (47%) — **36 بلا أثر استخدام (53%)**: 17 بلا أي استيراد (dnd-kit×3, hookform/resolvers, mdxeditor, reactuse, tanstack×2, next-auth, next-intl, date-fns, react-markdown, react-syntax-highlighter, remark-gfm, sharp, z-ai-web-dev-sdk, zod) + 19 «سلسلة ميتة» (مستوردة فقط في مكونات ui غير مستهلكة: cmdk, embla, input-otp, react-day-picker, react-hook-form, react-resizable-panels, sonner, vaul, tailwindcss-animate + 10 حزم radix) · devDeps: 8/9 مستخدمة + bun-types معلنة غير موصولة بـtsconfig
+- [الأمن الحرج] **next@16.1.3 عليها 32 تحذيرًا منشورًا في OSV** (middleware/proxy bypass · تسميم كاش · SSRF · DoS · XSS · تهريب طلبات — أقدم إصلاح 16.1.5/16.1.7 والأشمل 16.2.11، كله داخل نطاق ^16.1.1 بلا كسر) — التطبيق المباشر منخفض (لا middleware.ts · لا next/image · لا Server Actions · لا rewrites) لكن الإنتاج standalone هو نمط عدة تحذيرات → **MAJOR: يجب الترقية** · كامنة في حزم غير مستوردة: next-auth 4.24.13 (3 CVEs — الإصلاح 4.24.15) · next-intl 4.7.0 (2) · sharp 0.34.5 (libvips) · uuid 11.1.0 (GHSA-w5hq-g745-h8pq — لا ينطبق على v4() المستخدمة في validate/route.ts:11) · نظيفة حيًّا: prisma/@prisma/client 6.19.2 · socket.io 4.8.3 + engine.io 6.6.9 + ws 8.21.3 · react/react-dom 19.2.3 · framer-motion 12.26.2 · zustand · lucide-react · recharts وكل الحزم الجارية الأخرى
+- [الجوال] 5 runtime: 4 مستخدمة + **cupertino_icons غير مستخدمة** (صفر CupertinoIcons في lib/test) · **لا pubspec.lock مؤرشف** — الحزم تُحل طازجة كل CI (اليوم حيًّا: socket_io_client 3.1.6 · http 1.6.0 · shared_preferences 2.5.5 · url_launcher 6.3.2) · صفر ثغرات في OSV-Pub (بتحفظ تغطية)
+- [realtime] socket.io ^4.8.1→محجوزة 4.8.3 مستخدمة في index.ts:9 — مطابقة للعميل JS 4.8.3 (تطابق تام في القفلين) ومتوافقة مع عميل Dart 3.x (بروتوكول v4) + تبعياتها engine.io/ws نظيفة
+- [التناقضات] **صفر تناقضات حادة** — كل نسخة محجوزة داخل نطاق caret · انجرافات موثقة (prisma 6.11.1→6.19.2 · react 19.0→19.2.3 · next 16.1.1→16.1.3 — زعم بطاقة AUDIT_BRIEF «16.1.3» مطابق للقفل) · التوافق البيني كله سليم (prisma==client · next↔react 19.2 · tailwindcss==postcss 4.1.18 · eslint-config-next==next)
+- [ازدواج/موضع] tailwindcss-animate ميت فعليًا (tailwind.config.ts غير محمَّل في Tailwind 4 — لا @config في globals.css وأنماط content فيه لمسارات غير موجودة) مقابل tw-animate-css الفعال · react-query مقابل zustand · next-auth مقابل المصادقة الداخلية · منظومة markdown رباعية كاملة غير مستخدمة · prisma CLI في dependencies (الأدق dev) · sharp غير مستخدمة أصلًا · examples/websocket/server.ts يستورد socket.io غير المتوفرة في الجذر (مثال مكسور)
+- [خطر caret] لا كسر متوقع (كل النطاقات major-مقيدة — والأهم: ترقية الأمان 16.2.11 تنفذ من داخل ^16.1.1 نفسه) · الخطر الأعلى فعليًا: bun-version: latest في web-ci.yml:29 (أداة CI غير مثبتة) + غياب pubspec.lock
+- [المخرجات] تقرير كامل بجداول (الحزمة/المعلن/المحجوز/مستخدمة؟/ملاحظات) للجذر (76 صفًا في 3 جداول) والجوال وrealtime + قوائم غير المستخدمة وسجل الأمن بمصادره + التوصيات المرتبة: agent-ctx/A-s8.md · نقطة الوقوف: HEAD 2e3897b (فروقات docs-only عن fb9edf2 — ملفات الاعتماديات لم تتغير) · صفر تعديل على أي ملف كود
+
+Stage Summary:
+- **S8 منفذة بالكامل بمعيار الأدلة:** 36/68 من اعتماديات الجذر (53%) بلا أثر استخدام فعلي (17 بلا استيراد + 19 سلسلة ميتة عبر مكونات ui ميتة) + cupertino_icons في الجوال — المشروع يحمل ~الضعف من اللازم في node_modules
+- **أهم خطر أمني:** next 16.1.3 العمود الفقري عليها 32 تحذيرًا منشورًا (OSV حي 2026-09-05) — MAJOR مع تطبيق مباشر منخفض (غياب middleware/image/actions) لكن الترقية إلى ≥16.2.11 إلزامية وسهلة (داخل caret) · 6 تحذيرات كامنة أخرى كلها في حزم غير مستوردة (next-auth/next-intl/sharp/uuid)
+- **صفر تناقضات إصدارات حادة** والتوافق البيني سليم كليًا (socket.io 4.8.3 خادمًا وعميلًا JS متطابقان + Dart 3.x متوافق بروتوكولًا؛ prisma==client 6.19.2)
+- ملاحظتان بنيويتان للتقرير النهائي: tailwind.config.ts غير محمَّل أصلًا في Tailwind 4 (وtailwindcss-animate ميت معه) · لا pubspec.lock في mobile وbun CI غير مثبت
+- ساكنة تمامًا: لا كود عُدّل، لا حزم ثُبتت، لا قواعد لمست — التقرير في agent-ctx/A-s8.md وهذا السجل فقط
+
+---
+Task ID: A-s7
+Agent: Audit Sub-Agent (A-s7 — الفحص الساكن S7: تتبع المتطلبات)
+Task: S7 من AUDIT_BRIEF §5 — تتبع متطلبات upload/PLAN_WEBSITE.md وupload/PLAN_ MOBILE-APK.md وMASTER_PLAN §2.1/§6 إلى المنفَّذ فعليًا (قراءة فقط — لا تعديل كود، لا commit، لا db:push)
+
+Work Log:
+- قرأت ذيل worklog.md وAUDIT_BRIEF.md كاملًا (القسم 5 جدول S7 + القواعد الثلاث) قبل أي عمل
+- قرأت الخطين الأصليين سطرًا بسطر: PLAN_WEBSITE.md (3424 سطرًا — 137 قسمًا مرقّمًا) وPLAN_ MOBILE-APK.md (2070 سطرًا — 18 قسمًا) + MASTER_PLAN.md v2.5 (§1.2 أسبقية الوثائق، §2.1 المبني، §2.2 المؤجل، §3 ADR، §6 مراحل F، §7 W، §8 P، §12 الثوابت)
+- جردت المنفَّذ: 67 ملف مسار API + مكونات website/guest/reception/admin كاملة + mobile/lib (79 ملف dart) + prisma/schema.prisma (22 نموذجًا)
+- تتبعت 72 متطلبًا قابلًا للتحقق بالقراءة المباشرة وGrep — لكل متطلب موضع دليل (ملف:سطر) أو بحث الإثبات للغياب (نماذج المخطط، المسارات، المكونات، package.json/pubspec)
+- النتائج الحرفية: 49 منفَّذًا (68.1%) · 7 منحرفة بقرار موثق (SPA §2.1/§6.10 · عربون بلا بوابة §2.1+P5 · wa.me قرار W0 · طباعة بدل PDF §2.1 · كود الضيف حصري عند الوصول I11 · الهولد يُستبدل بتأكيد فوري) · 4 منحرفة إعادة نطاق (مرافق/معرض ثابتة بلا CMS · About مدمج · CMS جزئي · SEO بلا sitemap/بيانات مهيكلة ببنية SPA) · 4 غائبة فعليًا · 8 مؤجلة بقرار صريح (F3/F7/F8/W1-4/P5/P1-6/O4)
+- الأدلة المفصلية الموثقة في التقرير: availability.ts:40-56 (كل حالات التحقق) · bookings/route.ts:23-68/151/233-248 (Idempotency+ذرية+عربون 50%) · pricing.ts:73-129 (الحتمية+اللقطة) · lookup/cancel (أمان التعداد 5/دقيقة) · codes.ts:12-35 (checksum+sha256) · auth/validate:14-60 (5/د+قفل 10) · check-in:45-49 (نفس النوع+متاحة) · check-out:63-70 (موت الكود I11) · admin/codes:66-88 (تطابق الدور+1-30 يومًا) · إشعارات مولدة فعليًا في 9 مسارات · mobile: api_client 401→renew + app_version guard + socket عبر البوابة
+- الغائب فعليًا بلا قرار يؤجل (قائمة مرشحي العيوب): تعديل الحجز من الموقع+سجل التعديلات (Journey C كاملة — المرشح الوحيد لمستوى MAJOR) · تأكيد البريد الإلكتروني (SHOULD) · FAQ+العروض (قابل للإعداد/اختياري) · رابط «تحتاج مساعدة؟» بالدخول — + نواقص فرعية موثقة (مرفق صورة/وقت مفضل بالطلب، فلاتر طلباتي للضيف، تحويل محادثة لطلب+مرفقات الرسائل، تذكير الخروج المجدول، تصدير التقارير/التدقيق، تنبيهات LOW_AVAILABILITY/Revenue، sitemap+schema.org)
+- كتبت التقرير الكامل في agent-ctx/A-s7.md (جداول التتبع الثلاثة + الإحصاءات + قائمة الغائب + خلاصة) — صفر تعديل على أي ملف كود
+
+Stage Summary:
+- S7 مكتمل: 72 صف تتبع بأدلة موضعية — 77.8% منفذ أو منحرف بقرار موثق، وكل التأجيلات (8) بأقسام صريحة في MASTER_PLAN
+- عيب جوهري وحيد مرشح MAJOR: غياب «تعديل الحجز المؤهل» من الموقع بلا قرار مؤجل مسجل (سقط من الخطة الحاكمة بعد أن كان Journey C كاملة بالخطة الأصلية) — توصيته للمالك: قرار موثق (تأجيل أو تنفيذ)
+- نواقص فرعية (MINOR غالبًا): بريد/FAQ/عروض/مساعدة بالدخول/مرفقات وتصدير — كلها موثقة بموضع البحث في التقرير
+- لا تغييرات على الكود أو البيانات (مهمة قراءة فقط) — المخرجان: agent-ctx/A-s7.md + هذا القسم
