@@ -59,10 +59,14 @@ class PrivacyScreen extends StatelessWidget {
         title: const Text('الخصوصية وحول التطبيق'),
       ),
       body: SafeArea(
+        // SingleChildScrollView (لا ListView) — يُبنى كل المحتوى دفعة واحدة:
+        // شاشة ثابتة النصوص، وbuilder الكسول يقصّ عناصر خارج نافذة الاختبار
         child: Scrollbar(
-          child: ListView(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            children: [
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               // ── حول التطبيق ──
               AppCard(
                 child: Column(
@@ -156,7 +160,8 @@ class PrivacyScreen extends StatelessWidget {
                   color: theme.colorScheme.outline,
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
