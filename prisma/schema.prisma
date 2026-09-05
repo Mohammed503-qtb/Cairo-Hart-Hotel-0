@@ -47,6 +47,22 @@ model Hotel {
   updatedAt               DateTime @updatedAt
 }
 
+// ─────────────────────────── SITE CONTENT (CMS) ───────────────────────────
+// محتوى الموقع القابل للإدارة من لوحة الإدارة — قيمة JSON لكل قسم
+// المفاتيح الموثقة: header | hero | rooms | facilities | gallery | contact | footer
+// الأشكال والعقود: src/lib/site-content.ts (DEFAULT_CONTENT + sanitizeSection)
+// القراءة تدمج القيمة المخزنة فوق الافتراضي — لا حاجة لـ seed.
+
+model SiteContent {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String   @default("{}") // JSON object for the section
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("site_content")
+}
+
 model RoomType {
   id               String        @id @default(uuid())
   hotelId          String

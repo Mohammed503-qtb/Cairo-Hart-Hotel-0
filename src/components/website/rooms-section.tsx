@@ -13,16 +13,19 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatMoney } from '@/lib/format'
 import type { HotelPublic, RoomTypePublic } from '@/types'
+import type { RoomsContent } from '@/lib/site-content'
 import { SectionHeading, miniCapacity } from './helpers'
 
 export function RoomsSection({
   hotel,
   roomTypes,
+  content,
   loading,
   onBook,
 }: {
   hotel: HotelPublic | null
   roomTypes: RoomTypePublic[]
+  content: RoomsContent
   loading: boolean
   onBook: (roomTypeId: string) => void
 }) {
@@ -30,9 +33,9 @@ export function RoomsSection({
     <section id="rooms" className="scroll-mt-20 bg-muted/40 py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeading
-          kicker="الإقامة"
-          title="غرف وأجنحة تناسب كل مسافر"
-          subtitle="أسعار شفافة تشمل كل التجهيزات — الضريبة ورسوم نهاية الأسبوع تحسب عند الحجز"
+          kicker={content.kicker}
+          title={content.title}
+          subtitle={content.subtitle}
         />
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

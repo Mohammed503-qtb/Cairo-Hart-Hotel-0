@@ -10,10 +10,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAppStore } from '@/lib/store'
 import type { HotelPublic } from '@/types'
+import type { ContactContent, FooterContent, NavLink } from '@/lib/site-content'
 import { SectionHeading, Reveal, formatClockAr, waLink } from './helpers'
 import { PrivacyDialog } from './privacy-dialog'
 
-export function ContactSection({ hotel }: { hotel: HotelPublic | null }) {
+export function ContactSection({ hotel, content }: { hotel: HotelPublic | null; content: ContactContent }) {
   const mapsUrl = hotel
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${hotel.address}، ${hotel.city}، ${hotel.country}`)}`
     : '#'
@@ -30,9 +31,9 @@ export function ContactSection({ hotel }: { hotel: HotelPublic | null }) {
     <section id="contact" className="scroll-mt-20 py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeading
-          kicker="الموقع والتواصل"
-          title="نحن في قلب عدن — تواصلوا معنا"
-          subtitle="يسعدنا خدمتكم في أي وقت"
+          kicker={content.kicker}
+          title={content.title}
+          subtitle={content.subtitle}
         />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -164,24 +165,25 @@ export function ContactSection({ hotel }: { hotel: HotelPublic | null }) {
 
 // ─────────────────────────────────────────────────────────────
 
-const QUICK_LINKS = [
-  { href: '#home', label: 'الرئيسية' },
-  { href: '#rooms', label: 'الغرف والأجنحة' },
-  { href: '#facilities', label: 'المرافق' },
-  { href: '#gallery', label: 'المعرض' },
-  { href: '#contact', label: 'الموقع والتواصل' },
-]
-
 export function SiteFooter({
   hotel,
+  content,
+  navLinks,
   loading,
   onManage,
 }: {
   hotel: HotelPublic | null
+  content: FooterContent
+  navLinks: NavLink[]
   loading: boolean
   onManage: () => void
 }) {
   const setMode = useAppStore((s) => s.setMode)
+
+  const siteName = hotel?.name ?? 'فندق قلب القاهرة'
+  const siteTagline = hotel?.tagline ?? 'ضيافة راقية في قلب عدن'
+  const description =
+    content.description || `${hotel?.address ?? 'شارع الجمهورية، كريتر'}، ${hotel?.city ?? 'عدن'}، ${hotel?.country ?? 'اليمن'}`
 
   return (
     <footer className="mt-auto bg-[#0C1320] pb-[env(safe-area-inset-bottom)] pt-12 text-white/80">
@@ -189,18 +191,16 @@ export function SiteFooter({
         {/* معلومات الفندق */}
         <div>
           <div className="flex items-center gap-2.5">
-            <img src="/logo-hotel.svg" alt="شعار فندق قلب القاهرة" className="h-10 w-10" />
+            <img src="/logo-hotel.svg" alt={`شعار ${siteName}`} className="h-10 w-10" />
             <div>
-              <div className="text-base font-extrabold text-white">فندق قلب القاهرة</div>
-              <div className="text-xs text-gold">{hotel?.tagline ?? 'ضيافة راقية في قلب عدن'}</div>
+              <div className="text-base font-extrabold text-white">{siteName}</div>
+              <div className="text-xs text-gold">{siteTagline}</div>
             </div>
           </div>
           {loading ? (
             <Skeleton className="mt-4 h-4 w-40 bg-white/10" />
           ) : (
-            <p className="mt-4 text-sm leading-relaxed">
-              {hotel?.address ?? 'شارع الجمهورية، كريتر'}، {hotel?.city ?? 'عدن'}، {hotel?.country ?? 'اليمن'}
-            </p>
+            <p className="mt-4 text-sm leading-relaxed">{description}</p>
           )}
           {hotel?.phone ? (
             <p className="mt-2 text-sm" dir="ltr">
@@ -213,8 +213,8 @@ export function SiteFooter({
         <div>
           <h4 className="mb-4 text-sm font-bold uppercase tracking-wide text-white">روابط سريعة</h4>
           <ul className="space-y-2 text-sm">
-            {QUICK_LINKS.map((l) => (
-              <li key={l.href}>
+            {navLinks.map((l) => (
+              <li key={l.href + l.label}>
                 <a href={l.href} className="transition-colors hover:text-gold">
                   {l.label}
                 </a>
@@ -296,7 +296,7 @@ export function SiteFooter({
 
       <div className="mx-auto mt-10 flex max-w-7xl flex-col items-center gap-3 border-t border-white/10 px-4 py-6 text-center sm:flex-row sm:justify-between sm:px-6 sm:text-right">
         <p className="text-xs">
-          © {new Date().getFullYear()} فندق قلب القاهرة — جميع الحقوق محفوظة
+          © {new Date().getFullYear()} {content.copyright}
         </p>
         <button
           type="button"
@@ -304,7 +304,7 @@ export function SiteFooter({
           className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-4 py-1.5 text-xs font-bold text-white/85 transition-colors hover:border-gold/60 hover:text-gold"
         >
           <LogIn className="size-3.5" />
-          منصة إدارة الإقامة — دخول التطبيق
+          {content.loginButtonLabel}
         </button>
       </div>
     </footer>

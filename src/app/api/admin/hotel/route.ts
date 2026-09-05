@@ -12,7 +12,7 @@ import { asString, asInt } from '../_shared'
 export const dynamic = 'force-dynamic'
 
 const STRING_FIELDS = [
-  'name', 'tagline', 'description', 'phone', 'whatsapp', 'email', 'address', 'city', 'currency',
+  'name', 'tagline', 'description', 'phone', 'whatsapp', 'email', 'address', 'city', 'country', 'currency',
   'cancellationPolicy', 'paymentPolicy', 'childrenPolicy', 'petsPolicy', 'smokingPolicy',
 ] as const
 

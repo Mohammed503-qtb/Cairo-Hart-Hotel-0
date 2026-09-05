@@ -4,7 +4,7 @@
 import type { DashboardStats } from '@/types'
 
 export type SectionKey =
-  | 'dashboard' | 'hotel' | 'room-types' | 'rooms' | 'rates' | 'services'
+  | 'dashboard' | 'content' | 'hotel' | 'room-types' | 'rooms' | 'rates' | 'services'
   | 'staff' | 'reservations' | 'guests' | 'reports' | 'audit'
 
 export interface DashboardResponse {

@@ -26,6 +26,8 @@ const AUDIT_ACTIONS: Array<{ value: string; label: string }> = [
   { value: 'ROOM_TYPE_CHANGED', label: 'تعديل نوع غرفة' },
   { value: 'RATE_CHANGED', label: 'تعديل معدل سعر' },
   { value: 'SETTINGS_UPDATED', label: 'تحديث الإعدادات' },
+  { value: 'CONTENT_UPDATED', label: 'تحديث محتوى الموقع' },
+  { value: 'CONTENT_IMAGE_UPLOADED', label: 'رفع صورة للمحتوى' },
   { value: 'SERVICE_CATALOG_CHANGED', label: 'تعديل كتالوج الخدمات' },
   { value: 'STAFF_CHANGED', label: 'تعديل الطاقم' },
   { value: 'CODE_GENERATED', label: 'توليد كود' },

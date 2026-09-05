@@ -865,3 +865,46 @@ Stage Summary:
 - **صفر أسرار في المستودع الآن**: الكود المسرب مُبطل (ميت في القاعدة الحية) ومحجوب من الوثائق ومُزال من تاريخ البعيد بالكتابة فوق الالتزام
 - درس مقرر: أي echo >> على .gitignore يسبقه فحص السطر الأخير (أو printf بـ\n بادئ) — وضعت القاعدة في التعليق أعلاه السطرين الجديدين
 - مهارة الـCI خضراء مستمرة: Web CI @ 2cca2a0 ✓ · Mobile CI @ 841847a ✓ — الالتزام البديل docs-only (.gitignore + وثائق) يعاد التحقق منه بعد الدفع
+
+---
+Task ID: 26-a
+Agent: Full-Stack Sub-Agent (CMS Screen)
+Task: بناء شاشة إدارة محتوى الموقع في لوحة الإدارة
+
+Work Log:
+- قرأت سجل العمل + عقد `src/lib/site-content.ts` و`content-icons.tsx` + مسارات `/api/admin/site-content` و`/api/admin/upload` و`/api/admin/hotel` و`/api/admin/room-types/[id]` للتأكد من الأشكال الدقيقة
+- اختبار حي قبل التصميم: دخول admin (A371849L9) ثم PATCH `country` على `/api/admin/hotel` → الخادم يتجاهل الحقل (لا يُحفظ) → قرار: عرض «الدولة» للقراءة فقط في نموذج التواصل لتفادي فقدان صامت للتغييرات
+- أنشأت `src/components/admin/sections/site-content/fields.tsx`: apiUpload (fetch + FormData + Bearer من useAppStore)، FieldRow، ListRow (↑↓ + حذف بأزرار 44px)، IconSelect (Select + ContentIcon)، ImageLibraryDialog (رفع GET /api/admin/upload + IMAGE_LIBRARY، أحادي/متعدد، تحديث عند الفتح)، ImageField (معاينة + رفع/مكتبة/رابط بـ Popover وتحقق / أو http)، FormFooter (حفظ/تراجع)
+- أنشأت `forms.tsx`: نماذج الأقسام السبعة بـ props موحدة (value/onChange/busy/dirty/onSave/onRevert) — HeaderForm (شعار + اسم + روابط تنقل ListRow حتى 8)، HeroForm (صورة h-48 + شارة/عنوان/tagline + شريط ثقة حتى 8)، RoomsForm (عناوين + RoomTypesEditor: بطاقات قابلة للطي لكل نوع غرفة بمعرض صوره (رفع/مكتبة متعددة/ترتيب/حذف) + بياناته + مزايا chips + «حفظ هذا النوع» PATCH بالحقول المتغيرة فقط)، FacilitiesForm (عناوين + بطاقات حتى 8 + مزايا حتى 12)، GalleryForm (شبكة صور مربعة بعناوين + رفع متعدد تباعيًا + مكتبة متعددة حتى 24 + ملاحظة صور الغرف التلقائية)، ContactForm (عناوين بحفظ مستقل + بيانات التواصل والسياسات من /api/admin/hotel بحفظ PATCH خاص)، FooterForm
+- أنشأت `index.tsx`: useLoader لجلب المحتوى + شريط chips أفقي قابل للتمرير بترتيب الموقع الحقيقي (PanelTop→PanelBottom) مع نقطة ذهبية للأقسام غير المحفوظة + شريط معلومات ذهبي + dirty بمقارنة stableJson (مستقلة عن ترتيب المفاتيح) + حفظ PATCH section مع toast + تحديث من الاستجابة + زر تراجع + skeletons/ErrorState
+- وصلت القسم: أضفت 'content' لـ SectionKey في types.ts + مدخل «محتوى الموقع» ب Palette كثاني عنصر بعد dashboard في admin-app.tsx + case 'content'، وأضفت CONTENT_UPDATED وCONTENT_IMAGE_UPLOADED لعامل AUDIT_ACTIONS في audit-log.tsx
+- إصلاح react-hooks/set-state-in-effect في حوار المكتبة (جلب بـ .then/.catch/.finally مع alive-flag وإعادة ضبط التحديد في سياق الحدث) + إصلاح 4 أخطاء TS في ContactForm (EMPTY_HOTEL_FORM كسجل كامل)
+- تحققت: eslint صفر أخطاء (exit 0) على الملفات الستة، tsc صفر أخطاء في components/admin، GET / يساوي 200 بلا أخطاء compile في dev.log، وPATCH idempotent لـ header يعيد «لا توجد تغييرات» كما يتوقع الـ UI
+
+Stage Summary:
+- الملفات المنشأة: `sections/site-content/{index,forms,fields}.tsx` (شاشة CMS كاملة RTL) — المعدلة: `admin/types.ts`، `admin-app.tsx` (مدخل محتوى الموقع ثانيًا)، `sections/audit-log.tsx` (فعلان جديدان)
+- كل تغيير قسم يُحفظ عبر PATCH /api/admin/site-content ويظهر على الموقع فورًا؛ الغرف والتواصل لهما مصادر حفظ خاصة (room-types/hotel) بأزرار منفصلة وواضحة
+- قراران تصميميان: (1) حقل الدولة للقراءة فقط لأن الخادم يتجاهله في PATCH hotel (مثبت بالاختبار الحي) (2) dirty بمقارنة stableJson لأن الخادم يعيد ترتيب مفاتيح مختلفًا أحيانًا عن ترتيب العميل
+- الحدود محترمة من جانب العميل ومطابقة للتنقية: روابط 1-8، ثقة 0-8، بطاقات 0-8، مزايا 0-12، معرض 0-24، مع hints عربية عند الحذف/التجاوز
+---
+Task ID: 26
+Agent: Main Agent (Z.ai Code)
+Task: أمر المالك — شاشة جديدة في لوحة تحكم الإدارة لمحتوى الموقع بالكامل (من الترويسة إلى التذييل): تبديل/تعديل/رفع المحتوى وكل الصور (الهيرو وكل ما يليه) — كل تغيير يعمل end-to-end
+
+Work Log:
+- [البنية] عقد المحتوى المشترك src/lib/site-content.ts: أنواع الأقسام السبعة (header/hero/rooms/facilities/gallery/contact/footer) + DEFAULT_CONTENT مطابق حرفيًا للموقع قبل الميزة (بلا seed) + sanitizeSection للتنقية الخادمية + IMAGE_LIBRARY + 26 مفتاح أيقونة — وsrc/components/website/content-icons.tsx لتحويلها لمكونات Lucide (مشترك بين الموقع والمنتقي)
+- [البنية] نموذج Prisma SiteContent (key فريد + value JSON، @@map site_content) + db push — والقراءة تدمج المخزَّن فوق الافتراضي (src/lib/site-content-server.ts) فالقسم غير المحفوظ يُرجع الافتراضي دائمًا
+- [Backend] GET /api/public/site-content (عام) · GET/PATCH /api/admin/site-content (section+data → تنقية → upsert → audit CONTENT_UPDATED → إرجاع المحتوى الكامل) · POST /api/admin/upload (multipart حتى 5MB: PNG/JPG/WebP/GIF/SVG مع رفض SVG الحامل سكربت + audit CONTENT_IMAGE_UPLOADED) + GET لقائمة المكتبة · GET /api/uploads/[name] (شبكة أمان) + rewrite في next.config (الملفات الثابتة أولًا ثم السقوط للمسار)
+- [إصلاح] إضافة country لحقول PATCH /api/admin/hotel (كانت مفقودة تاريخيًا — رصدها وكيل 26-a)
+- [الويب] توصيل المكونات السبعة بالمحتوى: SiteHeader (شعار/اسم/روابط/أزرار) · HeroSection (صورة/شارة/عنوان/أزرار/شريط ثقة بأيقونات) · RoomsSection (عناوين القسم) · Facilities/Gallery (بطاقات + مزايا + صور منتقاة تسبق صور الغرف التلقائية) · Contact/Footer (عناوين + وصف + حقوق + زر التطبيق) — القيم الفارغة تسقط لبيانات الفندق والافتراضيات تحمي الموقع عند فشل API
+- [26-a subagent] شاشة إدارة المحتوى: src/components/admin/sections/site-content/ (index: تبويبات بترتيب الموقع + نقطة ذهبية للقسم المتسخ + skeletons — fields: apiUpload/FieldRow/ListRow بأزرار 44px/IconSelect/ImageLibraryDialog أحادي ومتعدد/ImageField برفع ومكتبة ورابط يدوي — forms: نماذج الأقسام السبعة + RoomTypesEditor ببطاقات قابلة للطي (معرض صور مرتب/الرفع/بيانات/مزايا chips/حفظ بالحقول المتغيرة فقط) + ContactForm بحفظين مستقلين) + التوصيل (SectionKey + زر «محتوى الموقع» ثانيًا بعد لوحة التحكم) + فعلا التدقيق في سجل التدقيق
+- [تحقق حي agent-browser] دخول A371849L9 → شاشة المحتوى: ① الهيرو: رفع صورة PNG فعلية (67KB) عبر input الملف + تعديل الشارة والعنوان + حفظ → الموقع بعد الخروج وإعادة التحميل: الصورة المرفوعة في الهيرو (naturalWidth 1600) + العنوان الجديد + الشارة الجديدة + الاسم الجديد في الهيدر ② المرافق: تعديل عنوان القسم وبطاقة اللوبي → ظهرا بالموقع ③ الغرف: تعديل غرفة مفردة (اسم + وصف + سعر $80→$95) → ظهرت بالموقع بالسعر الجديد ④ مكتبة الصور: حوارها يعرض المرفوعة + الجاهزة (11 صورة) ⑤ 375px: صفر فيض أفقي + تذييل لاصق + 1440px نظيف ⑥ مسار الحجز يعمل بعد التعديلات — صفر أخطاء console في كل الجلسة
+- [نظافة] إعادة الحالة البكر بعد الاختبار: مسح صفوف site_content الثلاثة (عودة الافتراضي) + إعادة نوع الغرفة المفردة + حذف صور الاختبار — الموقع الآن بحالته الأصلية والمالك يجرب بنفسه
+- [الحماية] .gitignore: public/uploads/ (بيانات تشغيل لا تدخل المستودع) + agent-ctx/ — بقاعدة السطر الجديد المتعلمة من الحادثة السابقة (فُحصtail قبل printf)
+- [الأدوات] lint نظيف · 165/165 اختبارًا أخضر · tsc بلا أخطاء في src/ · dev.log نظيف
+
+Stage Summary:
+- شاشة «محتوى الموقع» في لوحة الإدارة تغطي الموقع كله: الترويسة (شعار/اسم/روابط/أزرار) · الهيرو (صورة قابلة للرفع/شارة/عنوان/أزرار/4 بطاقات ثقة بأيقونات) · الغرف (عناوين + تحرير كامل لكل نوع غرفة: صور متعددة مرتبة/بيانات/مزايا/سعر) · المرافق (4 بطاقات قابلة للرفع والإضافة + 6 مزايا بأيقونات) · المعرض (صور مرفوعة/منتقاة مع ترتيب — صور الغرف تتبعها تلقائيًا) · التواصل (عناوين + بيانات الفندق والسياسات الخمس بحفظ مستقل) · التذييل (وصف/حقوق/زر التطبيق)
+- كل تغيير end-to-end مُثبت حيًا بالمتصفح: حفظ → تحديث في القاعدة (site_content أو جداولها الأصلية) → يظهر على الموقع فور إعادة التحميل — بما فيها رفع الصور الفعلي (uploads تُخزَّن في public/uploads وتُقدَّم ثابتًا مع مسار احتياطي)
+- البنية تحمي التشغيل: القيم الفارغة تسقط لبيانات الفندق · الأقسام غير المحفوظة تعمل بالافتراضي · تنقية خادمية لكل قسم · حدود (روابط 1-8/ثقة 0-8/بطاقات 0-8/مزايا 0-12/معرض 0-24) · SVG يرفض إن حمل سكربت
+- التدقيق: كل حفظ قسم يقيّد CONTENT_UPDATED وكل رفع صورة CONTENT_IMAGE_UPLOADED — ظهرا فعليًا في سجل التدقيق أثناء الاختبار

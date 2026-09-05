@@ -10,7 +10,7 @@ import { motion } from 'framer-motion'
 import {
   LayoutDashboard, Settings, BedDouble, DoorOpen, CalendarRange, ConciergeBell,
   KeyRound, ClipboardList, Users, BarChart3, ScrollText, Bell, LogOut, Menu,
-  PanelRightClose, PanelRightOpen, Hotel,
+  PanelRightClose, PanelRightOpen, Hotel, Palette,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -25,6 +25,7 @@ import { timeAgoAr } from '@/lib/format'
 import type { NotificationItem, SectionKey } from './types'
 import { useLoader } from './shared'
 import DashboardSection from './sections/dashboard'
+import SiteContentSection from './sections/site-content'
 import HotelSettingsSection from './sections/hotel-settings'
 import RoomTypesSection from './sections/room-types'
 import RoomsSection from './sections/rooms'
@@ -38,6 +39,7 @@ import AuditLogSection from './sections/audit-log'
 
 const SECTIONS: Array<{ key: SectionKey; label: string; icon: React.ComponentType<{ className?: string }> }> = [
   { key: 'dashboard', label: 'لوحة التحكم', icon: LayoutDashboard },
+  { key: 'content', label: 'محتوى الموقع', icon: Palette },
   { key: 'hotel', label: 'إعدادات الفندق', icon: Settings },
   { key: 'room-types', label: 'أنواع الغرف', icon: BedDouble },
   { key: 'rooms', label: 'الغرف', icon: DoorOpen },
@@ -107,6 +109,8 @@ export default function AdminApp() {
     switch (section) {
       case 'dashboard':
         return <DashboardSection key={dashKey} onNavigate={navigate} />
+      case 'content':
+        return <SiteContentSection />
       case 'hotel':
         return <HotelSettingsSection />
       case 'room-types':

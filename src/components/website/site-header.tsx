@@ -2,25 +2,25 @@
 
 // ─────────────────────────────────────────────────────────────
 // SITE HEADER — هيدر الموقع الثابت + تنقل + وضع ليلي
+// المحتوى (الشعار/الاسم/الروابط/الأزرار) من لوحة إدارة المحتوى
+// القيم الفارغة تُسقط لبيانات الفندق
 // ─────────────────────────────────────────────────────────────
 import { useState, useSyncExternalStore } from 'react'
 import { useTheme } from 'next-themes'
 import { Moon, Sun, Menu, CalendarCheck, ClipboardList } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-
-const NAV_LINKS = [
-  { href: '#home', label: 'الرئيسية' },
-  { href: '#rooms', label: 'الغرف' },
-  { href: '#facilities', label: 'المرافق' },
-  { href: '#gallery', label: 'المعرض' },
-  { href: '#contact', label: 'الموقع والتواصل' },
-]
+import type { HotelPublic } from '@/types'
+import type { HeaderContent } from '@/lib/site-content'
 
 export function SiteHeader({
+  hotel,
+  content,
   onBook,
   onManage,
 }: {
+  hotel: HotelPublic | null
+  content: HeaderContent
   onBook: () => void
   onManage: () => void
 }) {
@@ -36,23 +36,27 @@ export function SiteHeader({
 
   const isDark = mounted && theme === 'dark'
 
+  const siteName = content.siteName || hotel?.name || 'فندق قلب القاهرة'
+  const siteTagline = content.siteTagline || hotel?.tagline || 'ضيافة راقية في قلب عدن'
+  const logoUrl = content.logoUrl || '/logo-hotel.svg'
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
         {/* الشعار */}
         <a href="#home" className="flex items-center gap-2.5" aria-label="العودة إلى الرئيسية">
-          <img src="/logo-hotel.svg" alt="شعار فندق قلب القاهرة" className="h-9 w-9 shrink-0" />
+          <img src={logoUrl} alt={`شعار ${siteName}`} className="h-9 w-9 shrink-0" />
           <div className="leading-tight">
-            <div className="text-base font-extrabold text-foreground">فندق قلب القاهرة</div>
-            <div className="hidden text-[11px] text-muted-foreground sm:block">ضيافة راقية في قلب عدن</div>
+            <div className="text-base font-extrabold text-foreground">{siteName}</div>
+            <div className="hidden text-[11px] text-muted-foreground sm:block">{siteTagline}</div>
           </div>
         </a>
 
         {/* تنقل سطح المكتب */}
         <nav className="mx-auto hidden items-center gap-1 lg:flex" aria-label="التنقل الرئيسي">
-          {NAV_LINKS.map((l) => (
+          {content.navLinks.map((l) => (
             <a
-              key={l.href}
+              key={l.href + l.label}
               href={l.href}
               className="rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
@@ -70,7 +74,7 @@ export function SiteHeader({
             className="hidden text-muted-foreground sm:inline-flex"
           >
             <ClipboardList className="size-4" />
-            إدارة حجزك
+            {content.manageButtonLabel}
           </Button>
 
           {/* الوضع الليلي */}
@@ -87,7 +91,7 @@ export function SiteHeader({
           {/* احجز الآن */}
           <Button size="sm" onClick={onBook} className="hidden shrink-0 sm:inline-flex">
             <CalendarCheck className="size-4" />
-            احجز الآن
+            {content.bookButtonLabel}
           </Button>
 
           {/* قائمة الموبايل */}
@@ -100,9 +104,9 @@ export function SiteHeader({
             <SheetContent side="right" className="w-72">
               <SheetTitle className="sr-only">قائمة التنقل</SheetTitle>
               <nav className="mt-2 flex flex-col gap-1" aria-label="قائمة الموبايل">
-                {NAV_LINKS.map((l) => (
+                {content.navLinks.map((l) => (
                   <a
-                    key={l.href}
+                    key={l.href + l.label}
                     href={l.href}
                     onClick={() => setMenuOpen(false)}
                     className="rounded-md px-3 py-3 text-base font-semibold text-foreground transition-colors hover:bg-accent"
@@ -118,7 +122,7 @@ export function SiteHeader({
                     }}
                   >
                     <CalendarCheck className="size-4" />
-                    احجز الآن
+                    {content.bookButtonLabel}
                   </Button>
                   <Button
                     variant="outline"
@@ -128,7 +132,7 @@ export function SiteHeader({
                     }}
                   >
                     <ClipboardList className="size-4" />
-                    إدارة حجزك
+                    {content.manageButtonLabel}
                   </Button>
                 </div>
               </nav>

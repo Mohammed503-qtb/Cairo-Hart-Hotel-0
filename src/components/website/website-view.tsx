@@ -10,6 +10,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { api, ApiError } from '@/lib/api-client'
 import type { HotelPublic, RoomTypePublic } from '@/types'
+import { DEFAULT_CONTENT, type SiteContentAll } from '@/lib/site-content'
 import { SiteHeader } from './site-header'
 import { HeroSection } from './hero-section'
 import { RoomsSection } from './rooms-section'
@@ -25,6 +26,7 @@ export default function WebsiteView() {
   // ── بيانات الفندق ──
   const [hotel, setHotel] = useState<HotelPublic | null>(null)
   const [roomTypes, setRoomTypes] = useState<RoomTypePublic[]>([])
+  const [content, setContent] = useState<SiteContentAll>(DEFAULT_CONTENT)
   const [dataLoading, setDataLoading] = useState(true)
   const [dataError, setDataError] = useState<string | null>(null)
 
@@ -49,13 +51,17 @@ export default function WebsiteView() {
       setDataLoading(true)
       setDataError(null)
       try {
-        const [h, rt] = await Promise.all([
+        const [h, rt, sc] = await Promise.all([
           api<{ hotel: HotelPublic }>('/api/public/hotel'),
           api<{ roomTypes: RoomTypePublic[] }>('/api/public/room-types'),
+          api<{ content: SiteContentAll }>('/api/public/site-content'),
         ])
         if (cancelled) return
         setHotel(h.hotel)
         setRoomTypes(rt.roomTypes)
+        if (sc.content && typeof sc.content === 'object') {
+          setContent({ ...DEFAULT_CONTENT, ...sc.content })
+        }
       } catch (e) {
         if (cancelled) return
         setDataError(e instanceof ApiError ? e.message : 'تعذر تحميل بيانات الفندق')
@@ -113,7 +119,7 @@ export default function WebsiteView() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <SiteHeader onBook={() => openBooking()} onManage={() => openManage()} />
+      <SiteHeader hotel={hotel} content={content.header} onBook={() => openBooking()} onManage={() => openManage()} />
 
       <main className="flex-1">
         {dataError ? (
@@ -129,6 +135,7 @@ export default function WebsiteView() {
           <>
             <HeroSection
               hotel={hotel}
+              content={content.hero}
               loading={dataLoading}
               search={search}
               onSearchChange={(v) => {
@@ -142,20 +149,21 @@ export default function WebsiteView() {
             <RoomsSection
               hotel={hotel}
               roomTypes={roomTypes}
+              content={content.rooms}
               loading={dataLoading}
               onBook={handleBookRoom}
             />
 
-            <FacilitiesSection />
+            <FacilitiesSection content={content.facilities} />
 
-            <GallerySection roomTypes={roomTypes} loading={dataLoading} />
+            <GallerySection content={content.gallery} roomTypes={roomTypes} loading={dataLoading} />
 
-            <ContactSection hotel={hotel} />
+            <ContactSection hotel={hotel} content={content.contact} />
           </>
         )}
       </main>
 
-      <SiteFooter hotel={hotel} loading={dataLoading} onManage={() => openManage()} />
+      <SiteFooter hotel={hotel} content={content.footer} navLinks={content.header.navLinks} loading={dataLoading} onManage={() => openManage()} />
 
       {/* الحوارات */}
       <BookingDialog

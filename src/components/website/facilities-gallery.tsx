@@ -2,92 +2,68 @@
 
 // ─────────────────────────────────────────────────────────────
 // FACILITIES + GALLERY — قسم المرافق + المعرض مع Lightbox
+// المحتوى (البطاقات/المزايا/عناوين المعرض/صوره) من إدارة المحتوى
+// صور المعرض المنتقاة تُتبع بصور الغرف تلقائيًا
 // ─────────────────────────────────────────────────────────────
 import { useCallback, useEffect, useMemo, useState, Fragment } from 'react'
-import { Wifi, SquareParking, Shirt, Clock, Tv, ShieldCheck, ChevronRight, ChevronLeft } from 'lucide-react'
+import { ChevronRight, ChevronLeft } from 'lucide-react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import type { RoomTypePublic } from '@/types'
+import type { FacilitiesContent, GalleryContent } from '@/lib/site-content'
+import { ContentIcon } from './content-icons'
 import { SectionHeading, Reveal } from './helpers'
 
-const FACILITY_CARDS = [
-  {
-    src: '/images/facility-lobby.png',
-    title: 'الاستقبال واللوبي',
-    text: 'لوبي فخم بلمسة عربية أصيلة وخدمة استقبال على مدار الساعة لراحتكم منذ لحظة الوصول.',
-  },
-  {
-    src: '/images/facility-restaurant.png',
-    title: 'المطعم',
-    text: 'مطعم يقدم أشهى الأطباق المحنية والعالمية بإشراف طهاة محترفين على مدار اليوم.',
-  },
-  {
-    src: '/images/facility-terrace.png',
-    title: 'التراس المقصف',
-    text: 'تراس مقصف بإطلالة ساحرة على المدينة — قهوتكم الصباحية ومساءاتكم الهادئة.',
-  },
-  {
-    src: '/images/facility-gym.png',
-    title: 'النادي الرياضي',
-    text: 'نادٍ رياضي مجهز بأحدث الأجهزة للاحتفاظ بنشاطكم خلال الإقامة.',
-  },
-]
-
-const AMENITY_ICONS = [
-  { icon: Wifi, label: 'واي فاي مجاني' },
-  { icon: SquareParking, label: 'موقف سيارات' },
-  { icon: Shirt, label: 'غسيل ملابس' },
-  { icon: Clock, label: 'استقبال 24 ساعة' },
-  { icon: Tv, label: 'تلفاز ذكي' },
-  { icon: ShieldCheck, label: 'خزنة إلكترونية' },
-]
-
-export function FacilitiesSection() {
+export function FacilitiesSection({ content }: { content: FacilitiesContent }) {
   return (
     <section id="facilities" className="scroll-mt-20 py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeading
-          kicker="المرافق"
-          title="مرافق صُممت لراحتكم"
-          subtitle="كل ما تحتاجونه لإقامة متكاملة تحت سقف واحد"
+          kicker={content.kicker}
+          title={content.title}
+          subtitle={content.subtitle}
         />
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {FACILITY_CARDS.map((f, i) => (
-            <Reveal key={f.title} delay={i * 0.08}>
-              <div className="group overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
-                <div className="h-44 overflow-hidden">
-                  <img
-                    src={f.src}
-                    alt={`${f.title} — فندق قلب القاهرة`}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
+        {content.cards.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {content.cards.map((f, i) => (
+              <Reveal key={f.title + i} delay={i * 0.08}>
+                <div className="group overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
+                  <div className="h-44 overflow-hidden">
+                    <img
+                      src={f.image}
+                      alt={`${f.title} — فندق قلب القاهرة`}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-base font-extrabold text-foreground">{f.title}</h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.text}</p>
+                  </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="text-base font-extrabold text-foreground">{f.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.text}</p>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-
-        {/* شبكة مزايا نصية */}
-        <Reveal delay={0.15} className="mt-10">
-          <div className="grid grid-cols-2 gap-3 rounded-2xl border bg-muted/40 p-5 sm:grid-cols-3 lg:grid-cols-6">
-            {AMENITY_ICONS.map((a) => (
-              <div
-                key={a.label}
-                className="flex flex-col items-center gap-2 rounded-xl bg-card p-4 text-center shadow-sm"
-              >
-                <a.icon className="size-6 text-primary dark:text-gold" />
-                <span className="text-xs font-bold text-foreground">{a.label}</span>
-              </div>
+              </Reveal>
             ))}
           </div>
-        </Reveal>
+        ) : null}
+
+        {/* شبكة مزايا نصية */}
+        {content.amenities.length > 0 ? (
+          <Reveal delay={0.15} className="mt-10">
+            <div className="grid grid-cols-2 gap-3 rounded-2xl border bg-muted/40 p-5 sm:grid-cols-3 lg:grid-cols-6">
+              {content.amenities.map((a, i) => (
+                <div
+                  key={a.label + i}
+                  className="flex flex-col items-center gap-2 rounded-xl bg-card p-4 text-center shadow-sm"
+                >
+                  <ContentIcon name={a.icon} className="size-6 text-primary dark:text-gold" />
+                  <span className="text-xs font-bold text-foreground">{a.label}</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        ) : null}
       </div>
     </section>
   )
@@ -100,22 +76,23 @@ interface GalleryImage {
   title: string
 }
 
-export function GallerySection({ roomTypes, loading }: { roomTypes: RoomTypePublic[]; loading: boolean }) {
+export function GallerySection({
+  content,
+  roomTypes,
+  loading,
+}: {
+  content: GalleryContent
+  roomTypes: RoomTypePublic[]
+  loading: boolean
+}) {
   const [lightbox, setLightbox] = useState<number | null>(null)
 
-  // صور المعرض: ثابتة + صور الغرف من البيانات (مشتقة بدون تأثير)
+  // صور المعرض: المنتقاة من إدارة المحتوى + صور الغرف من البيانات (مشتقة بدون تأثير)
   const images: GalleryImage[] = useMemo(() => {
+    const curated = content.images.map((img) => ({ src: img.src, title: img.title }))
     const roomImages = roomTypes.flatMap((rt) => rt.images.map((src) => ({ src, title: rt.name })))
-    return [
-      { src: '/images/hero-hotel.png', title: 'واجهة الفندق' },
-      ...roomImages,
-      { src: '/images/facility-lobby.png', title: 'الاستقبال واللوبي' },
-      { src: '/images/facility-restaurant.png', title: 'المطعم' },
-      { src: '/images/facility-terrace.png', title: 'التراس المقصف' },
-      { src: '/images/facility-gym.png', title: 'النادي الرياضي' },
-      { src: '/images/gallery-corridor.png', title: 'ممر الغرف' },
-    ]
-  }, [roomTypes])
+    return [...curated, ...roomImages]
+  }, [content.images, roomTypes])
 
   const next = useCallback(() => {
     setLightbox((i) => (i === null ? null : (i + 1) % images.length))
@@ -141,11 +118,17 @@ export function GallerySection({ roomTypes, loading }: { roomTypes: RoomTypePubl
   return (
     <section id="gallery" className="scroll-mt-20 bg-muted/40 py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHeading kicker="المعرض" title="لمحة من الفندق" subtitle="تصفح صور الغرف والمرافق" />
+        <SectionHeading
+          kicker={content.kicker}
+          title={content.title}
+          subtitle={content.subtitle}
+        />
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {loading
-            ? Array.from({ length: 10 }).map((_, i) => <Skeleton key={i} className="aspect-square rounded-xl" />)
+            ? Array.from({ length: Math.max(10, images.length) }).map((_, i) => (
+                <Skeleton key={i} className="aspect-square rounded-xl" />
+              ))
             : images.map((img, i) => (
                 <Reveal key={img.src + i} delay={(i % 5) * 0.05} y={16}>
                   <button

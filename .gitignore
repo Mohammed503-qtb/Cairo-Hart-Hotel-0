@@ -66,3 +66,8 @@ server.log
 rollbacks/
 
 backups/
+
+# صور المحتوى المرفوعة (بيانات تشغيل — لا تدخل المستودع)
+public/uploads/
+# سجلات الوكلاء
+agent-ctx/
