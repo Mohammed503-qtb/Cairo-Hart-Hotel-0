@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────
 // CONTACT + FOOTER — الموقع والتواصل + السياسات + التذييل اللاصق
 // ─────────────────────────────────────────────────────────────
-import { MapPin, Phone, Mail, MessageCircle, Clock, LogIn, Navigation, FileText } from 'lucide-react'
+import { MapPin, Phone, Mail, MessageCircle, Clock, LogIn, Navigation, FileText, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useAppStore } from '@/lib/store'
 import type { HotelPublic } from '@/types'
 import { SectionHeading, Reveal, formatClockAr, waLink } from './helpers'
+import { PrivacyDialog } from './privacy-dialog'
 
 export function ContactSection({ hotel }: { hotel: HotelPublic | null }) {
   const mapsUrl = hotel
@@ -134,6 +135,23 @@ export function ContactSection({ hotel }: { hotel: HotelPublic | null }) {
                       </AccordionContent>
                     </AccordionItem>
                   ))}
+                  <AccordionItem value="policy-privacy">
+                    <PrivacyDialog>
+                      <button
+                        type="button"
+                        className="group flex w-full items-center justify-between py-3 text-sm font-bold text-foreground transition-colors"
+                        aria-label="عرض سياسة الخصوصية كاملة"
+                      >
+                        <span className="flex items-center gap-2">
+                          <ShieldCheck className="size-4 text-primary dark:text-gold" />
+                          سياسة الخصوصية
+                        </span>
+                        <span className="text-muted-foreground transition-transform group-hover:translate-x-1" aria-hidden>
+                          ←
+                        </span>
+                      </button>
+                    </PrivacyDialog>
+                  </AccordionItem>
                 </Accordion>
               </CardContent>
             </Card>
@@ -228,6 +246,13 @@ export function SiteFooter({
               <a href="#contact" className="transition-colors hover:text-gold">
                 سياسة الأطفال
               </a>
+            </li>
+            <li>
+              <PrivacyDialog>
+                <button type="button" className="text-right transition-colors hover:text-gold">
+                  سياسة الخصوصية
+                </button>
+              </PrivacyDialog>
             </li>
             <li>
               <span className="cursor-default">

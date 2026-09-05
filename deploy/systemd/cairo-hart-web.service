@@ -1,0 +1,46 @@
+# ─────────────────────────────────────────────────────────────
+# SYSTEMD — فندق قلب القاهرة (عدن) · خدمة الويب (Task 24-c / P1)
+# التطبيق: Next.js standalone (bun .next/standalone/server.js)
+# التركيب:
+#   sudo cp deploy/systemd/cairo-hart-web.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now cairo-hart-web.service
+# ─────────────────────────────────────────────────────────────
+
+[Unit]
+Description=Cairo Heart Hotel Aden — Web (Next.js standalone :3000)
+Documentation=file:///opt/cairo-hart/docs/RUNBOOK.md
+Wants=network-online.target
+# الترتيب: الشبكة ← realtime ← web (الويب يبث أحداثه إلى 3004 الداخلي)
+After=network-online.target cairo-hart-realtime.service
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/opt/cairo-hart
+EnvironmentFile=/etc/cairo-hart/env
+# bun منسوخ إلى /usr/local/bin (دليل الإعداد deploy/README.md §2) —
+# PATH الصريح لأن PATH الافتراضي لـ systemd لا يشمل مجلدات المستخدم
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="HOSTNAME=0.0.0.0"
+# مطابق لسكربت start في package.json:
+#   NODE_ENV=production bun .next/standalone/server.js
+# (بلا tee — systemd journal يجمع المخرجات مباشرة)
+ExecStart=/usr/bin/env NODE_ENV=production PORT=3000 bun .next/standalone/server.js
+
+# إعادة تشغيل تلقائية بعد أي فشل (شرط قبول P1)
+Restart=always
+RestartSec=3
+
+# حماية أساسية (systemd hardening)
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/cairo-hart/.next /opt/cairo-hart/db
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+
+[Install]
+WantedBy=multi-user.target

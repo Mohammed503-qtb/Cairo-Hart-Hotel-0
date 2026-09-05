@@ -1,0 +1,56 @@
+# ─────────────────────────────────────────────────────────────
+# CADDYFILE الإنتاج — فندق قلب القاهرة (عدن) · Task 24-c / P1
+#
+# التركيب على الخادم:
+#   sudo cp /opt/cairo-hart/deploy/Caddyfile.prod /etc/caddy/Caddyfile
+#   sudo systemctl edit caddy          # أضف:  [Service]
+#                                     #        Environment=DOMAIN=hotel.example.com
+#   sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+#   sudo systemctl restart caddy
+#
+# - النطاق يُقرأ من متغير البيئة {$DOMAIN} (تصيير caddy للبيئة).
+# - TLS تلقائي عبر Let's Encrypt: caddy يحصل على الشهادة عند أول تشغيل
+#   ويجدّدها قبل انتهائها بلا أي تدخل يدوي (يشترط أن يشير سجل DNS
+#   للنطاق إلى هذا الخادم وأن المنفذين 80/443 مفتوحان).
+# - القناة الخلفية الوحيدة المعروضة من البوابة: web على 127.0.0.1:3000 —
+#   لا يُمرَّر أي منفذ آخر غير 3002 (منفذ 3004 بث داخلي localhost فقط).
+# ─────────────────────────────────────────────────────────────
+
+{$DOMAIN} {
+        # ── آلية تحويل Realtime — حرفيًا كما في بوابة البيئة الرملية ──
+        # عملاء الويب والتطبيق يطلبون خدمة الأحداث الفورية عبر
+        #   /?XTransformPort=3002   (socket.io على المسار "/")
+        # لا تُغيِّر هذا السلوك وإلا انقطع التحديث الفوري عن كل العملاء.
+        # (في الرملة كان الـ matcher عامًا XTransformPort=* — هنا حصرناه
+        #  بالقيمة 3002 وحدها: قناة واحدة مكشوفة، والباقي كله يذهب للويب)
+        @transform_port_query {
+                query XTransformPort=3002
+        }
+
+        handle @transform_port_query {
+                reverse_proxy 127.0.0.1:3002 {
+                        header_up Host {host}
+                        header_up X-Forwarded-For {remote_host}
+                        header_up X-Forwarded-Proto {scheme}
+                        header_up X-Real-IP {remote_host}
+                }
+        }
+
+        handle {
+                reverse_proxy 127.0.0.1:3000 {
+                        header_up Host {host}
+                        header_up X-Forwarded-For {remote_host}
+                        header_up X-Forwarded-Proto {scheme}
+                        header_up X-Real-IP {remote_host}
+
+                        # فحص صحة نشط عبر /api/health (أُضيف المسار في Task 24-e —
+                        # يعيد 200 فقط عندما تستجيب القاعدة، و503 عند تعطلها):
+                        health_uri /api/health
+                        health_interval 30s
+                        health_timeout 5s
+                }
+        }
+
+        # HSTS — إجبار المتصفحات على HTTPS لمدة 180 يومًا (بند P6 في قائمة الأمن)
+        header Strict-Transport-Security "max-age=15552000"
+}

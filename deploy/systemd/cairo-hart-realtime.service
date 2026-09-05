@@ -1,0 +1,43 @@
+# ─────────────────────────────────────────────────────────────
+# SYSTEMD — فندق قلب القاهرة (عدن) · خدمة Realtime (Task 24-c / P1)
+# المنفذ 3002 — socket.io للعملاء (عبر البوابة /?XTransformPort=3002)
+# المنفذ 3004 — HTTP داخلي (127.0.0.1 فقط) للبث من تطبيق الويب
+# التركيب:
+#   sudo cp deploy/systemd/cairo-hart-realtime.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now cairo-hart-realtime.service
+# ─────────────────────────────────────────────────────────────
+
+[Unit]
+Description=Cairo Heart Hotel Aden — Realtime (socket.io :3002 + emit :3004)
+Documentation=file:///opt/cairo-hart/docs/RUNBOOK.md
+Wants=network-online.target
+After=network-online.target
+# تُشغَّل قبل الويب: البث من الويب يذهب إلى 127.0.0.1:3004
+# (الويب يقول After=cairo-hart-realtime.service — هذا الوجه الآخر للترتيب)
+Before=cairo-hart-web.service
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/opt/cairo-hart/mini-services/realtime
+EnvironmentFile=/etc/cairo-hart/env
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+# الخدمة تعمل مباشرة من المصدر بـ bun (لا خطوة بناء لها)
+ExecStart=/usr/bin/env bun index.ts
+
+# نفس نمط إعادة التشغيل كخدمة الويب
+Restart=always
+RestartSec=3
+
+# حماية أساسية (systemd hardening) — الخدمة للقراءة فقط: لا تكتب شيئًا
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+
+[Install]
+WantedBy=multi-user.target

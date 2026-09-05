@@ -16,6 +16,7 @@ import 'chat/chat_screen.dart';
 import 'home/home_screen.dart';
 import 'notifications/notifications_screen.dart';
 import 'services/services_screen.dart';
+import 'shared/privacy_screen.dart';
 import 'stay/stay_screen.dart';
 
 class GuestShell extends StatefulWidget {
@@ -149,6 +150,18 @@ class _GuestShellState extends State<GuestShell> {
               ],
             ),
             actions: [
+              // الخصوصية وحول التطبيق (F8 — إلزام المتاجر: وصول داخلي للسياسة)
+              IconButton(
+                tooltip: 'الخصوصية وحول التطبيق',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const PrivacyScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.shield_outlined),
+              ),
               // جرس الإشعارات (بadge غير المقروء)
               IconButton(
                 tooltip: unread > 0 ? 'الإشعارات — $unread غير مقروء' : 'الإشعارات',
