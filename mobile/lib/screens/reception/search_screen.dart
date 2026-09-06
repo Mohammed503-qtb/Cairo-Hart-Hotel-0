@@ -178,7 +178,7 @@ class _SearchDialogState extends State<_SearchDialog> {
                   ),
                 )
               else if (_loading && results == null)
-                loadingBlocks(2, height: 56)
+                loadingBlocks(context, 2, height: 56)
               else if (results != null) ...[
                 if (results.reservations.isEmpty &&
                     results.stays.isEmpty)

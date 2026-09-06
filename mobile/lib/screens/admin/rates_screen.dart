@@ -34,7 +34,9 @@ class _RatesScreenState extends State<RatesScreen> {
   @override
   void initState() {
     super.initState();
-    _refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
+    });
   }
 
   /// عند الفتح: refreshRates ثم refreshRoomTypes (الأنواع مطلوبة

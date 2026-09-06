@@ -129,10 +129,10 @@ class _PaymentDialogState extends State<_PaymentDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
-                const Icon(
+                Icon(
                   Icons.payments_rounded,
                   size: 20,
-                  color: AppColors.success,
+                  color: AppColors.successOf(context),
                 ),
                 const SizedBox(width: 8),
                 const Text(
@@ -157,11 +157,11 @@ class _PaymentDialogState extends State<_PaymentDialog> {
                   Text(
                     fmt.formatMoney(widget.balanceCents),
                     textDirection: TextDirection.ltr,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.danger,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                      color: AppColors.dangerOf(context),
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ],

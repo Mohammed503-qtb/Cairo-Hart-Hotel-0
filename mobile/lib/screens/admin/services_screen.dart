@@ -40,7 +40,9 @@ class _ServicesScreenState extends State<ServicesScreen> {
   @override
   void initState() {
     super.initState();
-    _refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
+    });
   }
 
   Future<void> _refresh() async {
@@ -410,12 +412,12 @@ class _ServicesScreenState extends State<ServicesScreen> {
                   ),
                 ),
                 if (s.priceCents == 0)
-                  const Text(
+                  Text(
                     'مجاني',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.success,
+                      color: AppColors.successOf(context),
                     ),
                   )
                 else
@@ -636,13 +638,16 @@ class _ServicesScreenState extends State<ServicesScreen> {
   }
 
   Widget _tableSkeleton() {
+    // هياكل التحميل: كانت أسود 7% (0x11000000) تختفي فوق الخلفية
+    // الداكنة — سطح الثيم المخفف مرئي في الوضعين (كـ loadingBlocks)
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         for (var i = 0; i < 6; i++) ...[
           Container(
             height: 56,
             decoration: BoxDecoration(
-              color: const Color(0x11000000),
+              color: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(12),
             ),
           ),

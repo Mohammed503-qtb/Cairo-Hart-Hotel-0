@@ -68,7 +68,9 @@ class _RequestsScreenState extends State<RequestsScreen> {
     if (store.requests.isNotEmpty) {
       _loaded = true;
     } else {
-      _refresh();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _refresh();
+      });
     }
   }
 
@@ -122,7 +124,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
               ReceptionSectionTitle(
                 _loaded ? 'الطلبات (${filtered.length} معروضة)' : 'الطلبات',
                 icon: Icons.room_service_rounded,
-                iconColor: AppColors.warning,
+                iconColor: AppColors.warningOf(context),
               ),
               // فلاتر الحالات (rounded-full في الويب)
               Wrap(
@@ -161,7 +163,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
                 const SizedBox(height: 12),
               ],
               if (!_loaded && _error == null)
-                loadingBlocks(4, height: 96)
+                loadingBlocks(context, 4, height: 96)
               else if (_loaded && filtered.isEmpty)
                 EmptyState(
                   icon: Icons.inbox_rounded,
@@ -308,6 +310,8 @@ class _RequestCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final isUrgent = request.priority == 'URGENT';
     final isOpen = kPendingRequestStatuses.contains(request.status);
+    // معنوية حسب الثيم (النغمة الفاتحة داكنًا — صبغة البرق وأيقونته معًا)
+    final danger = AppColors.dangerOf(context);
     return Material(
       color: scheme.surface,
       borderRadius: BorderRadius.circular(12),
@@ -338,14 +342,14 @@ class _RequestCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isUrgent && isOpen
-                      ? AppColors.danger.withValues(alpha: 0.10)
+                      ? danger.withValues(alpha: 0.10)
                       : scheme.surfaceContainerHighest,
                 ),
                 child: Icon(
                   isUrgent ? Icons.bolt_rounded : Icons.room_service_rounded,
                   size: 20,
                   color: isUrgent && isOpen
-                      ? AppColors.danger
+                      ? danger
                       : scheme.onSurfaceVariant,
                 ),
               ),

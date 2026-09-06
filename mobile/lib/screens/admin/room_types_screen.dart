@@ -47,7 +47,9 @@ class _RoomTypesScreenState extends State<RoomTypesScreen> {
   @override
   void initState() {
     super.initState();
-    _refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
+    });
   }
 
   Future<void> _refresh() async {

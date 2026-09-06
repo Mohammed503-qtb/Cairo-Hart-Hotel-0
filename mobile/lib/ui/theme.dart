@@ -22,6 +22,59 @@ class AppColors {
   static const Color warningContainer = Color(0xFFFCEBD5);
   static const Color info = Color(0xFF1F6E8C);
   static const Color infoContainer = Color(0xFFDCF0F7);
+
+  // ── توكنات الوضع الداكن — مرآة .dark في globals.css للموقع ──
+  // (--success:#4ADE80 · --warning:#FBBF24 · --destructive:#F87171
+  //  · --primary:#8FB3E3) — الألوان المعنوية الفاتحة فوق الخلفيات
+  // الداكنة (الرصيد 7-10:1) بدل الألوان الغامقة الثابتة
+  static const Color successDark = Color(0xFF4ADE80);
+  static const Color warningDark = Color(0xFFFBBF24);
+  static const Color dangerDark = Color(0xFFF87171);
+  static const Color infoDark = Color(0xFF8FB3E3);
+
+  /// اللون المعنوي حسب سطوع الثيم الحالي:
+  /// الفاتح → النغمة الغامقة الصلبة · الداكن → النغمة الفاتحة (كالموقع)
+  static Color semantic(BuildContext context, Color light, Color dark) {
+    return Theme.of(context).colorScheme.brightness == Brightness.dark
+        ? dark
+        : light;
+  }
+
+  /// success حسب الثيم الحالي
+  static Color successOf(BuildContext context) =>
+      semantic(context, success, successDark);
+
+  /// warning حسب الثيم الحالي
+  static Color warningOf(BuildContext context) =>
+      semantic(context, warning, warningDark);
+
+  /// danger حسب الثيم الحالي
+  static Color dangerOf(BuildContext context) =>
+      semantic(context, danger, dangerDark);
+
+  /// info حسب الثيم الحالي
+  static Color infoOf(BuildContext context) =>
+      semantic(context, info, infoDark);
+
+  /// الحاوية الداكنة المكافئة لـ bg-X/15 في موقع داكن:
+  /// 15% من النغمة الفاتحة فوق خلفية الثيم → صبغة داكنة أنيقة
+  static Color darkTint(Color darkToken) => darkToken.withValues(alpha: 0.15);
+
+  /// يربط نغمة الفاتح بنظيرتها الفاتح في الداكن (ويمرر غيرها كما هو):
+  /// مفيد للمكونات التي تستقبل Color من call sites ثابتة const ثم
+  /// تحلها داخل build — gold والمحايدات تمرّ دون تغيير
+  static Color resolveTone(BuildContext context, Color tone) {
+    if (Theme.of(context).colorScheme.brightness != Brightness.dark) {
+      return tone;
+    }
+    return switch (tone) {
+      AppColors.success => AppColors.successDark,
+      AppColors.warning => AppColors.warningDark,
+      AppColors.danger => AppColors.dangerDark,
+      AppColors.info => AppColors.infoDark,
+      _ => tone,
+    };
+  }
 }
 
 ThemeData buildLightTheme() {

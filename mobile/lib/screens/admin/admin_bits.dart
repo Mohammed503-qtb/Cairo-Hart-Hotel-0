@@ -77,10 +77,17 @@ class RawCodeBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
+    // الفاتح: كريمي ذهبي فوق حوار فاتح + كود داكن (كما كان)
+    // الداكن: صبغة ذهبية 12% (كbg-gold/10 في الويب الداكن) + كود ذهبي
+    // فاتح (text-gold) — الحاوية الصلبة الفاتحة كانت تتحول لرمادي
+    // عند 0.35 في الداكن فيقتل تباين الكود والتحذير
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.goldContainer.withValues(alpha: 0.35),
+        color: dark
+            ? AppColors.gold.withValues(alpha: 0.12)
+            : AppColors.goldContainer.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.gold, width: 1.5),
       ),
@@ -94,23 +101,23 @@ class RawCodeBox extends StatelessWidget {
               fontSize: 26,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.5,
-              color: scheme.onSurface,
+              color: dark ? AppColors.gold : scheme.onSurface,
             ),
           ),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.warning_rounded,
-                  size: 16, color: AppColors.warning),
+              Icon(Icons.warning_rounded,
+                  size: 16, color: AppColors.warningOf(context)),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
                   'انسخه الآن — لن يظهر مرة أخرى',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.warning,
+                    color: AppColors.warningOf(context),
                   ),
                 ),
               ),
@@ -228,33 +235,58 @@ class AdminBarChart extends StatelessWidget {
   }
 }
 
+/// نغمة صندوق التحذير — معنوية حسب الثيم (كtext-warning/bg-warning/15)
+enum AdminAlertTone { warning, neutral }
+
 /// صندوق تحذير/تنبيه صغير (مقابل التنبيهات في dashboard.tsx)
 class AdminAlertBox extends StatelessWidget {
   const AdminAlertBox({
     super.key,
     required this.icon,
     required this.text,
-    this.color = AppColors.warning,
-    this.background = AppColors.warningContainer,
+    this.tone = AdminAlertTone.warning,
   });
 
   final IconData icon;
   final String text;
-  final Color color;
-  final Color background;
+  final AdminAlertTone tone;
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
+    // الفاتح: حاوية تحذير مخففة 50% (كما كان) · الداكن: صبغة 15% من
+    // النغمة الفاتحة + نص فاتح (bg-warning/15 text-warning بالموقع)
+    // — الحاوية الفاتحة عند 50% فوق بطاقة داكنة كانت تصير رمادية
+    // فيقتل التباين (≈1.35:1)
+    final (fg, bg, borderColor) = switch (tone) {
+      AdminAlertTone.warning => dark
+          ? (
+              AppColors.warningDark,
+              AppColors.warningDark.withValues(alpha: 0.15),
+              AppColors.warningDark.withValues(alpha: 0.4),
+            )
+          : (
+              AppColors.warning,
+              AppColors.warningContainer.withValues(alpha: 0.5),
+              AppColors.warning.withValues(alpha: 0.4),
+            ),
+      AdminAlertTone.neutral => (
+        scheme.onSurfaceVariant,
+        scheme.surfaceContainerHighest,
+        scheme.outlineVariant,
+      ),
+    };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: background.withValues(alpha: 0.5),
+        color: bg,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: color),
+          Icon(icon, size: 18, color: fg),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -262,7 +294,7 @@ class AdminAlertBox extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: color,
+                color: fg,
               ),
             ),
           ),

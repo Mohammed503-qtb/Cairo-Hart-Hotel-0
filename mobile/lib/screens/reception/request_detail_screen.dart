@@ -212,6 +212,8 @@ class _RequestDetailDialogState extends State<_RequestDetailDialog> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final req = _request;
+    // معنوية حسب الثيم (النغمة الفاتحة داكنًا) — عنوان العاجل ونبضة البرق
+    final danger = AppColors.dangerOf(context);
     return Dialog(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 560),
@@ -232,7 +234,7 @@ class _RequestDetailDialogState extends State<_RequestDetailDialog> {
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           color: req.priority == 'URGENT'
-                              ? AppColors.danger
+                              ? danger
                               : scheme.onSurface,
                         ),
                       ),
@@ -244,12 +246,12 @@ class _RequestDetailDialogState extends State<_RequestDetailDialog> {
                         height: 28,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.danger.withValues(alpha: 0.10),
+                          color: danger.withValues(alpha: 0.10),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.bolt_rounded,
                           size: 16,
-                          color: AppColors.danger,
+                          color: danger,
                         ),
                       ),
                     ],
@@ -306,7 +308,7 @@ class _RequestDetailDialogState extends State<_RequestDetailDialog> {
               ],
               const SizedBox(height: 12),
               if (req == null)
-                loadingBlocks(2, height: 64)
+                loadingBlocks(context, 2, height: 64)
               else ...[
                 // نص الوصف إن وجد
                 if (req.description != null && req.description!.isNotEmpty)
@@ -596,12 +598,12 @@ class _PriorityBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: urgent
-            ? AppColors.danger.withValues(alpha: 0.10)
+            ? AppColors.dangerOf(context).withValues(alpha: 0.10)
             : scheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: urgent
-              ? AppColors.danger.withValues(alpha: 0.40)
+              ? AppColors.dangerOf(context).withValues(alpha: 0.40)
               : scheme.outlineVariant,
         ),
       ),
@@ -612,7 +614,7 @@ class _PriorityBadge extends StatelessWidget {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: urgent ? AppColors.danger : scheme.onSurfaceVariant,
+          color: urgent ? AppColors.dangerOf(context) : scheme.onSurfaceVariant,
         ),
       ),
     );
@@ -738,7 +740,7 @@ class _Timeline extends StatelessWidget {
                 height: 12,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.success,
+                  color: AppColors.successOf(context),
                   border: Border.all(color: scheme.surface, width: 2),
                 ),
               ),
@@ -747,7 +749,7 @@ class _Timeline extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.success,
+                  color: AppColors.successOf(context),
                 ),
               ),
             ),

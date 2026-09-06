@@ -113,7 +113,7 @@ class _ReceptionNotificationsScreenState
     final showSkeleton =
         (_firstLoad || store.notificationsLoading) && notifs.isEmpty;
     if (showSkeleton) {
-      return _scrollable(children: [loadingBlocks(4, height: 64)]);
+      return _scrollable(children: [loadingBlocks(context, 4, height: 64)]);
     }
     if (notifs.isEmpty) {
       return _scrollable(children: [

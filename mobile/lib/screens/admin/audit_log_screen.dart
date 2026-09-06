@@ -88,7 +88,9 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
     super.initState();
     // استمرار البحث الملتزم من المخزن (الفلاتر تقاوم تنقّل الأقسام)
     _searchCtrl = TextEditingController(text: widget.store.auditQuery);
-    _refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
+    });
   }
 
   @override
@@ -283,49 +285,57 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
     );
     return Padding(
       padding: const EdgeInsets.only(top: 6),
-      child: Row(
+      // Wrap (كـ Pager الويب): يلف عند الضيق بدل الفيض (68px عند 360×1.3)
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 12,
+        runSpacing: 8,
         children: [
-          Flexible(
-            child: Text(
-              'الإجمالي: ${_arabicNumber(d.total)}',
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: scheme.onSurfaceVariant,
+          Text(
+            'الإجمالي: ${_arabicNumber(d.total)}',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              OutlinedButton.icon(
+                style: small,
+                onPressed:
+                    d.page <= 1 ? null : () => _applyFilters(page: d.page - 1),
+                icon: const Icon(Icons.chevron_right_rounded, size: 16),
+                label: const Text('السابق'),
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          OutlinedButton.icon(
-            style: small,
-            onPressed:
-                d.page <= 1 ? null : () => _applyFilters(page: d.page - 1),
-            icon: const Icon(Icons.chevron_right_rounded, size: 16),
-            label: const Text('السابق'),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text(
-              'صفحة ${d.page} من ${d.pages}',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: scheme.onSurfaceVariant,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Text(
+                  'صفحة ${d.page} من ${d.pages}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
               ),
-            ),
-          ),
-          OutlinedButton(
-            style: small,
-            onPressed:
-                d.page >= d.pages ? null : () => _applyFilters(page: d.page + 1),
-            child: const Row(
-              children: [
-                Text('التالي'),
-                SizedBox(width: 4),
-                Icon(Icons.chevron_left_rounded, size: 16),
-              ],
-            ),
+              OutlinedButton(
+                style: small,
+                onPressed:
+                    d.page >= d.pages ? null : () => _applyFilters(page: d.page + 1),
+                child: const Row(
+                  children: [
+                    Text('التالي'),
+                    SizedBox(width: 4),
+                    Icon(Icons.chevron_left_rounded, size: 16),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

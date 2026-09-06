@@ -31,6 +31,7 @@ class RefCodeText extends StatelessWidget {
 }
 
 /// مبلغ ملوّن: أحمر للرصيد المستحق — أخضر للصفر — أصفر للسالب — MoneyAmount
+/// الألوان معنوية حسب الثيم (كالموقع: النغمات الفاتحة في الداكن)
 class MoneyText extends StatelessWidget {
   const MoneyText(this.cents, {super.key, this.colored = false});
 
@@ -42,10 +43,10 @@ class MoneyText extends StatelessWidget {
     Color? color;
     if (colored) {
       color = cents > 0
-          ? AppColors.danger
+          ? AppColors.dangerOf(context)
           : cents < 0
-              ? AppColors.warning
-              : AppColors.success;
+              ? AppColors.warningOf(context)
+              : AppColors.successOf(context);
     }
     return Text(
       fmt.formatMoney(cents),
@@ -131,26 +132,28 @@ class KpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    // معنوي حسب الثيم: الفاتح → نغمة غامقة فوق صبغة 8-10% فاتحة
+    // (كما bg-X/10 في الويب) · الداكن → نغمة فاتحة فوق صبغة داكنة
     final (fg, bg) = switch (tone) {
       KpiTone.primary => (
           scheme.primary,
           scheme.primary.withValues(alpha: 0.08),
         ),
       KpiTone.coral => (
-          AppColors.danger,
-          AppColors.danger.withValues(alpha: 0.08),
+          AppColors.dangerOf(context),
+          AppColors.dangerOf(context).withValues(alpha: 0.08),
         ),
       KpiTone.success => (
-          AppColors.success,
-          AppColors.success.withValues(alpha: 0.08),
+          AppColors.successOf(context),
+          AppColors.successOf(context).withValues(alpha: 0.08),
         ),
       KpiTone.warning => (
-          AppColors.warning,
-          AppColors.warning.withValues(alpha: 0.10),
+          AppColors.warningOf(context),
+          AppColors.warningOf(context).withValues(alpha: 0.10),
         ),
       KpiTone.urgent => (
-          AppColors.danger,
-          AppColors.danger.withValues(alpha: 0.10),
+          AppColors.dangerOf(context),
+          AppColors.dangerOf(context).withValues(alpha: 0.10),
         ),
     };
     final body = Container(
@@ -207,7 +210,7 @@ class KpiCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: AppColors.danger,
+                color: AppColors.dangerOf(context),
               ),
             ),
           ],
@@ -352,23 +355,26 @@ String? buildWhatsappCheckInUrl({
   return 'https://wa.me/$digits?text=${Uri.encodeComponent(text)}';
 }
 
-/// هوياكل تحميل (مقابل Skeleton في الويب)
-Widget loadingBlocks(int count, {double height = 120}) {
+/// هوياكل تحميل (مقابل Skeleton في الويب) — مرئية في الوضعين
+/// (الفاتح: رمادي فاتح · الداكن: سطح داكن) — كانت 0x11000000
+/// (أسود 7%) فتختفي تمامًا في الداكن
+Widget loadingBlocks(BuildContext context, int count, {double height = 120}) {
   return Column(
     children: [
       for (var i = 0; i < count; i++) ...[
-        _placeholderBox(height),
+        _placeholderBox(context, height),
         const SizedBox(height: 10),
       ],
     ],
   );
 }
 
-Widget _placeholderBox(double height) {
+Widget _placeholderBox(BuildContext context, double height) {
+  final scheme = Theme.of(context).colorScheme;
   return Container(
     height: height,
     decoration: BoxDecoration(
-      color: const Color(0x11000000),
+      color: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
       borderRadius: BorderRadius.circular(12),
     ),
   );

@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "test": "bun test tests/unit/ && bun test tests/auth/ && bun test tests/integration/",
     "smoke": "bun scripts/smoke.ts",
+    "mobile-contract": "bun scripts/mobile-contract-test.ts",
     "purge-demo": "bun scripts/purge-demo.ts",
     "backup": "bash scripts/backup.sh",
     "restore": "bash scripts/restore.sh",

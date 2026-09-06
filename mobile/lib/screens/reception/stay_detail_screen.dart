@@ -193,7 +193,7 @@ class _StayDetailPageState extends State<_StayDetailPage>
                     ),
                   ),
                 Expanded(
-                  child: Center(child: loadingBlocks(2, height: 120)),
+                  child: Center(child: loadingBlocks(context, 2, height: 120)),
                 ),
               ],
             )
@@ -851,11 +851,12 @@ class _MoneySuccess extends StatelessWidget {
     return Text(
       fmt.formatMoney(cents),
       textDirection: TextDirection.ltr,
-      style: const TextStyle(
+      // معنوية حسب الثيم (النغمة الفاتحة داكنًا)
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w800,
-        color: AppColors.success,
-        fontFeatures: [FontFeature.tabularFigures()],
+        color: AppColors.successOf(context),
+        fontFeatures: const [FontFeature.tabularFigures()],
       ),
     );
   }
@@ -1517,8 +1518,8 @@ class _RoomChangeCard extends StatelessWidget {
               if (c.priceDiffCents > 0)
                 _OutlineChip(
                   '+ ${fmt.formatMoney(c.priceDiffCents)}',
-                  foreground: AppColors.warning,
-                  borderColor: AppColors.warning.withValues(alpha: 0.40),
+                  foreground: AppColors.warningOf(context),
+                  borderColor: AppColors.warningOf(context).withValues(alpha: 0.40),
                 ),
             ],
           ),
@@ -1613,8 +1614,8 @@ class _TabIcon extends StatelessWidget {
         Container(
           width: 7,
           height: 7,
-          decoration: const BoxDecoration(
-            color: AppColors.danger,
+          decoration: BoxDecoration(
+            color: AppColors.dangerOf(context),
             shape: BoxShape.circle,
           ),
         ),

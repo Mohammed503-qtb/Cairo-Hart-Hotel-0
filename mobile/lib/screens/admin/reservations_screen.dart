@@ -74,7 +74,9 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
     // استمرار البحث الملتزم من المخزن (الفلاتر تقاوم تنقّل الأقسام)
     _searchCtrl =
         TextEditingController(text: widget.store.reservationsQuery);
-    _refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
+    });
   }
 
   @override
@@ -316,10 +318,15 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                // Wrap (flex-wrap الويب): المرجع + شارة المصدر يلفان
+                // عند الضيق بدل الفيض (5.9px عند 320×1.3)
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     RefCodeText(r.reference, color: scheme.primary),
-                    const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
@@ -409,16 +416,16 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.success,
+                          color: AppColors.successOf(context),
                         ),
                       ),
                       Text(
                         fmt.formatMoney(r.paidCents),
                         textDirection: TextDirection.ltr,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.success,
+                          color: AppColors.successOf(context),
                         ),
                       ),
                     ],
@@ -444,7 +451,13 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
     );
     return Padding(
       padding: const EdgeInsets.only(top: 6),
-      child: Row(
+      // Wrap (Pager الويب flex-wrap عند الضيق): الزران والعدّاد
+      // والإجمالي يلفون بدل الفيض (123px عند 360×1.3)
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 12,
+        runSpacing: 8,
         children: [
           Text(
             'الإجمالي: ${_arabicNumber(d.total)}',
@@ -454,36 +467,43 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
               color: scheme.onSurfaceVariant,
             ),
           ),
-          const Spacer(),
-          OutlinedButton.icon(
-            style: small,
-            onPressed:
-                d.page <= 1 ? null : () => _applyFilters(page: d.page - 1),
-            icon: const Icon(Icons.chevron_right_rounded, size: 16),
-            label: const Text('السابق'),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text(
-              'صفحة ${d.page} من ${d.pages}',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: scheme.onSurfaceVariant,
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              OutlinedButton.icon(
+                style: small,
+                onPressed:
+                    d.page <= 1 ? null : () => _applyFilters(page: d.page - 1),
+                icon: const Icon(Icons.chevron_right_rounded, size: 16),
+                label: const Text('السابق'),
               ),
-            ),
-          ),
-          OutlinedButton(
-            style: small,
-            onPressed:
-                d.page >= d.pages ? null : () => _applyFilters(page: d.page + 1),
-            child: const Row(
-              children: [
-                Text('التالي'),
-                SizedBox(width: 4),
-                Icon(Icons.chevron_left_rounded, size: 16),
-              ],
-            ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Text(
+                  'صفحة ${d.page} من ${d.pages}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              OutlinedButton(
+                style: small,
+                onPressed: d.page >= d.pages
+                    ? null
+                    : () => _applyFilters(page: d.page + 1),
+                child: const Row(
+                  children: [
+                    Text('التالي'),
+                    SizedBox(width: 4),
+                    Icon(Icons.chevron_left_rounded, size: 16),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -491,13 +511,16 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
   }
 
   Widget _tableSkeleton() {
+    // هياكل التحميل: كانت أسود 7% (0x11000000) تختفي فوق الخلفية
+    // الداكنة — سطح الثيم المخفف مرئي في الوضعين (كـ loadingBlocks)
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         for (var i = 0; i < 6; i++) ...[
           Container(
             height: 110,
             decoration: BoxDecoration(
-              color: const Color(0x11000000),
+              color: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(16),
             ),
           ),
@@ -1082,7 +1105,7 @@ class _ReservationDetailPageState extends State<_ReservationDetailPage> {
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
                             color: r.payments[i].status == 'COMPLETED'
-                                ? AppColors.success
+                                ? AppColors.successOf(context)
                                 : scheme.error,
                           ),
                         ),

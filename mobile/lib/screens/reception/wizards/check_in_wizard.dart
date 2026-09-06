@@ -222,6 +222,8 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
 
   Widget _buildHeader(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    // معنوية حسب الثيم (النغمة الفاتحة داكنًا — الصبغة والنص معًا)
+    final success = AppColors.successOf(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -251,7 +253,7 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
                   color: i == _step
                       ? scheme.primary
                       : i < _step
-                          ? AppColors.success.withValues(alpha: 0.15)
+                          ? success.withValues(alpha: 0.15)
                           : scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(999),
                 ),
@@ -263,7 +265,7 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
                     color: i == _step
                         ? scheme.onPrimary
                         : i < _step
-                            ? AppColors.success
+                            ? success
                             : scheme.onSurfaceVariant,
                   ),
                 ),
@@ -278,23 +280,25 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
     String message, {
     IconData icon = Icons.warning_amber_rounded,
   }) {
+    // معنوية حسب الثيم (النغمة الفاتحة داكنًا — الصبغة والحد والأيقونة والنص معًا)
+    final danger = AppColors.dangerOf(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.danger.withValues(alpha: 0.1),
+        color: danger.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.danger.withValues(alpha: 0.4)),
+        border: Border.all(color: danger.withValues(alpha: 0.4)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: AppColors.danger),
+          Icon(icon, size: 16, color: danger),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
-                  fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.danger),
+              style: TextStyle(
+                  fontSize: 13, fontWeight: FontWeight.w600, color: danger),
             ),
           ),
         ],
@@ -355,22 +359,30 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
   // ── الخطوة 1: التحقق من الضيف ──
   Widget _buildStep0(BuildContext context) {
     final a = _arrival;
+    // معنوية حسب الثيم (النغمة الفاتحة داكنًا) — صندوق الرصيد المستحق
+    final warn = AppColors.warningOf(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 14),
         if (a == null) ...[
-          // هيكل تحميل (Skeleton في الويب)
+          // هيكل تحميل (Skeleton في الويب) — مرئي في الوضعين (كان 0x11000000)
           Container(
               height: 64,
               decoration: BoxDecoration(
-                  color: const Color(0x11000000),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(10))),
           const SizedBox(height: 8),
           Container(
               height: 40,
               decoration: BoxDecoration(
-                  color: const Color(0x11000000),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(10))),
         ] else ...[
           _detailsBox(
@@ -427,13 +439,13 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.warning.withValues(alpha: 0.1),
+                color: warn.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.warning.withValues(alpha: 0.4)),
+                border: Border.all(color: warn.withValues(alpha: 0.4)),
               ),
               child: Row(children: [
                 Icon(Icons.warning_amber_rounded,
-                    size: 16, color: AppColors.warning),
+                    size: 16, color: warn),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -499,10 +511,10 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
             style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
             children: [
               const TextSpan(text: 'الغرف '),
-              const TextSpan(
+              TextSpan(
                   text: 'المتاحة',
                   style: TextStyle(
-                      fontWeight: FontWeight.w800, color: AppColors.success)),
+                      fontWeight: FontWeight.w800, color: AppColors.successOf(context))),
               const TextSpan(text: ' من نوع '),
               TextSpan(
                   text: a?.roomType.name ?? '—',
@@ -561,6 +573,11 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
       builder: (context, constraints) {
         const gap = 8.0;
         final w = (constraints.maxWidth - gap * 2) / 3;
+        // مرئي في الوضعين (كان 0x11000000)
+        final skel = Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.6);
         return Wrap(
           spacing: gap,
           runSpacing: gap,
@@ -570,7 +587,7 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
                 width: w,
                 height: 70,
                 decoration: BoxDecoration(
-                    color: const Color(0x11000000),
+                    color: skel,
                     borderRadius: BorderRadius.circular(10)),
               ),
           ],
@@ -610,7 +627,7 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
                   style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.success),
+                      color: AppColors.successOf(context)),
                 ),
                 Text(' (طابق ${selectedRoom?.floor ?? 0})'),
               ]),
@@ -682,6 +699,10 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
     final result = _result!;
     final scheme = Theme.of(context).colorScheme;
     final caption = TextStyle(fontSize: 12, color: scheme.onSurfaceVariant);
+    // معنوية حسب الثيم (النغمة الفاتحة داكنًا) — دائرة النجاح ورقم الغرفة
+    final success = AppColors.successOf(context);
+    // وتنبيه «احتفظ بالكود» — النغمة الفاتحة داكنًا
+    final danger = AppColors.dangerOf(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -691,9 +712,9 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
           height: 64,
           decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.success.withValues(alpha: 0.15)),
+              color: success.withValues(alpha: 0.15)),
           child: Icon(Icons.check_circle_rounded,
-              size: 40, color: AppColors.success),
+              size: 40, color: success),
         ),
         const SizedBox(height: 12),
         const Text('تم تسجيل الوصول ✅',
@@ -713,7 +734,7 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
                 style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.success)),
+                    color: success)),
             Text(' — ${result.guestName}', style: caption),
           ],
         ),
@@ -746,7 +767,7 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
         ),
         const SizedBox(height: 10),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(Icons.warning_amber_rounded, size: 14, color: AppColors.danger),
+          Icon(Icons.warning_amber_rounded, size: 14, color: danger),
           const SizedBox(width: 6),
           Flexible(
             child: Text(
@@ -755,7 +776,7 @@ class _CheckInWizardDialogState extends State<_CheckInWizardDialog> {
               style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.danger),
+                  color: danger),
             ),
           ),
         ]),
@@ -869,12 +890,14 @@ class _RoomTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    // معنوية حسب الثيم (النغمة الفاتحة داكنًا — الصبغة والحد والرقم معًا)
+    final success = AppColors.successOf(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.success.withValues(alpha: selected ? 0.15 : 0.05),
+        color: success.withValues(alpha: selected ? 0.15 : 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-            color: AppColors.success.withValues(alpha: selected ? 1 : 0.3),
+            color: success.withValues(alpha: selected ? 1 : 0.3),
             width: 2),
       ),
       child: Material(
@@ -893,14 +916,14 @@ class _RoomTile extends StatelessWidget {
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.success),
+                      color: success),
                 ),
                 const SizedBox(height: 2),
                 Text('الطابق ${room.floor}',
                     style: TextStyle(
                         fontSize: 10, color: scheme.onSurfaceVariant)),
                 if (selected)
-                  Icon(Icons.check, size: 14, color: AppColors.success),
+                  Icon(Icons.check, size: 14, color: success),
               ],
             ),
           ),

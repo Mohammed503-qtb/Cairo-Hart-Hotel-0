@@ -61,7 +61,9 @@ class _HotelSettingsScreenState extends State<HotelSettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
+    });
   }
 
   @override
@@ -323,7 +325,11 @@ class _HotelSettingsScreenState extends State<HotelSettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.goldContainer.withValues(alpha: 0.4),
+        // goldContainer مخففة 40% تتحول رمادي وسطي فوق الداكن —
+        // صبغة ذهبية 12% في الداكن (bg-gold/12) · الفاتح كما كان
+        color: scheme.brightness == Brightness.dark
+            ? AppColors.gold.withValues(alpha: 0.12)
+            : AppColors.goldContainer.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.gold.withValues(alpha: 0.4)),
       ),
@@ -516,13 +522,16 @@ class _HotelSettingsScreenState extends State<HotelSettingsScreen> {
   }
 
   Widget _skeletonCards() {
+    // هياكل التحميل: كانت أسود 7% (0x11000000) تختفي فوق الخلفية
+    // الداكنة — سطح الثيم المخفف مرئي في الوضعين (كـ loadingBlocks)
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         for (var i = 0; i < 3; i++) ...[
           Container(
             height: 150,
             decoration: BoxDecoration(
-              color: const Color(0x11000000),
+              color: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(16),
             ),
           ),

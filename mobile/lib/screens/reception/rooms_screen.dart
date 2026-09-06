@@ -14,53 +14,62 @@ import '../../ui/widgets.dart';
 import 'reception_bits.dart';
 import 'stay_detail_screen.dart';
 
-/// دليل الألوان (LEGEND في الويب)
-const List<({String status, Color color})> _legend = [
-  (status: 'AVAILABLE', color: AppColors.success),
-  (status: 'OCCUPIED', color: AppColors.danger),
-  (status: 'CLEANING', color: AppColors.gold),
-  (status: 'DIRTY', color: AppColors.warning),
-  (status: 'OUT_OF_ORDER', color: Color(0xFF262626)),
-];
+/// دليل الألوان (LEGEND في الويب) — يُحل حسب الثيم عند البناء
+List<({String status, Color color})> _legendOf(BuildContext context) {
+  final scheme = Theme.of(context).colorScheme;
+  final dark = scheme.brightness == Brightness.dark;
+  return [
+    (status: 'AVAILABLE', color: AppColors.successOf(context)),
+    (status: 'OCCUPIED', color: AppColors.dangerOf(context)),
+    (status: 'CLEANING', color: AppColors.gold),
+    (status: 'DIRTY', color: AppColors.warningOf(context)),
+    // الفاتح: رقاقة داكنة كما الويب (bg-neutral-800) · الداكن: محايد
+    // مرئي (#262626 فوق سطح داكن = غير مرئي 1.15:1)
+    (
+      status: 'OUT_OF_ORDER',
+      color: dark
+          ? scheme.onSurfaceVariant.withValues(alpha: 0.6)
+          : const Color(0xFF262626),
+    ),
+  ];
+}
 
 /// ألوان بطاقة الغرفة (ROOM_CARD_STYLE في الويب): خلفية/حد/نص
+/// — النص معنوي حسب الثيم ثم الخلفية/الحد صبغات منه:
+/// الفاتح: نغمة غامقة فوق صبغة فاتحة · الداكن: نغمة فاتحة (مرآة
+/// .dark في موقع الويب) فوق صبغة داكنة — التباين سليم في الوضعين
 (Color, Color, Color) _roomCardStyle(BuildContext context, String status) {
   final scheme = Theme.of(context).colorScheme;
+  final dark = scheme.brightness == Brightness.dark;
+  final fg = switch (status) {
+    'AVAILABLE' => AppColors.successOf(context),
+    'OCCUPIED' => scheme.onSurface,
+    'RESERVED' => scheme.primary,
+    // الويب: text-[#8a6d1f] فاتحًا · dark:text-gold داكنًا
+    'CLEANING' => dark ? AppColors.gold : AppColors.goldDark,
+    'DIRTY' => AppColors.warningOf(context),
+    _ => scheme.onSurface,
+  };
+  final tint = switch (status) {
+    'AVAILABLE' => AppColors.successOf(context),
+    'OCCUPIED' => AppColors.dangerOf(context),
+    'RESERVED' => scheme.primary,
+    'CLEANING' => AppColors.gold,
+    'DIRTY' => AppColors.warningOf(context),
+    _ => scheme.onSurfaceVariant,
+  };
   return switch (status) {
-    'AVAILABLE' => (
-        AppColors.success.withValues(alpha: 0.10),
-        AppColors.success.withValues(alpha: 0.40),
-        AppColors.success,
-      ),
-    'OCCUPIED' => (
-        AppColors.danger.withValues(alpha: 0.10),
-        AppColors.danger.withValues(alpha: 0.40),
-        scheme.onSurface,
-      ),
-    'RESERVED' => (
-        scheme.primary.withValues(alpha: 0.10),
-        scheme.primary.withValues(alpha: 0.30),
-        scheme.primary,
-      ),
-    'CLEANING' => (
-        AppColors.gold.withValues(alpha: 0.15),
-        AppColors.gold.withValues(alpha: 0.40),
-        AppColors.goldDark,
-      ),
-    'DIRTY' => (
-        AppColors.warning.withValues(alpha: 0.15),
-        AppColors.warning.withValues(alpha: 0.50),
-        AppColors.warning,
-      ),
+    // رقاقة داكنة ثابتة (bg-neutral-800/90 border-neutral-900
+    // text-neutral-200 في الويب) — سليمة في الوضعين
     'OUT_OF_ORDER' => (
         const Color(0xE6262626),
         const Color(0xFF171717),
         const Color(0xFFE5E5E5),
       ),
     _ => (
-        scheme.surfaceContainerHighest,
-        scheme.outlineVariant,
-        scheme.onSurface,
+        tint.withValues(alpha: 0.10),
+        tint.withValues(alpha: 0.40),
+        fg,
       ),
   };
 }
@@ -88,7 +97,9 @@ class _RoomsScreenState extends State<RoomsScreen> {
     if (store.rooms.isNotEmpty) {
       _loaded = true;
     } else {
-      _refresh();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _refresh();
+      });
     }
   }
 
@@ -146,7 +157,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                 const SizedBox(height: 12),
               ],
               if (!_loaded && _error == null)
-                loadingBlocks(2, height: 130)
+                loadingBlocks(context, 2, height: 130)
               else
                 for (final entry in sortedFloors) ...[
                   Row(
@@ -232,7 +243,7 @@ class _LegendCard extends StatelessWidget {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          for (final item in _legend)
+          for (final item in _legendOf(context))
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -634,7 +645,7 @@ class _RoomDialogState extends State<_RoomDialog> {
                       Icon(
                         Icons.warning_amber_rounded,
                         size: 14,
-                        color: AppColors.warning,
+                        color: AppColors.warningOf(context),
                       ),
                       const SizedBox(width: 6),
                       Expanded(

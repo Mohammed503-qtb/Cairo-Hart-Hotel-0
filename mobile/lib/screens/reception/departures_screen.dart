@@ -44,9 +44,9 @@ class _DeparturesScreenState extends State<DeparturesScreen> {
   @override
   void initState() {
     super.initState();
-    if (store.departures.isEmpty) {
-      _refresh();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && (store.departures.isEmpty)) _refresh();
+    });
   }
 
   Future<void> _refresh({String? date}) async {
@@ -76,7 +76,7 @@ class _DeparturesScreenState extends State<DeparturesScreen> {
               ReceptionSectionTitle(
                 'المغادرون${isToday ? ' اليوم' : ''}',
                 icon: Icons.flight_takeoff_rounded,
-                iconColor: AppColors.danger,
+                iconColor: AppColors.dangerOf(context),
               ),
               DateFieldRow(
                 value: store.departuresDate,
@@ -105,7 +105,7 @@ class _DeparturesBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (store.departuresLoading && store.departures.isEmpty) {
-      return loadingBlocks(2, height: 110);
+      return loadingBlocks(context, 2, height: 110);
     }
     final isToday = store.departuresDate == fmt.todayInputValue();
     final overdue =
@@ -116,10 +116,10 @@ class _DeparturesBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (overdue.isNotEmpty) ...[
-          const ReceptionSectionTitle(
+          ReceptionSectionTitle(
             'مغادرات متأخرة',
             icon: Icons.alarm_rounded,
-            iconColor: AppColors.danger,
+            iconColor: AppColors.dangerOf(context),
           ),
           for (final d in overdue) ...[
             _DepartureCard(dep: d, store: store),
@@ -130,7 +130,7 @@ class _DeparturesBody extends StatelessWidget {
         ReceptionSectionTitle(
           'مستحقو ${isToday ? 'اليوم' : 'هذا اليوم'}',
           icon: Icons.flight_takeoff_rounded,
-          iconColor: AppColors.danger,
+          iconColor: AppColors.dangerOf(context),
         ),
         if (dueToday.isEmpty)
           const EmptyState(
@@ -262,9 +262,11 @@ class _DepartureCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           // الأزرار: تحت المحتوى (flex-wrap في الويب يلفها على الشاشات الضيقة)
-          // الفاتورة (secondary + Receipt في الويب) → تفصيل الإقامة بتبويب الفاتورة
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          // Wrap يطابق الويب حرفيًا (كان Row يفيض 68px عند 320×1.3)
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.end,
             children: [
               OutlinedButton.icon(
                 onPressed: () => showStayDetail(
@@ -276,7 +278,6 @@ class _DepartureCard extends StatelessWidget {
                 icon: const Icon(Icons.receipt_rounded, size: 18),
                 label: const Text('الفاتورة'),
               ),
-              const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: () => showCheckOutWizard(
                   context,
@@ -300,24 +301,26 @@ class _OverdueBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // معنوية حسب الثيم (النغمة الفاتحة داكنًا — الصبغة والحد والأيقونة والنص معًا)
+    final danger = AppColors.dangerOf(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.danger.withValues(alpha: 0.10),
+        color: danger.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.danger.withValues(alpha: 0.40)),
+        border: Border.all(color: danger.withValues(alpha: 0.40)),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.alarm_rounded, size: 12, color: AppColors.danger),
-          SizedBox(width: 3),
+          Icon(Icons.alarm_rounded, size: 12, color: danger),
+          const SizedBox(width: 3),
           Text(
             'متأخر',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.danger,
+              color: danger,
             ),
           ),
         ],

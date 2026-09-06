@@ -37,7 +37,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.store.dashboard == null) _refresh();
+    // F6: التحميل بعد اكتمال أول إطار — notifyListeners أثناء بناء
+    // السلف (ListenableBuilder في الصدفة) يرمي markNeedsBuild-during-build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && (widget.store.dashboard == null)) _refresh();
+    });
   }
 
   Future<void> _refresh() async {
@@ -266,7 +270,7 @@ class _DashboardBody extends StatelessWidget {
         ReceptionSectionTitle(
           'مغادرات اليوم',
           icon: Icons.flight_takeoff_rounded,
-          iconColor: AppColors.danger,
+          iconColor: AppColors.dangerOf(context),
           action: TextButton(
               onPressed: () => onGoTab(4), child: const Text('الكل')),
         ),
@@ -288,7 +292,7 @@ class _DashboardBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ReceptionSectionTitle('طلبات معلقة',
-            icon: Icons.room_service_rounded, iconColor: AppColors.warning),
+            icon: Icons.room_service_rounded, iconColor: AppColors.warningOf(context)),
         if (data.pendingRequests.isEmpty)
           const EmptyState(
               icon: Icons.notifications_outlined,
@@ -375,31 +379,35 @@ class _ArrivalRow extends StatelessWidget {
                     text: '$paidPercent%',
                     style: TextStyle(
                         fontWeight: FontWeight.w800,
-                        color: AppColors.success)),
+                        color: AppColors.successOf(context))),
                 const TextSpan(text: ' مدفوع'),
               ],
             ),
           ),
           const SizedBox(height: 8),
-          Row(children: [
-            StatusChip.paymentStatus(context, a.paymentStatus),
-            const Spacer(),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(64, 38),
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                textStyle: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w700),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.spaceBetween,
+            children: [
+              StatusChip.paymentStatus(context, a.paymentStatus),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(64, 38),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w700),
+                ),
+                onPressed: () => showCheckInWizard(
+                  context,
+                  store: store,
+                  reservationId: a.reservationId,
+                  checkInIso: a.checkIn,
+                ),
+                child: const Text('تسجيل وصول'),
               ),
-              onPressed: () => showCheckInWizard(
-                context,
-                store: store,
-                reservationId: a.reservationId,
-                checkInIso: a.checkIn,
-              ),
-              child: const Text('تسجيل وصول'),
-            ),
-          ]),
+            ],
+          ),
         ],
       ),
     );
@@ -454,40 +462,43 @@ class _DepartureRow extends StatelessWidget {
             MoneyText(d.balanceCents, colored: true),
           ]),
           const SizedBox(height: 8),
-          Row(children: [
-            const Spacer(),
-            // الفاتورة (secondary في الويب) → تفصيل الإقامة بتبويب الفاتورة
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(64, 38),
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                textStyle: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w700),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.end,
+            children: [
+              // الفاتورة (secondary في الويب) → تفصيل الإقامة بتبويب الفاتورة
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(64, 38),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w700),
+                ),
+                onPressed: () => showStayDetail(
+                  context,
+                  store: store,
+                  stayId: d.stayId,
+                  initialTab: 'bill',
+                ),
+                child: const Text('الفاتورة'),
               ),
-              onPressed: () => showStayDetail(
-                context,
-                store: store,
-                stayId: d.stayId,
-                initialTab: 'bill',
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(64, 38),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w700),
+                ),
+                onPressed: () => showCheckOutWizard(
+                  context,
+                  store: store,
+                  stayId: d.stayId,
+                ),
+                child: const Text('تسجيل خروج'),
               ),
-              child: const Text('الفاتورة'),
-            ),
-            const SizedBox(width: 8),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(64, 38),
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                textStyle: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w700),
-              ),
-              onPressed: () => showCheckOutWizard(
-                context,
-                store: store,
-                stayId: d.stayId,
-              ),
-              child: const Text('تسجيل خروج'),
-            ),
-          ]),
+            ],
+          ),
         ],
       ),
     );
@@ -506,6 +517,8 @@ class _RequestRow extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final r = request;
     final urgent = r.priority == 'URGENT';
+    // معنوية حسب الثيم (النغمة الفاتحة داكنًا — صبغة البرق وأيقونته معًا)
+    final danger = AppColors.dangerOf(context);
     return AppCard(
       padding: const EdgeInsets.all(12),
       child: InkWell(
@@ -524,13 +537,13 @@ class _RequestRow extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: urgent
-                  ? AppColors.danger.withValues(alpha: 0.10)
+                  ? danger.withValues(alpha: 0.10)
                   : scheme.surfaceContainerHighest,
             ),
             child: Icon(
               urgent ? Icons.bolt_rounded : Icons.notifications_outlined,
               size: 18,
-              color: urgent ? AppColors.danger : scheme.onSurfaceVariant,
+              color: urgent ? danger : scheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(width: 10),
@@ -585,10 +598,15 @@ class _DashboardSkeleton extends StatelessWidget {
       final cols = constraints.maxWidth >= 700 ? 4 : 2;
       const gap = 10.0;
       final width = (constraints.maxWidth - gap * (cols - 1)) / cols;
+      // مرئي في الوضعين (كان 0x11000000)
+      final skel = Theme.of(context)
+          .colorScheme
+          .surfaceContainerHighest
+          .withValues(alpha: 0.6);
       Widget box(double h) => Container(
             height: h,
             decoration: BoxDecoration(
-              color: const Color(0x11000000),
+              color: skel,
               borderRadius: BorderRadius.circular(12),
             ),
           );

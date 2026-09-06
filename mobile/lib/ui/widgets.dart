@@ -77,6 +77,21 @@ class StatusChip extends StatelessWidget {
   final Color foreground;
   final Color background;
 
+  /// زوج (نص، خلفية) المتطابق مع الويب حرفيًا في الوضعين:
+  /// الفاتح → النغمة الغامقة فوق الحاوية الفاتحة الصلبة
+  /// الداكن → النغمة الفاتحة فوق صبغة 15% منها (bg-X/15 في
+  /// dark:text-X بالموقع — توكنات #4ADE80/#FBBF24/#F87171/#8FB3E3)
+  static (Color, Color) _chip(
+    BuildContext context,
+    Color lightFg,
+    Color lightBg,
+    Color darkToken,
+  ) {
+    return Theme.of(context).colorScheme.brightness == Brightness.dark
+        ? (darkToken, AppColors.darkTint(darkToken))
+        : (lightFg, lightBg);
+  }
+
   /// حالات طلب الخدمة (نفس ألوان الويب المعنوية)
   factory StatusChip.requestStatus(BuildContext context, String status) {
     final c = requestStatusChipColors(context, status);
@@ -89,58 +104,73 @@ class StatusChip extends StatelessWidget {
 
   factory StatusChip.stayStatus(BuildContext context, String status) {
     final scheme = Theme.of(context).colorScheme;
-    final (fg, bg) = switch (status) {
-      'ACTIVE' => (AppColors.success, AppColors.successContainer),
-      'CHECKOUT_REQUESTED' => (AppColors.warning, AppColors.warningContainer),
+    final pair = switch (status) {
+      'ACTIVE' => _chip(
+          context, AppColors.success, AppColors.successContainer, AppColors.successDark),
+      'CHECKOUT_REQUESTED' => _chip(
+          context, AppColors.warning, AppColors.warningContainer, AppColors.warningDark),
       _ => (scheme.onSurfaceVariant, scheme.surfaceContainerHighest),
     };
     return StatusChip(
       label: fmt.label(fmt.stayStatusLabels, status),
-      foreground: scheme.brightness == Brightness.light ? fg : scheme.onSurface,
-      background: bg,
+      foreground: pair.$1,
+      background: pair.$2,
     );
   }
 
   factory StatusChip.paymentStatus(BuildContext context, String status) {
     final scheme = Theme.of(context).colorScheme;
-    final (fg, bg) = switch (status) {
-      'PAID' => (AppColors.success, AppColors.successContainer),
-      'PARTIALLY_PAID' => (AppColors.warning, AppColors.warningContainer),
+    final pair = switch (status) {
+      'PAID' => _chip(
+          context, AppColors.success, AppColors.successContainer, AppColors.successDark),
+      'PARTIALLY_PAID' => _chip(
+          context, AppColors.warning, AppColors.warningContainer, AppColors.warningDark),
       'UNPAID' => (scheme.onSurfaceVariant, scheme.surfaceContainerHighest),
       _ => (scheme.onSurfaceVariant, scheme.surfaceContainerHighest),
     };
     return StatusChip(
       label: fmt.label(fmt.paymentStatusLabels, status),
-      foreground: scheme.brightness == Brightness.light ? fg : scheme.onSurface,
-      background: bg,
+      foreground: pair.$1,
+      background: pair.$2,
     );
   }
 
   factory StatusChip.reservationStatus(BuildContext context, String status) {
     final scheme = Theme.of(context).colorScheme;
-    final (fg, bg) = switch (status) {
-      'PENDING' => (AppColors.warning, AppColors.warningContainer),
-      'CONFIRMED' => (AppColors.success, AppColors.successContainer),
-      'CHECKED_IN' => (AppColors.info, AppColors.infoContainer),
-      'COMPLETED' => (AppColors.info, AppColors.infoContainer),
-      'NO_SHOW' => (AppColors.danger, AppColors.dangerContainer),
+    final pair = switch (status) {
+      'PENDING' => _chip(
+          context, AppColors.warning, AppColors.warningContainer, AppColors.warningDark),
+      'CONFIRMED' => _chip(
+          context, AppColors.success, AppColors.successContainer, AppColors.successDark),
+      'CHECKED_IN' => _chip(
+          context, AppColors.info, AppColors.infoContainer, AppColors.infoDark),
+      'COMPLETED' => _chip(
+          context, AppColors.info, AppColors.infoContainer, AppColors.infoDark),
+      'NO_SHOW' => _chip(
+          context, AppColors.danger, AppColors.dangerContainer, AppColors.dangerDark),
       _ => (scheme.onSurfaceVariant, scheme.surfaceContainerHighest),
     };
     return StatusChip(
       label: fmt.label(fmt.reservationStatusLabels, status),
-      foreground: scheme.brightness == Brightness.light ? fg : scheme.onSurface,
-      background: bg,
+      foreground: pair.$1,
+      background: pair.$2,
     );
   }
 
   factory StatusChip.roomStatus(BuildContext context, String status) {
     final scheme = Theme.of(context).colorScheme;
-    final (fg, bg) = switch (status) {
-      'AVAILABLE' => (AppColors.success, AppColors.successContainer),
-      'OCCUPIED' => (AppColors.danger, AppColors.dangerContainer),
-      'RESERVED' => (AppColors.info, AppColors.infoContainer),
-      'CLEANING' => (AppColors.gold, AppColors.goldContainer),
-      'DIRTY' => (AppColors.warning, AppColors.warningContainer),
+    final pair = switch (status) {
+      'AVAILABLE' => _chip(
+          context, AppColors.success, AppColors.successContainer, AppColors.successDark),
+      'OCCUPIED' => _chip(
+          context, AppColors.danger, AppColors.dangerContainer, AppColors.dangerDark),
+      'RESERVED' => _chip(
+          context, AppColors.info, AppColors.infoContainer, AppColors.infoDark),
+      // الويب: text-[#8a6d1f] فوق bg-gold/15 · الداكن: dark:text-gold
+      'CLEANING' => _chip(
+          context, AppColors.goldDark, AppColors.goldContainer, AppColors.gold),
+      'DIRTY' => _chip(
+          context, AppColors.warning, AppColors.warningContainer, AppColors.warningDark),
       'OUT_OF_ORDER' => (
           scheme.brightness == Brightness.light
               ? const Color(0xFF444444)
@@ -151,23 +181,26 @@ class StatusChip extends StatelessWidget {
     };
     return StatusChip(
       label: fmt.label(fmt.roomStatusLabels, status),
-      foreground: fg,
-      background: bg,
+      foreground: pair.$1,
+      background: pair.$2,
     );
   }
 
   factory StatusChip.extensionStatus(BuildContext context, String status) {
     final scheme = Theme.of(context).colorScheme;
-    final (fg, bg) = switch (status) {
-      'PENDING' => (AppColors.warning, AppColors.warningContainer),
-      'APPROVED' => (AppColors.success, AppColors.successContainer),
-      'REJECTED' => (AppColors.danger, AppColors.dangerContainer),
+    final pair = switch (status) {
+      'PENDING' => _chip(
+          context, AppColors.warning, AppColors.warningContainer, AppColors.warningDark),
+      'APPROVED' => _chip(
+          context, AppColors.success, AppColors.successContainer, AppColors.successDark),
+      'REJECTED' => _chip(
+          context, AppColors.danger, AppColors.dangerContainer, AppColors.dangerDark),
       _ => (scheme.onSurfaceVariant, scheme.surfaceContainerHighest),
     };
     return StatusChip(
       label: fmt.label(fmt.extensionStatusLabels, status),
-      foreground: scheme.brightness == Brightness.light ? fg : scheme.onSurface,
-      background: bg,
+      foreground: pair.$1,
+      background: pair.$2,
     );
   }
 
@@ -206,17 +239,24 @@ class StatusChip extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final light = scheme.brightness == Brightness.light;
     return switch (status) {
-      'NEW' => (AppColors.info, AppColors.infoContainer),
-      'ACKNOWLEDGED' => (AppColors.info, AppColors.infoContainer),
-      'ASSIGNED' => (AppColors.warning, AppColors.warningContainer),
-      'IN_PROGRESS' => (AppColors.warning, AppColors.warningContainer),
-      'WAITING' => (AppColors.warning, AppColors.warningContainer),
-      'COMPLETED' => (AppColors.success, AppColors.successContainer),
+      'NEW' => _chip(
+          context, AppColors.info, AppColors.infoContainer, AppColors.infoDark),
+      'ACKNOWLEDGED' => _chip(
+          context, AppColors.info, AppColors.infoContainer, AppColors.infoDark),
+      'ASSIGNED' => _chip(
+          context, AppColors.warning, AppColors.warningContainer, AppColors.warningDark),
+      'IN_PROGRESS' => _chip(
+          context, AppColors.warning, AppColors.warningContainer, AppColors.warningDark),
+      'WAITING' => _chip(
+          context, AppColors.warning, AppColors.warningContainer, AppColors.warningDark),
+      'COMPLETED' => _chip(
+          context, AppColors.success, AppColors.successContainer, AppColors.successDark),
       'CANCELLED' => (
           light ? scheme.onSurfaceVariant : scheme.onSurface,
           scheme.surfaceContainerHighest
         ),
-      'REJECTED' => (AppColors.danger, AppColors.dangerContainer),
+      'REJECTED' => _chip(
+          context, AppColors.danger, AppColors.dangerContainer, AppColors.dangerDark),
       _ => (
           light ? scheme.onSurfaceVariant : scheme.onSurface,
           scheme.surfaceContainerHighest

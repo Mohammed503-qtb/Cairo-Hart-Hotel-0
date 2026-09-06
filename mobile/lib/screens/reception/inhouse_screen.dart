@@ -34,9 +34,9 @@ class _InHouseScreenState extends State<InHouseScreen> {
   void initState() {
     super.initState();
     // تحميل ذاتي عند الفراغ فقط (bootstrap يحمّل بالتوازي — لا تصادم)
-    if (store.inHouse.isEmpty) {
-      _refresh();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && (store.inHouse.isEmpty)) _refresh();
+    });
   }
 
   Future<void> _refresh() async {
@@ -76,7 +76,7 @@ class _InHouseScreenState extends State<InHouseScreen> {
               ReceptionSectionTitle(
                 'المقيمون الآن${showCount ? ' (${stays.length})' : ''}',
                 icon: Icons.groups_rounded,
-                iconColor: AppColors.success,
+                iconColor: AppColors.successOf(context),
               ),
               // الخطأ مع قائمة فارغة يحل محل البطاقات (EmptyState كما الويب)
               if (_error != null && stays.isEmpty)
@@ -86,7 +86,7 @@ class _InHouseScreenState extends State<InHouseScreen> {
                   subtitle: _error,
                 )
               else if (loading)
-                loadingBlocks(3, height: 112)
+                loadingBlocks(context, 3, height: 112)
               else if (stays.isEmpty)
                 const EmptyState(
                   icon: Icons.groups_rounded,
@@ -297,17 +297,19 @@ class _CheckoutBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final color = urgent ? AppColors.danger : scheme.onSurfaceVariant;
+    // معنوية حسب الثيم (النغمة الفاتحة داكنًا — الصبغة والحد والأيقونة والنص معًا)
+    final danger = AppColors.dangerOf(context);
+    final color = urgent ? danger : scheme.onSurfaceVariant;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: urgent
-            ? AppColors.danger.withValues(alpha: 0.10)
+            ? danger.withValues(alpha: 0.10)
             : scheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: urgent
-              ? AppColors.danger.withValues(alpha: 0.40)
+              ? danger.withValues(alpha: 0.40)
               : scheme.outlineVariant,
         ),
       ),
@@ -338,28 +340,30 @@ class _ActiveRequestsBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // معنوية حسب الثيم (النغمة الفاتحة داكنًا — الصبغة والحد والأيقونة والنص معًا)
+    final warn = AppColors.warningOf(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.warning.withValues(alpha: 0.10),
+        color: warn.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.warning.withValues(alpha: 0.40)),
+        border: Border.all(color: warn.withValues(alpha: 0.40)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             Icons.room_service_rounded,
             size: 12,
-            color: AppColors.warning,
+            color: warn,
           ),
           const SizedBox(width: 3),
           Text(
             '$count طلب نشط',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: AppColors.warning,
+              color: warn,
             ),
           ),
         ],

@@ -55,7 +55,9 @@ class _AdminRoomsScreenState extends State<AdminRoomsScreen> {
   @override
   void initState() {
     super.initState();
-    _refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
+    });
   }
 
   /// عند فتح الشاشة: refreshRooms ثم refreshRoomTypes (الأنواع

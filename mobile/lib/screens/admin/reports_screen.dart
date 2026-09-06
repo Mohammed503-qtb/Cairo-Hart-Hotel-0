@@ -32,7 +32,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
   @override
   void initState() {
     super.initState();
-    _refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
+    });
   }
 
   Future<void> _refresh() async {
@@ -341,7 +343,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             child: _StatBox(
               label: 'مكتمل',
               value: '${stats.completed}',
-              color: AppColors.success,
+              color: AppColors.successOf(context),
             ),
           ),
           SizedBox(
@@ -349,7 +351,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
             child: _StatBox(
               label: 'نشط',
               value: '${stats.active}',
-              color: AppColors.goldDark,
+              // goldDark ثابت فوق خلفية داكنة يفقد التباين —
+              // الذهبي الكامل في الداكن (نفس ذهبي الثيم)
+              color: Theme.of(context).colorScheme.brightness ==
+                      Brightness.dark
+                  ? AppColors.gold
+                  : AppColors.goldDark,
             ),
           ),
           SizedBox(

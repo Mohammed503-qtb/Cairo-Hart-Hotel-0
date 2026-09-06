@@ -31,7 +31,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
+    });
   }
 
   Future<void> _refresh() async {
@@ -57,7 +59,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             children: [
               _header(context),
               const SizedBox(height: 12),
-              loadingBlocks(5),
+              loadingBlocks(context, 5),
             ],
           );
         }
@@ -137,59 +139,64 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final k = d.kpis;
     return LayoutBuilder(builder: (context, c) {
       final cross = c.maxWidth >= 620 ? 4 : 2;
-      return GridView.count(
-        crossAxisCount: cross,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-        childAspectRatio: 1.5,
+      // Wrap بعرض ثابت وارتفاع تلقائي (كشبكة الإستقبال وgrid الويب):
+      // childAspectRatio الثابت كان يقص بطاقة KPI عموديًا عند تكبير
+      // نص الوصول (1.3) في فيض 20-40px — الارتفاع الذاتي يحمي تمامًا
+      const gap = 10.0;
+      final width = (c.maxWidth - gap * (cross - 1)) / cross;
+      return Wrap(
+        spacing: gap,
+        runSpacing: gap,
         children: [
-          KpiCard(
-            icon: Icons.hotel_rounded,
-            label: 'الإشغال',
-            value: k.occupancyPercent,
-            valueText: '${k.occupancyPercent}%',
-            sub: '${k.occupiedRooms} مشغولة من ${k.totalRooms} غرفة',
-            tone: KpiTone.success,
-          ),
-          KpiCard(
-            icon: Icons.groups_rounded,
-            label: 'المقيمون',
-            value: k.inHouseGuests,
-            sub:
-                '${k.inHouseStays} إقامة نشطة · وصول اليوم ${k.arrivalsToday} · مغادرة ${k.departuresToday}',
-          ),
-          KpiCard(
-            icon: Icons.wallet_rounded,
-            label: 'إيراد الشهر',
-            value: 0,
-            valueText: fmt.formatMoney(k.revenueMonthCents),
-            sub: 'مدفوعات مكتملة هذا الشهر',
-            tone: KpiTone.warning,
-          ),
-          KpiCard(
-            icon: Icons.room_service_rounded,
-            label: 'طلبات معلقة',
-            value: k.pendingRequests,
-            tone: k.urgentRequests > 0 ? KpiTone.coral : KpiTone.primary,
-            sub: k.urgentRequests > 0
-                ? 'عاجل: ${k.urgentRequests} ⚠'
-                : 'لا توجد طلبات عاجلة',
-          ),
+          for (final card in [
+            KpiCard(
+              icon: Icons.hotel_rounded,
+              label: 'الإشغال',
+              value: k.occupancyPercent,
+              valueText: '${k.occupancyPercent}%',
+              sub: '${k.occupiedRooms} مشغولة من ${k.totalRooms} غرفة',
+              tone: KpiTone.success,
+            ),
+            KpiCard(
+              icon: Icons.groups_rounded,
+              label: 'المقيمون',
+              value: k.inHouseGuests,
+              sub:
+                  '${k.inHouseStays} إقامة نشطة · وصول اليوم ${k.arrivalsToday} · مغادرة ${k.departuresToday}',
+            ),
+            KpiCard(
+              icon: Icons.wallet_rounded,
+              label: 'إيراد الشهر',
+              value: 0,
+              valueText: fmt.formatMoney(k.revenueMonthCents),
+              sub: 'مدفوعات مكتملة هذا الشهر',
+              tone: KpiTone.warning,
+            ),
+            KpiCard(
+              icon: Icons.room_service_rounded,
+              label: 'طلبات معلقة',
+              value: k.pendingRequests,
+              tone: k.urgentRequests > 0 ? KpiTone.coral : KpiTone.primary,
+              sub: k.urgentRequests > 0
+                  ? 'عاجل: ${k.urgentRequests} ⚠'
+                  : 'لا توجد طلبات عاجلة',
+            ),
+          ])
+            SizedBox(width: width, child: card),
         ],
       );
     });
   }
 
   /// لون نقطة الحالة — نفس معاني roomStatusColors في الويب
+  /// (النغمات المعنوية تُحل للفاتحة في الداكن عبر *Of)
   Color _statusColor(BuildContext context, String status) {
     return switch (status) {
-      'AVAILABLE' => AppColors.success,
-      'OCCUPIED' => AppColors.danger,
-      'RESERVED' => AppColors.info,
+      'AVAILABLE' => AppColors.successOf(context),
+      'OCCUPIED' => AppColors.dangerOf(context),
+      'RESERVED' => AppColors.infoOf(context),
       'CLEANING' => AppColors.gold,
-      'DIRTY' => AppColors.warning,
+      'DIRTY' => AppColors.warningOf(context),
       'OUT_OF_ORDER' => Theme.of(context).colorScheme.onSurfaceVariant,
       _ => Theme.of(context).colorScheme.onSurfaceVariant,
     };
@@ -415,7 +422,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Row(
             children: [
               Icon(Icons.warning_rounded,
-                  size: 16, color: AppColors.warning),
+                  size: 16, color: AppColors.warningOf(context)),
               const SizedBox(width: 6),
               Text(
                 'تنبيهات',
@@ -433,12 +440,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             text: a.staleRequests > 0
                 ? '${a.staleRequests} طلب معلّق منذ أكثر من 30 دقيقة'
                 : 'لا توجد طلبات متأخرة',
-            color: a.staleRequests > 0
-                ? AppColors.warning
-                : scheme.onSurfaceVariant,
-            background: a.staleRequests > 0
-                ? AppColors.warningContainer
-                : scheme.surfaceContainerHighest,
+            tone: a.staleRequests > 0
+                ? AdminAlertTone.warning
+                : AdminAlertTone.neutral,
           ),
           const SizedBox(height: 8),
           AdminAlertBox(
@@ -446,8 +450,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             text: a.outOfOrderRooms > 0
                 ? '${a.outOfOrderRooms} غرفة خارج الخدمة'
                 : 'كل الغرف فعّالة',
-            color: scheme.onSurfaceVariant,
-            background: scheme.surfaceContainerHighest,
+            tone: AdminAlertTone.neutral,
           ),
         ],
       ),

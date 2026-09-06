@@ -62,7 +62,9 @@ class _StaffCodesScreenState extends State<StaffCodesScreen> {
   @override
   void initState() {
     super.initState();
-    _refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
+    });
   }
 
   /// عند فتح الشاشة: الأكواد + الطاقم معًا (كما يحمّل تبويب
@@ -1133,7 +1135,7 @@ class _GenerateCodeDialogState extends State<_GenerateCodeDialog> {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.warning,
+                      color: AppColors.warningOf(context),
                     ),
                   ),
                 ],

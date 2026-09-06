@@ -34,7 +34,9 @@ class _GuestsScreenState extends State<GuestsScreen> {
     super.initState();
     // استمرار البحث الملتزم من المخزن (البحث يقيم في المخزن)
     _searchCtrl = TextEditingController(text: widget.store.guestsQuery);
-    _refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
+    });
   }
 
   @override

@@ -215,7 +215,7 @@ class _CheckOutWizardDialogState extends State<_CheckOutWizardDialog> {
         ],
         const SizedBox(height: 12),
         if (detail == null)
-          loadingBlocks(2, height: 110)
+          loadingBlocks(context, 2, height: 110)
         else if (step == 0)
           _buildStep0()
         else if (step == 1)
@@ -231,7 +231,7 @@ class _CheckOutWizardDialogState extends State<_CheckOutWizardDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(children: [
-          const Icon(Icons.flight_takeoff_rounded, size: 20, color: AppColors.danger),
+          Icon(Icons.flight_takeoff_rounded, size: 20, color: AppColors.dangerOf(context)),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
@@ -602,17 +602,20 @@ class _NoticeBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // نغمة معنوية حسب الثيم (النغمة الغامقة تمر كما هي فاتحًا —
+    // وتتحول لنظرتها الفاتحة داكنًا: النص والصبغة والحد معًا)
+    final c = AppColors.resolveTone(context, color);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
+        color: c.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.40)),
+        border: Border.all(color: c.withValues(alpha: 0.40)),
       ),
       child: DefaultTextStyle(
-        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: color),
+        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Icon(icon, size: 16, color: color),
+          Icon(icon, size: 16, color: c),
           const SizedBox(width: 8),
           Expanded(child: child),
         ]),
@@ -638,24 +641,26 @@ class _EffectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    // معنوية حسب الثيم (نظرتها الفاتحة داكنًا)
+    final warn = AppColors.warningOf(context);
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: warning ? AppColors.warning.withValues(alpha: 0.10) : null,
+        color: warning ? warn.withValues(alpha: 0.10) : null,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: warning ? AppColors.warning.withValues(alpha: 0.40) : scheme.outlineVariant,
+          color: warning ? warn.withValues(alpha: 0.40) : scheme.outlineVariant,
         ),
       ),
       child: Row(children: [
-        Icon(icon, size: 16, color: iconColor),
+        Icon(icon, size: 16, color: AppColors.resolveTone(context, iconColor)),
         const SizedBox(width: 8),
         Expanded(
           child: DefaultTextStyle(
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: warning ? AppColors.warning : scheme.onSurface,
+              color: warning ? warn : scheme.onSurface,
             ),
             child: child,
           ),
@@ -676,10 +681,11 @@ class _StepChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final success = AppColors.successOf(context);
     final (bg, fg) = active
         ? (AppColors.danger, Colors.white)
         : done
-            ? (AppColors.success.withValues(alpha: 0.15), AppColors.success)
+            ? (success.withValues(alpha: 0.15), success)
             : (scheme.surfaceContainerHighest, scheme.onSurfaceVariant);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -705,10 +711,11 @@ class _SuccessView extends StatelessWidget {
         width: 64,
         height: 64,
         decoration: BoxDecoration(
-          color: AppColors.success.withValues(alpha: 0.15),
+          color: AppColors.successOf(context).withValues(alpha: 0.15),
           shape: BoxShape.circle,
         ),
-        child: const Icon(Icons.check_circle_rounded, size: 40, color: AppColors.success),
+        child: Icon(Icons.check_circle_rounded,
+            size: 40, color: AppColors.successOf(context)),
       ),
       const SizedBox(height: 12),
       const Text('تم تسجيل الخروج ✅', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),

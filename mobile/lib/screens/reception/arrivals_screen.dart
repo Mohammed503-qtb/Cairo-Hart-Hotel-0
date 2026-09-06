@@ -28,7 +28,11 @@ class _ArrivalsScreenState extends State<ArrivalsScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.store.arrivals.isEmpty) _refresh();
+    // F6: التحميل بعد اكتمال أول إطار — notifyListeners أثناء بناء
+    // السلف (ListenableBuilder في الصدفة) يرمي markNeedsBuild-during-build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && (widget.store.arrivals.isEmpty)) _refresh();
+    });
   }
 
   Future<void> _refresh({String? date}) async {
@@ -69,7 +73,7 @@ class _ArrivalsScreenState extends State<ArrivalsScreen> {
               if (_error != null && store.arrivals.isEmpty)
                 ErrorRetryView(message: _error!, onRetry: () => _refresh())
               else if (store.arrivalsLoading && store.arrivals.isEmpty)
-                loadingBlocks(3, height: 120)
+                loadingBlocks(context, 3, height: 120)
               else if (store.arrivals.isEmpty)
                 SizedBox(
                   height: 300,
@@ -165,39 +169,44 @@ class _ArrivalCard extends StatelessWidget {
             ),
           ]),
           const SizedBox(height: 10),
-          Row(children: [
-            const Spacer(),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(64, 38),
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                textStyle: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w700),
+          // Wrap بدل Row (flex-wrap في الويب): يلف الزرين عند الضيق
+          // بدل الفيض (170px عند 320×1.3)
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.end,
+            children: [
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(64, 38),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w700),
+                ),
+                onPressed: () => _openDetail(context),
+                icon: const Icon(Icons.info_outline, size: 18),
+                label: const Text('تفاصيل'),
               ),
-              onPressed: () => _openDetail(context),
-              icon: const Icon(Icons.info_outline, size: 18),
-              label: const Text('تفاصيل'),
-            ),
-            const SizedBox(width: 8),
-            FilledButton.icon(
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(64, 38),
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                textStyle: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w700),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(64, 38),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w700),
+                ),
+                onPressed: a.status == 'CONFIRMED'
+                    ? () => showCheckInWizard(
+                          context,
+                          store: store,
+                          reservationId: a.id,
+                          checkInIso: a.checkIn,
+                        )
+                    : null,
+                icon: const Icon(Icons.meeting_room_rounded, size: 18),
+                label: const Text('تسجيل الوصول'),
               ),
-              onPressed: a.status == 'CONFIRMED'
-                  ? () => showCheckInWizard(
-                        context,
-                        store: store,
-                        reservationId: a.id,
-                        checkInIso: a.checkIn,
-                      )
-                  : null,
-              icon: const Icon(Icons.meeting_room_rounded, size: 18),
-              label: const Text('تسجيل الوصول'),
-            ),
-          ]),
+            ],
+          ),
           // ── حالة الدفع ──
           Container(
             margin: const EdgeInsets.only(top: 12),
@@ -249,7 +258,7 @@ class _ArrivalCard extends StatelessWidget {
                   value: paidPercent / 100,
                   minHeight: 6,
                   borderRadius: BorderRadius.circular(3),
-                  color: AppColors.success,
+                  color: AppColors.successOf(context),
                 ),
               ],
             ),
@@ -392,7 +401,7 @@ class _ArrivalDetailDialog extends StatelessWidget {
                     value: paidPercent / 100,
                     minHeight: 6,
                     borderRadius: BorderRadius.circular(3),
-                    color: AppColors.success,
+                    color: AppColors.successOf(context),
                   ),
                 ]),
               ),
