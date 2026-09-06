@@ -26,7 +26,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.3.14 # مثبتة (DEP-03) — سلسلة أدوات مقيدة بدل latest
 
       # حامل الاختبارات يُصلب المسار /home/z/my-project — نربطه بمسار العمل بلا أي تعديل كود
       - name: Link workspace (test harness fixed root)

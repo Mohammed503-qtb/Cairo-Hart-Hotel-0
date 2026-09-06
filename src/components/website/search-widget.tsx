@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { addDaysInput, todayInputValue } from '@/lib/format'
+import { useToast } from '@/hooks/use-toast'
 import type { SearchParams } from './helpers'
 
 export function defaultSearch(): SearchParams {
@@ -24,12 +25,19 @@ interface SearchWidgetProps {
 }
 
 export function SearchWidget({ value, onChange, onSubmit, error }: SearchWidgetProps) {
+  const { toast } = useToast()
   const minCheckOut = addDaysInput(value.checkIn, 1)
 
   const set = (patch: Partial<SearchParams>) => {
     const next = { ...value, ...patch }
-    // إصلاح فوري: المغادرة دائمًا بعد الوصول
-    if (next.checkOut <= next.checkIn) next.checkOut = addDaysInput(next.checkIn, 1)
+    // إصلاح فوري + تلميح ظاهر (LIVE-01): المغادرة دائمًا بعد الوصول
+    if (next.checkOut <= next.checkIn) {
+      next.checkOut = addDaysInput(next.checkIn, 1)
+      toast({
+        title: 'تم تعديل تاريخ المغادرة تلقائيًا',
+        description: 'المغادرة يجب أن تكون بعد الوصول — عُدّلت إلى اليوم التالي للوصول',
+      })
+    }
     onChange(next)
   }
 

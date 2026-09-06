@@ -102,14 +102,14 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.rel.outputs.tag }}
-          name: 'تطبيق الضيف — فندق قلب القاهرة ${{ steps.rel.outputs.tag }}'
+          name: 'تطبيق فندق قلب القاهرة ${{ steps.rel.outputs.tag }}'
           body: |
-            تطبيق الضيف (Flutter) — فندق قلب القاهرة — عدن
+            تطبيق فندق قلب القاهرة — عدن (Flutter)
 
-            - **CairoHeartGuest-v${{ env.VERSION }}-prod.apk** — نسخة الإنتاج الموقّعة (وضع الضيف F1).
+            - **CairoHeartGuest-v${{ env.VERSION }}-prod.apk** — نسخة الإنتاج الموقّعة: الأوضاع الثلاثة كاملة (الضيف F1 + الاستقبال F4 + الإدارة F5) مع حارس أقل إصدار F6.
             - **CairoHeartGuest-v${{ env.VERSION }}-dev.apk** — نسخة التطوير (suffix حزمة .dev — تُثبَّت جنبًا إلى جنب مع prod).
             - عند غياب عنوان الخادم المدمج: من شاشة الدخول → «إعدادات الخادم» → أدخل عنوان منصة الفندق.
-            - كود الدخول: كود الضيف الذي يصدره الاستقبال عند تسجيل الوصول.
+            - كود الدخول: كود الضيف/الاستقبال/الإدارة الذي يصدره الفندق (الضيف عند تسجيل الوصول · أكواد الطاقم من الإدارة).
           artifacts: 'dist/*.apk'
           allowUpdates: true
           replacesArtifacts: true

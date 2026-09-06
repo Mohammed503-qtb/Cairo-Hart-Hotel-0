@@ -71,3 +71,7 @@ backups/
 public/uploads/
 # سجلات الوكلاء
 agent-ctx/
+
+# خردة أدوات (لا تدخل المستودع)
+--fullpage
+

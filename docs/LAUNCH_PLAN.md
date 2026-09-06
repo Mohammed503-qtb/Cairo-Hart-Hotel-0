@@ -69,7 +69,7 @@ export DOMAIN=$(grep -E '^DOMAIN=' /etc/cairo-hart/env | cut -d= -f2-)
 ```
 
 1. **مسح بيانات العرض (AD-10):** لا كود/ضيف/حجز عرضي باقٍ —
-   المسار المعتمد `scripts/purge-demo.ts` (**غير موجود في المستودع عند 24-c** — البديل الموثق: إبطال كل أكواد طاقم العرض من الإدارة → الطاقم والأكواد، ومعالجة الحجوزات التجريبية من الإدارة → الحجوزات، أو `bunx prisma migrate reset --force && bun prisma/seed.ts` ثم إدخال البيانات الحقيقية قبل الفتح):
+   المسار المعتمد `scripts/purge-demo.ts` (**موجود في المستودع منذ Task 26/27** — جرد صفر تام + كود إقلاع أدمن خام مرة واحدة؛ البديل اليدوي: إبطال كل أكواد طاقم العرض من الإدارة → الطاقم والأكواد، ومعالجة الحجوزات التجريبية من الإدارة → الحجوزات، أو `bunx prisma migrate reset --force && bun prisma/seed.ts` ثم إدخال البيانات الحقيقية قبل الفتح):
    ```bash
    sudo -u deploy sqlite3 /opt/cairo-hart/db/custom.db \
      "SELECT type, status, COUNT(*) FROM access_codes GROUP BY type, status;"

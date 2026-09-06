@@ -1,7 +1,8 @@
 'use client'
 
 // ─────────────────────────────────────────────────────────────
-// MANAGE BOOKING DIALOG — إدارة الحجز (عرض + إلغاء + طباعة)
+// MANAGE BOOKING DIALOG — إدارة الحجز (عرض + تعديل + إلغاء + طباعة)
+// التعديل (المسار C · REQ-01): لحجز CONFIRMED داخل نافذة الـ24 ساعة قبل الوصول
 // ─────────────────────────────────────────────────────────────
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -17,6 +18,7 @@ import {
   CalendarDays,
   Users,
   Receipt,
+  Pencil,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,6 +40,7 @@ import { useToast } from '@/hooks/use-toast'
 import { api, ApiError } from '@/lib/api-client'
 import { formatMoney, formatDateWithDayAr, formatDateTimeAr } from '@/lib/format'
 import type { HotelPublic, ReservationPublic } from '@/types'
+import { EditBookingForm } from './edit-booking-form'
 import {
   nightsText,
   guestsText,
@@ -73,6 +76,7 @@ export function ManageBookingDialog({
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<LookupResult | null>(null)
   const [cancelling, setCancelling] = useState(false)
+  const [editing, setEditing] = useState(false)
 
   const initialRef = useRef(initialReference)
   initialRef.current = initialReference
@@ -86,6 +90,7 @@ export function ManageBookingDialog({
     setResult(null)
     setLoading(false)
     setCancelling(false)
+    setEditing(false)
   }, [open])
 
   const doLookup = async () => {
@@ -143,6 +148,16 @@ export function ManageBookingDialog({
     }
   }
 
+  // المسار C — اكتمال التعديل: حدّث النتيجة بالكامل (حجز + لقطة + سياسة)
+  const handleEditDone = (res: LookupResult) => {
+    setResult(res)
+    setEditing(false)
+    toast({
+      title: 'تم تعديل الحجز',
+      description: `${res.reservation.bookingReference} — الإجمالي الجديد ${formatMoney(res.reservation.grandTotalCents)}`,
+    })
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
@@ -196,18 +211,29 @@ export function ManageBookingDialog({
         <AnimatePresence mode="wait">
           {result ? (
             <motion.div
-              key={result.reservation.id + result.reservation.status}
+              key={result.reservation.id + result.reservation.status + (editing ? '-edit' : '')}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
             >
-              <ReservationDetails
-                hotel={hotel}
-                result={result}
-                cancelling={cancelling}
-                onCancel={doCancel}
-                onPrint={() => onPrint({ reservation: result.reservation, snapshot: result.snapshot })}
-              />
+              {editing ? (
+                <EditBookingForm
+                  hotel={hotel}
+                  result={result}
+                  phone={phone}
+                  onDone={handleEditDone}
+                  onBack={() => setEditing(false)}
+                />
+              ) : (
+                <ReservationDetails
+                  hotel={hotel}
+                  result={result}
+                  cancelling={cancelling}
+                  onCancel={doCancel}
+                  onEdit={() => setEditing(true)}
+                  onPrint={() => onPrint({ reservation: result.reservation, snapshot: result.snapshot })}
+                />
+              )}
             </motion.div>
           ) : (
             <p className="py-4 text-center text-sm text-muted-foreground">
@@ -227,12 +253,14 @@ function ReservationDetails({
   result,
   cancelling,
   onCancel,
+  onEdit,
   onPrint,
 }: {
   hotel: HotelPublic | null
   result: LookupResult
   cancelling: boolean
   onCancel: () => void
+  onEdit: () => void
   onPrint: () => void
 }) {
   const { reservation: r, snapshot, cancellation } = result
@@ -242,6 +270,8 @@ function ReservationDetails({
   const nightly = snapshot?.nightly ?? []
   const uniform = nightly.length > 0 && nightly.every((n) => n.priceCents === nightly[0].priceCents)
   const canCancel = r.status === 'CONFIRMED'
+  // المسار C: التعديل متاح لحجز مؤكد داخل نافذة الإلغاء المجاني نفسها
+  const canEdit = r.status === 'CONFIRMED' && cancellation.refundable
 
   return (
     <div className="space-y-4">
@@ -324,13 +354,19 @@ function ReservationDetails({
         </div>
       ) : null}
 
-      {/* سياسة الإلغاء الحالية */}
+      {/* سياسة الإلغاء الحالية + نافذة التعديل */}
       {canCancel ? (
         <div className="rounded-xl border border-warning/40 bg-warning/5 p-3 text-xs leading-relaxed text-foreground">
           {cancellation.refundable ? (
             <>
               <span className="font-bold text-success">الإلغاء مجاني الآن</span> — مجانًا حتى{' '}
               {formatDateTimeAr(cancellation.freeUntil)}.
+              {canEdit ? (
+                <>
+                  {' '}كما يمكنك <span className="font-bold text-success">تعديل حجزك</span> (المواعيد/نوع الغرفة/الضيوف)
+                  مجانًا خلال نفس المهلة.
+                </>
+              ) : null}
             </>
           ) : (
             <>
@@ -342,7 +378,13 @@ function ReservationDetails({
       ) : null}
 
       {/* الأزرار */}
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        {canEdit ? (
+          <Button onClick={onEdit}>
+            <Pencil className="size-4" />
+            تعديل الحجز
+          </Button>
+        ) : null}
         {canCancel ? (
           <AlertDialog>
             <AlertDialogTrigger asChild>

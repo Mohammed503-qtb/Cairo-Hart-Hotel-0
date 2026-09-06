@@ -13,12 +13,15 @@ export function staysOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date)
   return new Date(aStart) < new Date(bEnd) && new Date(aEnd) > new Date(bStart)
 }
 
-/** عدد الغرف المتاحة لنوع غرفة في نطاق تاريخي — يُستدعى دائمًا من الخادم */
+/** عدد الغرف المتاحة لنوع غرفة في نطاق تاريخي — يُستدعى دائمًا من الخادم
+ *  opts.excludeReservationId: يستثني حجزًا محددًا من عدّ المحجوز (يُستخدم عند
+ *  تعديل حجز قائم: غرفه المحجوزة تُحرَّر للحساب لأنها ستُستبدل ضمن المعاملة) */
 export async function availableRoomCount(
   tx: Tx,
   roomTypeId: string,
   checkIn: Date,
-  checkOut: Date
+  checkOut: Date,
+  opts?: { excludeReservationId?: string }
 ): Promise<number> {
   const total = await tx.room.count({
     where: { roomTypeId, status: { not: 'OUT_OF_ORDER' } },
@@ -28,6 +31,7 @@ export async function availableRoomCount(
     where: {
       roomTypeId,
       status: { in: BLOCKING_RESERVATION_STATUSES },
+      ...(opts?.excludeReservationId ? { id: { not: opts.excludeReservationId } } : {}),
       checkIn: { lt: new Date(checkOut) },
       checkOut: { gt: new Date(checkIn) },
     },

@@ -84,6 +84,16 @@ export default function AdminApp() {
       toast({ title: 'حجز جديد', description: p?.reference ? `${p.reference} — ${p.guestName ?? ''}` : 'وصل حجز جديد من الموقع' })
       setDashKey((k) => k + 1)
     },
+    'reservation:modified': (payload) => {
+      const p = payload as { bookingReference?: string; guestName?: string; roomTypeName?: string }
+      toast({
+        title: 'تعديل حجز',
+        description: p?.bookingReference
+          ? `${p.bookingReference} — ${p.guestName ?? ''}${p.roomTypeName ? ` — ${p.roomTypeName}` : ''}`
+          : 'عُدّل حجز قائم من الموقع',
+      })
+      setDashKey((k) => k + 1)
+    },
     'room:status': () => {
       setDashKey((k) => k + 1)
     },

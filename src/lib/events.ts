@@ -32,6 +32,7 @@ export const WS_EVENTS = {
   REQUEST_UPDATED: 'request:updated',
   NOTIFICATION_NEW: 'notification:new',
   RESERVATION_NEW: 'reservation:new',
+  RESERVATION_MODIFIED: 'reservation:modified',
   STAY_UPDATED: 'stay:updated',
   ROOM_STATUS: 'room:status',
 } as const

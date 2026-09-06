@@ -103,6 +103,15 @@ export default function ReceptionApp() {
       bump()
       setNotifVersion((v) => v + 1)
     },
+    [WS_EVENTS.RESERVATION_MODIFIED]: (payload) => {
+      const p = (payload ?? {}) as { bookingReference?: string; guestName?: string; roomTypeName?: string }
+      toast({
+        title: '✏️ تعديل حجز من الموقع',
+        description: `${p.bookingReference ?? ''}${p.guestName ? ` — ${p.guestName}` : ''}${p.roomTypeName ? ` — ${p.roomTypeName}` : ''}`,
+      })
+      bump()
+      setNotifVersion((v) => v + 1)
+    },
     [WS_EVENTS.CHAT_MESSAGE]: (payload) => {
       const p = (payload ?? {}) as { senderName?: string; stayId?: string }
       if (p.senderName && p.senderName !== session?.name) {

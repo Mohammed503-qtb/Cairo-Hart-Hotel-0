@@ -30,6 +30,7 @@ setupTestDb('integration')
 // ── استيراد ديناميكي للمعالجات بعد ضبط البيئة (إلزامي — لا استيراد ثابت لـ src/) ──
 const availabilityRoute = await import('@/app/api/public/availability/route')
 const bookingsRoute = await import('@/app/api/public/bookings/route')
+const editRoute = await import('@/app/api/public/edit/route')
 const validateRoute = await import('@/app/api/auth/validate/route')
 const arrivalsRoute = await import('@/app/api/reception/arrivals/route')
 const checkInRoute = await import('@/app/api/reception/check-in/route')
@@ -1156,5 +1157,382 @@ describe('H2.6 — الرحلة الذهبية (التكامل الكامل بأ
     expect(payAudit!.actor).toBe('أحمد الاستقبال') // من جلسة R492671M3
     expect(payAudit!.actorRole).toBe('RECEPTION')
     expect(payAudit!.details).toContain(String(golden!.expectedGrand + CHARGE))
+  }, 30_000)
+})
+
+// ─────────────────────────────────────────────────────────────
+// المسار C — تعديل الحجز المؤهل (REQ-01): POST /api/public/edit
+// «المؤهل» = CONFIRMED + قبل (الوصول − 24 ساعة) + بلا إقامة
+// الثوابت المغطاة: I1/I7 (توفر مع استثناء الذات داخل المعاملة) ·
+// I6 (لقطة سعر جديدة بالسنت) · I10 (تدقيق قبل/بعد) · §12.2 (إعادة
+// تسعير خادمية حتمية) · لا كشف وجود الحجز عند فشل التحقق
+// ─────────────────────────────────────────────────────────────
+describe('المسار C — تعديل الحجز المؤهل (REQ-01)', () => {
+  // نطاقات بعيدة عن كل حجوزات seed واختبارات H2.3 (التي تملأ المفردة
+  // في [اليوم+10، اليوم+12) والرحلة الذهبية بعد الأحد القادم)
+  const D1 = addDays(today, 40) // وصول حجز A
+  const D2 = addDays(today, 50) // وصول حجزي B/C (امتلاء المفردة)
+  let bookingA: ReservationPublicShape | null = null
+  const phoneA = '+967775000111'
+
+  /** إنشاء حجز مؤكد عبر بوابة الموقع (نفس بوابة الإنتاج) */
+  async function createBooking(opts: {
+    checkIn: Date
+    checkOut: Date
+    typeName: string
+    phone: string
+    paymentMethod?: string
+    adults?: number
+    roomsCount?: number
+  }): Promise<ReservationPublicShape> {
+    const t = await db.roomType.findFirst({ where: { name: opts.typeName } })
+    const res = await postTo(
+      bookingsRoute.POST as unknown as (r: Request) => Promise<Response>,
+      'http://localhost/api/public/bookings',
+      {
+        checkIn: isoDate(opts.checkIn),
+        checkOut: isoDate(opts.checkOut),
+        adults: opts.adults ?? 1,
+        children: 0,
+        roomsCount: opts.roomsCount ?? 1,
+        roomTypeId: t!.id,
+        guest: { fullName: `ضيف التعديل ${opts.phone}`, phone: opts.phone },
+        paymentMethod: opts.paymentMethod ?? 'PAY_AT_HOTEL',
+      }
+    )
+    expect(res.status).toBe(201)
+    const j = await json<{ reservation: ReservationPublicShape }>(res)
+    expect(j.ok).toBe(true)
+    return j.reservation
+  }
+
+  /** نداء تعديل */
+  async function callEdit(body: Record<string, unknown>): Promise<Response> {
+    return postTo(
+      editRoute.POST as unknown as (r: Request) => Promise<Response>,
+      'http://localhost/api/public/edit',
+      body
+    )
+  }
+
+  it('c1) تعديل المواعيد (تمديد الليلات): إعادة تسعير خادمية + لقطة جديدة + تدقيق قبل/بعد + إشعار استقبال', async () => {
+    bookingA = await createBooking({ checkIn: D1, checkOut: addDays(D1, 2), typeName: 'غرفة مفردة', phone: phoneA })
+    const oldGrand = bookingA!.grandTotalCents
+
+    const notifBefore = await db.notification.count({ where: { audience: 'RECEPTION' } })
+
+    // تمديد: ليلتان → ثلاث ليالٍ (نفس النوع)
+    const res = await callEdit({
+      reference: bookingA!.bookingReference,
+      phone: phoneA,
+      checkIn: isoDate(D1),
+      checkOut: isoDate(addDays(D1, 3)),
+      roomTypeId: (await db.roomType.findFirst({ where: { name: 'غرفة مفردة' } }))!.id,
+      adults: 1,
+      children: 0,
+      roomsCount: 1,
+      specialRequests: 'طابق مرتفع',
+    })
+    expect(res.status).toBe(200)
+    const j = await json<{ reservation: ReservationPublicShape; snapshot: { nightly: { date: string }[]; grandTotalCents: number } | null; cancellation: { refundable: boolean } }>(res)
+    expect(j.ok).toBe(true)
+
+    // §12.2 + I6: الإجمالي الجديد = المحسوب المستقل بالسنت
+    const expected = expectedQuote(D1, addDays(D1, 3), BASE.single, 1)
+    expect(j.reservation.grandTotalCents).toBe(expected.grandTotalCents)
+    expect(j.reservation.subtotalCents).toBe(expected.subtotalCents)
+    expect(j.reservation.taxCents).toBe(expected.taxCents)
+    expect(j.reservation.nights).toBe(3)
+    expect(j.reservation.specialRequests).toBe('طابق مرتفع')
+    expect(j.cancellation.refundable).toBe(true)
+
+    // اللقطة الجديدة مبنية على النطاق الجديد
+    expect(j.snapshot).not.toBeNull()
+    expect(j.snapshot!.nightly).toHaveLength(3)
+
+    // القاعدة: الصف الفعلي بلقطة وأرقام جديدة
+    const row = await db.reservation.findUnique({ where: { id: bookingA!.id } })
+    expect(row!.grandTotalCents).toBe(expected.grandTotalCents)
+    const snap = JSON.parse(row!.priceSnapshot) as { nightly: unknown[]; grandTotalCents: number; roomsCount: number }
+    expect(snap.nightly).toHaveLength(3)
+    expect(snap.grandTotalCents).toBe(expected.grandTotalCents)
+    expect(snap.roomsCount).toBe(1)
+
+    // I10: تدقيق RESERVATION_MODIFIED بقبل/بعد
+    const log = await db.auditLog.findFirst({
+      where: { action: 'RESERVATION_MODIFIED', entityId: bookingA!.id },
+      orderBy: { createdAt: 'desc' },
+    })
+    expect(log).not.toBeNull()
+    expect(log!.actorRole).toBe('WEBSITE')
+    const details = JSON.parse(log!.details as string) as {
+      reference: string
+      before: { grandTotalCents: number; checkIn: string }
+      after: { grandTotalCents: number; checkIn: string }
+      paidCents: number
+    }
+    expect(details.reference).toBe(bookingA!.bookingReference)
+    expect(details.before.grandTotalCents).toBe(oldGrand)
+    expect(details.after.grandTotalCents).toBe(expected.grandTotalCents)
+    expect(details.paidCents).toBe(0)
+
+    // إشعار استقبال جديد
+    const notifAfter = await db.notification.count({ where: { audience: 'RECEPTION' } })
+    expect(notifAfter).toBe(notifBefore + 1)
+  }, 30_000)
+
+  it('c2) تعديل نوع الغرفة: نقل الحجز للمفردة→الديلوكس وتحرير المفردة للتوفر العام', async () => {
+    // A الآن مفردة [D1, D1+3) — التوفر العام للمفردة = 1 (غرفتان − حجز A)
+    const before = await availabilityRoute.POST as unknown as (r: Request) => Promise<Response>
+    const availRes = await postTo(before, 'http://localhost/api/public/availability', {
+      checkIn: isoDate(D1), checkOut: isoDate(addDays(D1, 3)), adults: 1, children: 0, roomsCount: 1,
+    })
+    const availJ = await json<{ items: { roomType: { name: string }; availableCount: number }[] }>(availRes)
+    const singleBefore = availJ.items.find((i) => i.roomType.name === 'غرفة مفردة')!
+    const deluxeBefore = availJ.items.find((i) => i.roomType.name === 'غرفة ديلوكس')!
+    expect(singleBefore.availableCount).toBe(1)
+    expect(deluxeBefore.availableCount).toBe(5)
+
+    // تعديل A: مفردة → ديلوكس (نفس المواعيد)
+    const deluxeType = await db.roomType.findFirst({ where: { name: 'غرفة ديلوكس' } })
+    const res = await callEdit({
+      reference: bookingA!.bookingReference,
+      phone: phoneA,
+      checkIn: isoDate(D1),
+      checkOut: isoDate(addDays(D1, 3)),
+      roomTypeId: deluxeType!.id,
+      adults: 2,
+      children: 0,
+      roomsCount: 1,
+      specialRequests: '',
+    })
+    expect(res.status).toBe(200)
+    const j = await json<{ reservation: ReservationPublicShape }>(res)
+    expect(j.reservation.roomType.name).toBe('غرفة ديلوكس')
+    const expected = expectedQuote(D1, addDays(D1, 3), BASE.deluxe, 1)
+    expect(j.reservation.grandTotalCents).toBe(expected.grandTotalCents)
+
+    // بعد النقل: المفردة حرة كاملة (2) والديلوكس نقصت (3)
+    const avail2 = await postTo(before, 'http://localhost/api/public/availability', {
+      checkIn: isoDate(D1), checkOut: isoDate(addDays(D1, 3)), adults: 1, children: 0, roomsCount: 1,
+    })
+    const avail2J = await json<{ items: { roomType: { name: string }; availableCount: number }[] }>(avail2)
+    expect(avail2J.items.find((i) => i.roomType.name === 'غرفة مفردة')!.availableCount).toBe(2)
+    expect(avail2J.items.find((i) => i.roomType.name === 'غرفة ديلوكس')!.availableCount).toBe(4)
+  }, 30_000)
+
+  it('c3) معاينة التوفر بالاستثناء الذاتي: reference+phone صحيحان يحرران غرف الحجز نفسه (وفشل التحقق يُتجاهل بصمت)', async () => {
+    const handler = availabilityRoute.POST as unknown as (r: Request) => Promise<Response>
+    const body = { checkIn: isoDate(D1), checkOut: isoDate(addDays(D1, 3)), adults: 1, children: 0, roomsCount: 1 }
+
+    // بدون مرجع → الديلوكس 4 (حجز A محسوب)
+    const plain = await json<{ items: { roomType: { name: string }; availableCount: number }[] }>(
+      await postTo(handler, 'http://localhost/api/public/availability', body)
+    )
+    expect(plain.items.find((i) => i.roomType.name === 'غرفة ديلوكس')!.availableCount).toBe(4)
+
+    // بمرجع + هاتف A → A مستثنى → 5
+    const own = await json<{ items: { roomType: { name: string }; availableCount: number }[] }>(
+      await postTo(handler, 'http://localhost/api/public/availability', {
+        ...body, reference: bookingA!.bookingReference, phone: phoneA,
+      })
+    )
+    expect(own.items.find((i) => i.roomType.name === 'غرفة ديلوكس')!.availableCount).toBe(5)
+
+    // بمرجع A وهاتف خاطئ → لا استثناء ولا كشف (4 كما هي)
+    const wrong = await json<{ items: { roomType: { name: string }; availableCount: number }[] }>(
+      await postTo(handler, 'http://localhost/api/public/availability', {
+        ...body, reference: bookingA!.bookingReference, phone: '+967775000999',
+      })
+    )
+    expect(wrong.items.find((i) => i.roomType.name === 'غرفة ديلوكس')!.availableCount).toBe(4)
+  }, 30_000)
+
+  it('c4) I7-مجاور: تعديل «إلى نفس القيم» على مخزون ممتلئ لا يُغلق على نفسه (استثناء الذات داخل المعاملة)', async () => {
+    // B و C يملآن المفردة في [D2, D2+2)
+    const b = await createBooking({ checkIn: D2, checkOut: addDays(D2, 2), typeName: 'غرفة مفردة', phone: '+967775000222' })
+    await createBooking({ checkIn: D2, checkOut: addDays(D2, 2), typeName: 'غرفة مفردة', phone: '+967775000333' })
+
+    // التوفر العام صفر — لكن تعديل B «إلى نفس النطاق/النوع» يجب أن ينجح
+    const singleType = await db.roomType.findFirst({ where: { name: 'غرفة مفردة' } })
+    const res = await callEdit({
+      reference: b.bookingReference,
+      phone: '+967775000222',
+      checkIn: isoDate(D2),
+      checkOut: isoDate(addDays(D2, 2)),
+      roomTypeId: singleType!.id,
+      adults: 1,
+      children: 0,
+      roomsCount: 1,
+      specialRequests: 'ملاحظة معدلة على مخزون ممتلئ',
+    })
+    expect(res.status).toBe(200)
+    const j = await json<{ reservation: ReservationPublicShape }>(res)
+    expect(j.reservation.specialRequests).toBe('ملاحظة معدلة على مخزون ممتلئ')
+
+    // لا يزال بإمكان B الهروب لمواعيد أخرى (المخزون الحر)
+    const escape = await callEdit({
+      reference: b.bookingReference,
+      phone: '+967775000222',
+      checkIn: isoDate(addDays(D2, 5)),
+      checkOut: isoDate(addDays(D2, 7)),
+      roomTypeId: singleType!.id,
+      adults: 1,
+      children: 0,
+      roomsCount: 1,
+      specialRequests: '',
+    })
+    expect(escape.status).toBe(200)
+  }, 30_000)
+
+  it('c5) I1: التعديل إلى نطاق ممتلئ فوق المخزون → 409 برسالة التوفر (بلا كتابة)', async () => {
+    // B هرب في c4 → C وحده في [D2, D2+2) → المفردة متاحة 1… نملؤها بحجز جديد
+    await createBooking({ checkIn: D2, checkOut: addDays(D2, 2), typeName: 'غرفة مفردة', phone: '+967775000444' })
+    // الآن [D2, D2+2) ممتلئة تمامًا (C + الجديد = 2/2)
+
+    // حجز A (ديلوكس حاليًا) → محاولة الانتقال للمفردة في النطاق الممتلئ
+    const before = await db.reservation.findUnique({ where: { id: bookingA!.id } })
+    const singleType = await db.roomType.findFirst({ where: { name: 'غرفة مفردة' } })
+    const res = await callEdit({
+      reference: bookingA!.bookingReference,
+      phone: phoneA,
+      checkIn: isoDate(D2),
+      checkOut: isoDate(addDays(D2, 2)),
+      roomTypeId: singleType!.id,
+      adults: 1,
+      children: 0,
+      roomsCount: 1,
+      specialRequests: '',
+    })
+    expect(res.status).toBe(409)
+    const j = await json<{ error?: string }>(res)
+    expect(j.error).toContain('لم تعد متاحة')
+
+    // لا كتابة حدثت — الحجز كما كان
+    const after = await db.reservation.findUnique({ where: { id: bookingA!.id } })
+    expect(after!.roomTypeId).toBe(before!.roomTypeId)
+    expect(after!.checkIn.getTime()).toBe(before!.checkIn.getTime())
+    expect(after!.grandTotalCents).toBe(before!.grandTotalCents)
+  }, 30_000)
+
+  it('c6) المدفوع يُنقل كما هو: حجز CARD بعربون → تعديل أرخص → paidCents ثابت وpaymentStatus محسوب (بلا حركات مالية وهمية)', async () => {
+    // عائلي ليلتان بعربون 50% ثم تعديل إلى مفردة أرخص → مدفوع > الإجمالي الجديد
+    const g = await createBooking({
+      checkIn: D1, checkOut: addDays(D1, 2), typeName: 'الجناح العائلي',
+      phone: '+967775000555', paymentMethod: 'CARD', adults: 2,
+    })
+    const oldGrand = g.grandTotalCents
+    expect(g.paidCents).toBe(Math.round(oldGrand / 2))
+    expect(g.paymentStatus).toBe('PARTIALLY_PAID')
+
+    const singleType = await db.roomType.findFirst({ where: { name: 'غرفة مفردة' } })
+    const res = await callEdit({
+      reference: g.bookingReference,
+      phone: '+967775000555',
+      checkIn: isoDate(D1),
+      checkOut: isoDate(addDays(D1, 2)),
+      roomTypeId: singleType!.id,
+      adults: 1,
+      children: 0,
+      roomsCount: 1,
+      specialRequests: '',
+    })
+    expect(res.status).toBe(200)
+    const j = await json<{ reservation: ReservationPublicShape }>(res)
+
+    // المدفوع كما هو — لا صفوف دفع جديدة (المدفوع = ΣCOMPLETED كما كان)
+    expect(j.reservation.paidCents).toBe(Math.round(oldGrand / 2))
+    const payments = await db.payment.findMany({ where: { reservationId: g.id } })
+    expect(payments).toHaveLength(1) // العربون الأصلي فقط
+    expect(payments[0].status).toBe('COMPLETED')
+
+    // الإجمالي الجديد (مفردة أرخص) أقل من المدفوع → الحجز مغطى
+    const expected = expectedQuote(D1, addDays(D1, 2), BASE.single, 1)
+    expect(j.reservation.grandTotalCents).toBe(expected.grandTotalCents)
+    expect(j.reservation.paidCents).toBeGreaterThan(j.reservation.grandTotalCents)
+    expect(j.reservation.paymentStatus).toBe('PAID')
+  }, 30_000)
+
+  it('c7) حراس الأهلية: خارج نافذة الـ24 ساعة → 400 · هاتف خاطئ → 404 بلا كشف · بلا تغييرات → 400', async () => {
+    // حجز وصوله اليوم → نافذة التعديل المجاني فائتة
+    const todayBooking = await createBooking({
+      checkIn: today, checkOut: addDays(today, 2), typeName: 'غرفة مزدوجة', phone: '+967775000666',
+    })
+    const doubleType = await db.roomType.findFirst({ where: { name: 'غرفة مزدوجة' } })
+    const late = await callEdit({
+      reference: todayBooking.bookingReference,
+      phone: '+967775000666',
+      checkIn: isoDate(today),
+      checkOut: isoDate(addDays(today, 3)),
+      roomTypeId: doubleType!.id,
+      adults: 1, children: 0, roomsCount: 1, specialRequests: '',
+    })
+    expect(late.status).toBe(400)
+    expect((await json<{ error?: string }>(late)).error).toContain('مهلة التعديل المجاني')
+
+    // هاتف خاطئ → نفس رسالة عدم العثور (بلا كشف وجود الحجز)
+    const wrongPhone = await callEdit({
+      reference: bookingA!.bookingReference,
+      phone: '+967779999999',
+      checkIn: isoDate(D1),
+      checkOut: isoDate(addDays(D1, 4)),
+      roomTypeId: doubleType!.id,
+      adults: 1, children: 0, roomsCount: 1, specialRequests: '',
+    })
+    expect(wrongPhone.status).toBe(404)
+    expect((await json<{ error?: string }>(wrongPhone)).error).toContain('لم نتمكن من التحقق')
+
+    // بلا تغييرات → 400
+    const aRow = await db.reservation.findUnique({ where: { id: bookingA!.id }, include: { roomType: true } })
+    const noChange = await callEdit({
+      reference: bookingA!.bookingReference,
+      phone: phoneA,
+      checkIn: isoDate(new Date(aRow!.checkIn)),
+      checkOut: isoDate(new Date(aRow!.checkOut)),
+      roomTypeId: aRow!.roomTypeId,
+      adults: aRow!.adults, children: aRow!.children, roomsCount: aRow!.roomsCount,
+      specialRequests: aRow!.specialRequests ?? '',
+    })
+    expect(noChange.status).toBe(400)
+    expect((await json<{ error?: string }>(noChange)).error).toContain('لم تقم بأي تعديل')
+  }, 30_000)
+
+  it('c8) حجز ملغى/مقيم غير قابل للتعديل → 400 (الحالة)', async () => {
+    // إلغاء حجز اليوم (مجاني لأنه فات النافذة؟ الإلغاء يسمح PENDING/CONFIRMED — يلغى برسوم)
+    const cancelRoute = await import('@/app/api/public/cancel/route')
+    const todayBooking2 = await createBooking({
+      checkIn: today, checkOut: addDays(today, 2), typeName: 'غرفة مزدوجة', phone: '+967775000777',
+    })
+    const cancelled = await postTo(
+      cancelRoute.POST as unknown as (r: Request) => Promise<Response>,
+      'http://localhost/api/public/cancel',
+      { reference: todayBooking2.bookingReference, phone: '+967775000777' }
+    )
+    expect(cancelled.status).toBe(200)
+
+    const doubleType = await db.roomType.findFirst({ where: { name: 'غرفة مزدوجة' } })
+    const res = await callEdit({
+      reference: todayBooking2.bookingReference,
+      phone: '+967775000777',
+      checkIn: isoDate(today),
+      checkOut: isoDate(addDays(today, 3)),
+      roomTypeId: doubleType!.id,
+      adults: 1, children: 0, roomsCount: 1, specialRequests: '',
+    })
+    expect(res.status).toBe(400)
+    expect((await json<{ error?: string }>(res)).error).toContain('حالته الحالية')
+
+    // حجز خالد CHECKED_IN (seed) → غير قابل للتعديل
+    const khaled = await db.reservation.findFirst({ where: { bookingReference: 'HTL-2026-000415' }, include: { guest: true } })
+    const khaledRes = await callEdit({
+      reference: 'HTL-2026-000415',
+      phone: khaled!.guest.phone,
+      checkIn: isoDate(new Date(khaled!.checkIn)),
+      checkOut: isoDate(addDays(new Date(khaled!.checkIn), 5)),
+      roomTypeId: doubleType!.id,
+      adults: 2, children: 0, roomsCount: 1, specialRequests: '',
+    })
+    expect(khaledRes.status).toBe(400)
+    expect((await json<{ error?: string }>(khaledRes)).error).toContain('حالته الحالية')
   }, 30_000)
 })
