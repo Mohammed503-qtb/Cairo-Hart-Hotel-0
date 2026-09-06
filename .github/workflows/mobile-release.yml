@@ -74,7 +74,8 @@ jobs:
           flutter build apk --release --flavor prod --dart-define=APP_ENV=prod --dart-define=APP_VERSION=${{ env.APP_VERSION }} $ARGS
 
       - name: Build dev APK
-        if: ${{ inputs.build_dev != false }}
+        # دفع الوسم يبني dev دائمًا؛ workflow_dispatch يحترم المدخل
+        if: ${{ github.event_name == 'push' || inputs.build_dev != false }}
         working-directory: mobile
         run: flutter build apk --release --flavor dev --dart-define=APP_ENV=dev --dart-define=APP_VERSION=${{ env.APP_VERSION }}
 
